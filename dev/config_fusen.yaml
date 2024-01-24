@@ -1,0 +1,63 @@
+flat_teaching.Rmd:
+  path: dev/flat_teaching.Rmd
+  state: active
+  R: R/add_one.R
+  tests: tests/testthat/test-add_one.R
+  vignettes: vignettes/get-started.Rmd
+  inflate:
+    flat_file: dev/flat_teaching.Rmd
+    vignette_name: Get started
+    open_vignette: true
+    check: true
+    document: true
+    overwrite: ask
+NeighborFinder_flat.Rmd:
+  path: dev/NeighborFinder_flat.Rmd
+  state: active
+  R:
+  - R/apply_neighborfinder.R
+  - R/choose_prev_level.R
+  - R/compute_precision.R
+  - R/compute_recall.R
+  - R/cvglm_to_coeffs_by_bact.R
+  - R/final_step.R
+  - R/find_all_msp_neighbors.R
+  - R/find_msp_neighbors.R
+  - R/graph_step.R
+  - R/identify_msp.R
+  - R/intersections_network.R
+  - R/intersections_table.R
+  - R/msp_to_bact.R
+  - R/norm_data.R
+  - R/prev_for_selected_nodes.R
+  - R/simulate_by_prevalence.R
+  - R/test_filter.R
+  - R/truth_by_prevalence.R
+  - R/visualize_network.R
+  - R/taxo-data.R
+  - R/data-for-crc-patients.R
+  - R/metadata-for-crc-patients.R
+  - R/graphs-for-crc-patients.R
+  - R/pipe-function.R
+  tests:
+  - tests/testthat/test-msp_to_bact.R
+  - tests/testthat/test-identify_msp.R
+  - tests/testthat/test-graph_step.R
+  - tests/testthat/test-simulate_by_prevalence.R
+  - tests/testthat/test-prev_for_selected_nodes.R
+  - tests/testthat/test-truth_by_prevalence.R
+  - tests/testthat/test-norm_data.R
+  - tests/testthat/test-compute_precision.R
+  - tests/testthat/test-compute_recall.R
+  - tests/testthat/test-test_filter.R
+  - tests/testthat/test-choose_prev_level.R
+  - tests/testthat/test-apply_neighborfinder.R
+  - tests/testthat/test-intersections_table.R
+  vignettes: []
+  inflate:
+    flat_file: dev/NeighborFinder_flat.Rmd
+    vignette_name: .na
+    open_vignette: true
+    check: true
+    document: true
+    overwrite: ask
