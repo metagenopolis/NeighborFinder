@@ -7,9 +7,13 @@
 <!-- badges: end -->
 
 NeihborFinder uses the local approach to identify companion species of a
-bacteria of interest. From several abundance tables of metagenomic data,
-NeighborFinder suggests a shortlist of companion species based on the
-integration of results. A visualization via a network is proposed.
+bacteria of interest.
+
+From several abundance tables of metagenomic data, NeighborFinder
+suggests a shortlist of companion species based on the integration of
+results.
+
+A visualization via a network is proposed.
 
 ## Installation
 
