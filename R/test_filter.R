@@ -9,16 +9,18 @@
 #' @return Dataframe. Returns the precision and recall rates before and after the modification
 #' @export
 #' @examples
+#' data(data)
+#' data(taxo)
+#' data(graphs)
 #' #Generate dataframe with true neighbors
-#' df_true<-list(tibble::tibble(msp1=c("msp_1","msp_1","msp_2","msp_3"), msp2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
-#'           tibble::tibble(msp1=c("msp_2","msp_3"), msp2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
-#' names(df_true)<-c("0.20","0.30")
+#' df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella"), prev_list=c(0.20,0.30))
 #' #Generate dataframe with detected neighbors
-#' df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), msp1=c("msp_2","msp_2","msp_3","msp_3"), msp2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
+#' normed_JPN<-norm_data(data$CRC_JPN, col_msp_id="msp_id", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+#' df_detected<-cvglm_to_coeffs_by_bact(list_dfs=normed_JPN, test_msp=identify_msp("Klebsiella",taxo,"msp_id"), seed=20232024)
 #' #Use final_step() to gather both
 #' neighbors<-final_step(df_true, df_detected)
 #'
-#' neighbors_modif<-final_step(df_true, df_detected %>%  dplyr::filter(coef > 0))
+#' neighbors_modif<-final_step(df_true, res_by_filtering(df_detected, filtering_list=c(10,50)))
 #'
 #' scores<-test_filter(neighbors, neighbors_modif, prevs=names(df_true))
 
@@ -33,10 +35,10 @@ test_filter<-function(df_before, df_after, prevs = NULL){
   if(!nrow(scores_before) | !nrow(scores_after)){ return(tibble::tibble()) }
   else{
   score_table <-  dplyr::full_join(scores_before, scores_after, by=c("prev_level","msp1")) %>% 
-     dplyr::select(prev_level, precision_before, recall_before, precision_after, recall_after) %>% 
+     dplyr::select(prev_level, filtering_top, precision_before, recall_before, precision_after, recall_after) %>% 
      dplyr::mutate_all(~ replace(., is.na(.), 0))
   
-  res <- score_table %>%  dplyr::summarize(across(precision_before:recall_after, mean), .by = prev_level) %>% as.data.frame()
+  res <- score_table %>%  dplyr::summarize(across(precision_before:recall_after, mean), .by = c(prev_level,filtering_top)) %>% as.data.frame()
   if (is.null(prevs)) {return(res)}
   else {return(res %>%  dplyr::filter(prev_level %in% prevs))}
   }

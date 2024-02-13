@@ -16,7 +16,7 @@ NeighborFinder_flat.Rmd:
   state: active
   R:
   - R/apply_neighborfinder.R
-  - R/choose_prev_level.R
+  - R/choose_params_values.R
   - R/compute_precision.R
   - R/compute_recall.R
   - R/cvglm_to_coeffs_by_bact.R
@@ -30,6 +30,7 @@ NeighborFinder_flat.Rmd:
   - R/msp_to_bact.R
   - R/norm_data.R
   - R/prev_for_selected_nodes.R
+  - R/res_by_filtering.R
   - R/simulate_by_prevalence.R
   - R/test_filter.R
   - R/truth_by_prevalence.R
@@ -47,10 +48,10 @@ NeighborFinder_flat.Rmd:
   - tests/testthat/test-prev_for_selected_nodes.R
   - tests/testthat/test-truth_by_prevalence.R
   - tests/testthat/test-norm_data.R
+  - tests/testthat/test-res_by_filtering.R
   - tests/testthat/test-compute_precision.R
   - tests/testthat/test-compute_recall.R
-  - tests/testthat/test-test_filter.R
-  - tests/testthat/test-choose_prev_level.R
+  - tests/testthat/test-choose_params_values.R
   - tests/testthat/test-apply_neighborfinder.R
   - tests/testthat/test-intersections_table.R
   vignettes: []

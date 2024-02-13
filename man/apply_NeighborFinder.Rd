@@ -10,6 +10,7 @@ apply_NeighborFinder(
   col_msp_id,
   data_type = "fpkm",
   prev_level = 0.3,
+  filtering_top = 20,
   seed = NULL,
   ...
 )
@@ -24,6 +25,8 @@ apply_NeighborFinder(
 \item{data_type}{String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words: "comptage","couverture","coverage"}
 
 \item{prev_level}{Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20\% of prevalence}
+
+\item{filtering_top}{Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10\%}
 
 \item{seed}{Numeric. The seed number, ensuring reproducibility}
 

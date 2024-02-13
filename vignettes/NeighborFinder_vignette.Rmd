@@ -49,12 +49,12 @@ This step was commented since it takes few minutes to execute and also because i
 G <- graphs$CRC_JPN_CHN_EUR
 ```
 
-The displayed table indicates the precision and recall scores before and after applying the NeighborFinder method, for each level of prevalence tested.
-NeighborFinder uses by default the level of prevalence of 30%. If the results from the table rendered by choose_prev_level() indicate better performance scores at another prevalence level, feel free to change the 'prev_level' parameter in the function apply_NeighborFinder().
+The displayed table indicates the precision and recall scores before and after applying the NeighborFinder method, for each level of prevalence and filtering top percentage tested.
+NeighborFinder uses by default the level of prevalence of 30% and the filtering top 20%. If the results from the table rendered by choose_params_values() indicate better performance scores at other values of these parameters, feel free to change the 'prev_level' and 'filtering_top' parameters in the function apply_NeighborFinder().
 
-```{r choose-prev-level}
+```{r choose-params-values}
 simulations <- simulate_by_prevalence(data$CRC_JPN_CHN_EUR, prev_list=c(0.20,0.30), graph_file=G, col_msp_id="msp_id", seed=20232024)
-choose_prev_level(data$CRC_JPN_CHN_EUR, "Escherichia coli", simulations, graph_file=G, col_msp_id="msp_id", seed = 20232024)
+choose_params_values(data$CRC_JPN_CHN_EUR, "Escherichia coli", simulations, filtering_list=c(10,20,30), graph_file=G, col_msp_id="msp_id", seed = 20232024)
 ```
 
 ## Apply NeighborFinder & look for Escherichia coli neighbors on CRC patients

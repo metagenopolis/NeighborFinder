@@ -641,6 +641,47 @@ normed_CHN <-norm_data(data$CRC_CHN, col_msp_id="msp_id", prev_list=c(0.20, 0.25
 neighbors_CHN<-cvglm_to_coeffs_by_bact(list_dfs=normed_CHN, test_msp=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
+# Give results from cvglm_to_coeffs_by_bact() for each filtering top percentage
+
+```{r fun-res_by_filtering}
+#' Give results from cvglm_to_coeffs_by_bact() for each filtering top percentage
+#' 
+#' @param res_glm Dataframe. The one resulting from cvglm_to_coeffs_by_bact()
+#' @param filtering_list List of numeric. The filtering top percentages to be studied. Required format is: 10 for the top 10% 
+#' 
+#' @return List of dataframes. Each element of the list corresponds to a dataframe of detected edges by filtering top percentage
+#' @export
+
+res_by_filtering<-function(res_glm, filtering_list){
+ 
+ filtering_glm<-function(filtering_top){
+  res_glm %>% dplyr::group_by(prev_level) %>% 
+   dplyr::mutate(coef=abs(coef)) %>% dplyr::filter(coef > quantile(coef,1-filtering_top/100)) %>% 
+   dplyr::ungroup()
+ }
+ 
+ purrr::map(filtering_list, filtering_glm) %>% rlang::set_names(filtering_list)
+}
+```
+
+```{r ex-res_by_filtering}
+data(data)
+#Simple example
+normed_JPN <-norm_data(data$CRC_JPN, col_msp_id="msp_id", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+neighbors_JPN<-cvglm_to_coeffs_by_bact(list_dfs=normed_JPN, test_msp=c("msp_0030","msp_0345"), seed=20232024)
+filtered_neighbors_JPN<-res_by_filtering(neighbors_JPN, filtering_list=c(10,15,20))
+```
+
+```{r test-res_by_filtering}
+test_that("norm_data works", {
+ df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), msp1=c("msp_2","msp_2","msp_3","msp_3"), msp2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
+ expected_top20<-structure(list(prev_level = "0.30", msp1 = "msp_3", msp2 = "msp_18", 
+                                coef = 0.16), row.names = c(NA, -1L), class = "data.frame")
+  expect_equal(res_by_filtering(df_detected, filtering_list=c(20))[[1]] %>% as.data.frame() %>% dput(), expected_top20)
+})
+```
+
+
 # Gather lists of neighbors of true ones from the graph and detected ones from cv.glmnet()
 
 ```{r fun-final_step}
@@ -653,15 +694,21 @@ neighbors_CHN<-cvglm_to_coeffs_by_bact(list_dfs=normed_CHN, test_msp=c("msp_0030
 #' @export
 
 final_step<-function(df_truth, df_glm){
-  truth <- df_truth %>% dplyr::bind_rows(.id = "prev_level") %>% 
-    dplyr::summarize(msp2_true = list(msp2), .by = c(prev_level, msp1))
-  inference <- df_glm %>% 
-    dplyr::summarize(msp2_detected = list(msp2), 
-              msp2_coef     = list(coef), 
-              .by = c(prev_level, msp1))
-  dplyr::full_join(truth, inference, by = c("prev_level", "msp1")) %>% 
-    lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
-    tibble::as_tibble()
+ truth <- df_truth %>% dplyr::bind_rows(.id = "prev_level") %>% 
+  dplyr::summarize(msp2_true = list(msp2), .by = c(prev_level, msp1))
+ if (class(df_glm)[[1]]!="list"){inference <- df_glm %>% 
+  dplyr::summarize(msp2_detected = list(msp2), 
+                   msp2_coef     = list(coef), 
+                   .by = c(prev_level, msp1))
+ }
+ else {inference <- df_glm %>% dplyr::bind_rows(.id = "filtering_top") %>% 
+  dplyr::summarize(msp2_detected = list(msp2), 
+                   msp2_coef     = list(coef), 
+                   .by = c(prev_level, filtering_top, msp1))
+ }
+ dplyr::full_join(truth, inference, by = c("prev_level", "msp1")) %>% 
+  lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
+  tibble::as_tibble()
 }
 ```
 
@@ -759,10 +806,10 @@ test_filter<-function(df_before, df_after, prevs = NULL){
   if(!nrow(scores_before) | !nrow(scores_after)){ return(tibble::tibble()) }
   else{
   score_table <-  dplyr::full_join(scores_before, scores_after, by=c("prev_level","msp1")) %>% 
-     dplyr::select(prev_level, precision_before, recall_before, precision_after, recall_after) %>% 
+     dplyr::select(prev_level, filtering_top, precision_before, recall_before, precision_after, recall_after) %>% 
      dplyr::mutate_all(~ replace(., is.na(.), 0))
   
-  res <- score_table %>%  dplyr::summarize(across(precision_before:recall_after, mean), .by = prev_level) %>% as.data.frame()
+  res <- score_table %>%  dplyr::summarize(across(precision_before:recall_after, mean), .by = c(prev_level,filtering_top)) %>% as.data.frame()
   if (is.null(prevs)) {return(res)}
   else {return(res %>%  dplyr::filter(prev_level %in% prevs))}
   }
@@ -770,45 +817,32 @@ test_filter<-function(df_before, df_after, prevs = NULL){
 ```
 
 ```{r ex-test_filter}
+data(data)
+data(taxo)
+data(graphs)
 #Generate dataframe with true neighbors
-df_true<-list(tibble::tibble(msp1=c("msp_1","msp_1","msp_2","msp_3"), msp2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
-          tibble::tibble(msp1=c("msp_2","msp_3"), msp2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
-names(df_true)<-c("0.20","0.30")
+df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella"), prev_list=c(0.20,0.30))
 #Generate dataframe with detected neighbors
-df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), msp1=c("msp_2","msp_2","msp_3","msp_3"), msp2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
+normed_JPN<-norm_data(data$CRC_JPN, col_msp_id="msp_id", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+df_detected<-cvglm_to_coeffs_by_bact(list_dfs=normed_JPN, test_msp=identify_msp("Klebsiella",taxo,"msp_id"), seed=20232024)
 #Use final_step() to gather both
 neighbors<-final_step(df_true, df_detected)
 
-neighbors_modif<-final_step(df_true, df_detected %>%  dplyr::filter(coef > 0))
+neighbors_modif<-final_step(df_true, res_by_filtering(df_detected, filtering_list=c(10,50)))
 
 scores<-test_filter(neighbors, neighbors_modif, prevs=names(df_true))
 ```
 
-```{r test-test_filter}
-test_that("test_filter works", {
-  #Generate dataframe with true neighbors
-  df_true<-list(tibble::tibble(msp1=c("msp_1","msp_1","msp_2","msp_3"), msp2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
-                tibble::tibble(msp1=c("msp_2","msp_3"), msp2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
-  names(df_true)<-c("0.20","0.30")
-  #Generate dataframe with detected neighbors
-  df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), msp1=c("msp_2","msp_2","msp_3","msp_3"), msp2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
-  #Use final_step() to gather both
-  neighbors<-final_step(df_true, df_detected)
-  neighbors_modif<-final_step(df_true, df_detected %>%  dplyr::filter(coef > 0))
-  scores<-test_filter(neighbors, neighbors_modif, prevs=names(df_true))
-  expect_equal(scores$recall_after, c(100*1/3,50))
-})
-```
+# Render a table to give an indication of the values to choose for the prevalence level and the top filtering percentage
 
-# Render a table to help you choose the good prevalence level to select
-
-```{r fun-choose_prev_level}
-#' Render a table gathering precision and recall rates before and after filtering on coefficient values
+```{r fun-choose_params_values}
+#' Render a table to give an indication of the values to choose for the prevalence level and the top filtering percentage
 #' 
 #' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
 #' @param bact_of_interest String. The name of the bacteria or species of interest
 #' @param list_sims List of dataframes. The result of simulate_by_prevalence()
 #' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
+#' @param filtering_list List of numeric. The filtering top percentages to be studied. Required format is: 10 for the top 10% 
 #' @param graph_file Dataframe. The object generated by graph_step() function
 #' @param col_msp_id String. The name of the column with the msp names in taxo
 #' @param seed Numeric. The seed number, ensuring reproducibility
@@ -816,7 +850,7 @@ test_that("test_filter works", {
 #' @return Dataframe. Returns precision and recall rates before and after using NeighborFinder()
 #' @export
 
-choose_prev_level <- function(data_with_taxo, bact_of_interest, list_sims, prev_list=NULL, graph_file=NULL, col_msp_id, seed=NULL){
+choose_params_values <- function(data_with_taxo, bact_of_interest, list_sims, prev_list=NULL, filtering_list=c(0.20), graph_file=NULL, col_msp_id, seed=NULL){
   
   #Loading graph
   if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
@@ -836,30 +870,30 @@ choose_prev_level <- function(data_with_taxo, bact_of_interest, list_sims, prev_
   #Filtering results & rendering table
   cat("Calculating scores...\n")
   before<-final_step(list_truth, df_glm)
-  after_top20<-final_step(list_truth, df_glm %>% dplyr::group_by(prev_level) %>% dplyr::mutate(coef=abs(coef)) %>%  dplyr::filter(coef > quantile(coef,0.8)) %>% dplyr::ungroup())
+  after<-final_step(list_truth, res_by_filtering(df_glm,filtering_list))
   
   if (any(!prev_list %in% prevs)) {stop("The prevalence levels selected are not found in the simulations file. Please try another set of prevalences")}
-  else {res<-test_filter(before, after_top20, prev_list) 
+  else {res<-test_filter(before, after, prev_list) 
   if (!nrow(res)){return(tibble::tibble())}
   else{res %>%  dplyr::mutate(prev_level=as.numeric(prev_level))}
   }
 }
 ```
 
-```{r ex-choose_prev_level}
+```{r ex-choose_params_values}
 data(data)
 data(graphs)
 simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_msp_id="msp_id", seed=20232024)
-choose_prev_level(data$CRC_JPN, "Escherichia coli", simulations, graph_file = graphs$CRC_JPN, col_msp_id="msp_id", seed = 20232024)
+choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(10,20), graph_file = graphs$CRC_JPN, col_msp_id="msp_id", seed = 20232024)
 ```
 
-```{r test-choose_prev_level}
-test_that("choose_prev_level works", {
+```{r test-choose_params_values}
+test_that("choose_params_values works", {
   data(data)
   data(graphs)
   simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_msp_id="msp_id", seed=20232024)
-  scores<-choose_prev_level(data$CRC_JPN, "Escherichia coli", simulations, graph_file = graphs$CRC_JPN, col_msp_id="msp_id", seed = 20232024)
-  expect_equal(scores$precision_before %>% round(digits=2), c(25, 25))
+  scores<-choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(15,20), graph_file = graphs$CRC_JPN, col_msp_id="msp_id", seed = 20232024)
+  expect_equal(scores$precision_after %>% round(digits=2), c(100, 66.67, 100, 100))
 })
 ```
 
@@ -873,6 +907,7 @@ test_that("choose_prev_level works", {
 #' @param col_msp_id String. The name of the column with the msp names in taxo
 #' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words: "comptage","couverture","coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
+#' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
 #' @param meta_df Dataframe. The dataframe giving metadata information
@@ -880,7 +915,7 @@ test_that("choose_prev_level works", {
 #' @return Dataframe. Returns results after using NeighborFinder(): for each msp from 'bact_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 
-apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, data_type="fpkm", prev_level=0.30, seed=NULL, ...){
+apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
   if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 
   #Normalize data
   normed_data <- norm_data(data_with_taxo=data_with_taxo, col_msp_id=col_msp_id, type=data_type, prev_list=c(prev_level))
@@ -890,7 +925,7 @@ apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, dat
                                     seed=seed, ...)
   if (!nrow(df_glm)) {return(tibble::tibble(.rows = 0))}
   #Filter results, keeping top 20% of coefficients
-  df_glm %>%  dplyr::mutate(coef=abs(coef)) %>%  dplyr::filter(coef > quantile(coef,0.8)) %>%  dplyr::select(-prev_level)
+  df_glm %>%  dplyr::mutate(coef=abs(coef)) %>%  dplyr::filter(coef > quantile(coef,1-filtering_top/100)) %>%  dplyr::select(-prev_level)
 }
 ```
 

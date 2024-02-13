@@ -18,13 +18,19 @@
 #' neighbors<-final_step(df_true, df_detected)
 
 final_step<-function(df_truth, df_glm){
-  truth <- df_truth %>% dplyr::bind_rows(.id = "prev_level") %>% 
-    dplyr::summarize(msp2_true = list(msp2), .by = c(prev_level, msp1))
-  inference <- df_glm %>% 
-    dplyr::summarize(msp2_detected = list(msp2), 
-              msp2_coef     = list(coef), 
-              .by = c(prev_level, msp1))
-  dplyr::full_join(truth, inference, by = c("prev_level", "msp1")) %>% 
-    lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
-    tibble::as_tibble()
+ truth <- df_truth %>% dplyr::bind_rows(.id = "prev_level") %>% 
+  dplyr::summarize(msp2_true = list(msp2), .by = c(prev_level, msp1))
+ if (class(df_glm)[[1]]!="list"){inference <- df_glm %>% 
+  dplyr::summarize(msp2_detected = list(msp2), 
+                   msp2_coef     = list(coef), 
+                   .by = c(prev_level, msp1))
+ }
+ else {inference <- df_glm %>% dplyr::bind_rows(.id = "filtering_top") %>% 
+  dplyr::summarize(msp2_detected = list(msp2), 
+                   msp2_coef     = list(coef), 
+                   .by = c(prev_level, filtering_top, msp1))
+ }
+ dplyr::full_join(truth, inference, by = c("prev_level", "msp1")) %>% 
+  lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
+  tibble::as_tibble()
 }
