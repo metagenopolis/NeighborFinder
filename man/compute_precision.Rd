@@ -12,7 +12,7 @@ compute_precision(true, detected)
 \item{detected}{List. The one of detected neighbors}
 }
 \value{
-Numeric. Returns the precision rate in \%
+Numeric. Returns the precision rate
 }
 \description{
 Compute precision rate

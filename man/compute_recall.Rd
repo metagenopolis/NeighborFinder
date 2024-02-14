@@ -12,7 +12,7 @@ compute_recall(true, detected)
 \item{detected}{List. The one of detected neighbors}
 }
 \value{
-Numeric. Returns the recall rate in \%
+Numeric. Returns the recall rate
 }
 \description{
 Compute recall rate

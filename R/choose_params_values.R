@@ -20,30 +20,41 @@
 #' choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(10,20), graph_file = graphs$CRC_JPN, col_msp_id="msp_id", seed = 20232024)
 
 choose_params_values <- function(data_with_taxo, bact_of_interest, list_sims, prev_list=NULL, filtering_list=c(0.20), graph_file=NULL, col_msp_id, seed=NULL){
+ 
+ #Loading graph
+ if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
+ else {G <- graph_file}
+ 
+ # Extract edge_prevalence table for species of interest
+ true_edges <- prev_for_selected_nodes(data_with_taxo, graph_file, col_msp_id, bact_of_interest)
+ if(!nrow(true_edges)){return(tibble::tibble())}
+ 
+ prevs<-as.numeric(names(list_sims))
+ list_truth <- truth_by_prevalence(true_edges, prevs)
+ 
+ #Applying  glmnet
+ df_glm<-cvglm_to_coeffs_by_bact(list_sims, test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id), seed=seed)
+ if(!nrow(df_glm)){return(tibble::tibble())}
+ 
+ #Filtering results & rendering table
+ cat("Calculating scores...\n")
+ before<-final_step(list_truth, df_glm)
+ after<-final_step(list_truth, res_by_filtering(df_glm,filtering_list))
+ 
+ if (any(!prev_list %in% prevs)) {stop("The prevalence levels selected are not found in the simulations file. Please try another set of prevalences")}
+ else {
+  harm_mean<-function(P,R){
+   hm<-2*(P*R)/(P+R)
+   hm
+  }
+  res<-test_filter(before, after, prev_list) %>% 
+   dplyr::mutate(F1_before=harm_mean(precision_before, recall_before)) %>% 
+   dplyr::mutate(F1_after=harm_mean(precision_after, recall_after)) %>% 
+   dplyr::select(-precision_before,-recall_before,-precision_after,-recall_after)
+  res$F1_before[is.na(res$F1_before)] <- 0
+  res$F1_after[is.na(res$F1_after)] <- 0
   
-  #Loading graph
-  if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
-  else {G <- graph_file}
-  
-  # Extract edge_prevalence table for species of interest
-  true_edges <- prev_for_selected_nodes(data_with_taxo, graph_file, col_msp_id, bact_of_interest)
-  if(!nrow(true_edges)){return(tibble::tibble())}
-  
-  prevs<-as.numeric(names(list_sims))
-  list_truth <- truth_by_prevalence(true_edges, prevs)
-  
-  #Applying  glmnet
-  df_glm<-cvglm_to_coeffs_by_bact(list_sims, test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id), seed=seed)
-  if(!nrow(df_glm)){return(tibble::tibble())}
-  
-  #Filtering results & rendering table
-  cat("Calculating scores...\n")
-  before<-final_step(list_truth, df_glm)
-  after<-final_step(list_truth, res_by_filtering(df_glm,filtering_list))
-  
-  if (any(!prev_list %in% prevs)) {stop("The prevalence levels selected are not found in the simulations file. Please try another set of prevalences")}
-  else {res<-test_filter(before, after, prev_list) 
   if (!nrow(res)){return(tibble::tibble())}
   else{res %>%  dplyr::mutate(prev_level=as.numeric(prev_level))}
-  }
+ }
 }

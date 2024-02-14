@@ -5,7 +5,7 @@
 #' @param true List. The one of true neighbors
 #' @param detected List. The one of detected neighbors
 #' 
-#' @return Numeric. Returns the precision rate in %
+#' @return Numeric. Returns the precision rate
 #' @export
 #' @examples
 #' compute_precision(c("a"), c("a", "b", "c"))
@@ -14,5 +14,5 @@
 compute_precision <- function(true, detected) {
   if (length(detected) == 0) return(0)
   ## TP / (TP + FP)
-  100 * length(intersect(true, detected)) / length(detected)
+  length(intersect(true, detected)) / length(detected)
 }

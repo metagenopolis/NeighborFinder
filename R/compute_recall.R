@@ -5,7 +5,7 @@
 #' @param true List. The one of true neighbors
 #' @param detected List. The one of detected neighbors
 #' 
-#' @return Numeric. Returns the recall rate in %
+#' @return Numeric. Returns the recall rate
 #' @export
 #' @examples
 #' compute_recall(c("a"), c("a", "b", "c"))
@@ -14,5 +14,5 @@
 compute_recall <- function(true, detected) {
   if (length(true) == 0) return(0)
   ## TP / (TP + FN)
-  100 * length(intersect(true, detected)) / length(true)
+  length(intersect(true, detected)) / length(true)
 }
