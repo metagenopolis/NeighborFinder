@@ -54,7 +54,7 @@ NeighborFinder uses by default the level of prevalence of 30% and the filtering 
 
 ```{r choose-params-values}
 simulations <- simulate_by_prevalence(data$CRC_JPN_CHN_EUR, prev_list=c(0.20,0.30), graph_file=G, col_msp_id="msp_id", seed=20232024)
-choose_params_values(data$CRC_JPN_CHN_EUR, "Escherichia coli", simulations, filtering_list=c(10,20,30), graph_file=G, col_msp_id="msp_id", seed = 20232024)
+choose_params_values(data$CRC_JPN_CHN_EUR, "Escherichia coli", simulations, filtering_list=c(10,20,30), graph_file=G, col_msp_id="msp_id", seed = 20232024) %>% as.data.frame()
 ```
 
 ## Apply NeighborFinder & look for Escherichia coli neighbors on CRC patients

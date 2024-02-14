@@ -28,5 +28,5 @@ apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, dat
                                     seed=seed, ...)
   if (!nrow(df_glm)) {return(tibble::tibble(.rows = 0))}
   #Filter results, keeping top 20% of coefficients
-  df_glm %>%  dplyr::mutate(coef=abs(coef)) %>%  dplyr::filter(coef > quantile(coef,1-filtering_top/100)) %>%  dplyr::select(-prev_level)
+  df_glm %>% dplyr::filter(abs(coef) > quantile(abs(coef),1-filtering_top/100)) %>%  dplyr::select(-prev_level)
 }

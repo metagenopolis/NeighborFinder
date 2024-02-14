@@ -18,7 +18,7 @@ res_by_filtering<-function(res_glm, filtering_list){
  
  filtering_glm<-function(filtering_top){
   res_glm %>% dplyr::group_by(prev_level) %>% 
-   dplyr::mutate(coef=abs(coef)) %>% dplyr::filter(coef > quantile(coef,1-filtering_top/100)) %>% 
+   dplyr::filter(abs(coef) > quantile(abs(coef),1-filtering_top/100)) %>% 
    dplyr::ungroup()
  }
  

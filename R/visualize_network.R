@@ -29,7 +29,7 @@ visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, bact_of_intere
   if (!nrow(res_NeighborFinder)) {return(message("No neighbors were found."))}
   if (!taxo_option){
     #Give more visual weight to edges
-    res <- res_NeighborFinder %>%  dplyr::mutate(coef=coef*10)
+    res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10)
     #Build network
     net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     #Identify species of interest in a different color
@@ -42,7 +42,7 @@ visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, bact_of_intere
   }
   else{
     #Give taxonomic correspondence
-    res <- res_NeighborFinder %>%  dplyr::mutate(coef=coef*10) %>% 
+    res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10) %>% 
        dplyr::mutate(msp1=msp_to_bact(msp=msp1, taxo=taxo, col_msp_id=col_msp_id), 
              msp2=msp_to_bact(msp=msp2, taxo=taxo, col_msp_id=col_msp_id)) 
     #Build network
