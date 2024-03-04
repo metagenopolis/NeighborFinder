@@ -112,82 +112,84 @@ usethis::use_mit_license("Mathilde Sola")
 NULL
 ```
 
-# Correspondence between msp name and bacteria name
+# Correspondence between the module ID (msp or functional module) and its name (bacteria or function)
 
-```{r fun-msp_to_bact}
-#' Correspondence between msp name and bacteria name
+```{r fun-module_to_node}
+#' Correspondence between the module ID (msp or functional module) and its name (bacteria or function)
 #' 
-#' @param msp String. The name of the msp, can be a single one or a list
-#' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
-#' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param module String. The name of the biological object (msp or functional module), can be a single one or a list
+#' @param annotation_table Dataframe. The dataframe gathering the taxonomic or functional module correspondence information 
+#' @param col_module_id String. The name of the column with the module names in the annotation table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #'
-#' @return Dictionary. The name of the bacteria, can be a single one or a list
+#' @return Dictionary. The name of the module, can be a single one or a list
 #' @export
 
-msp_to_bact<-function(msp, taxo, col_msp_id="id_mgs"){
-  species_dict <- taxo %>% dplyr::select(all_of(col_msp_id), species) %>% tibble::deframe() 
-  species_dict[msp] %>% unname() %>% as.character()
+module_to_node<-function (module, annotation_table, col_module_id = "id_mgs", annotation_level){
+    node_dict <- annotation_table %>% dplyr::select(all_of(col_module_id),
+        !!sym(annotation_level)) %>% tibble::deframe()
+    node_dict[module] %>% unname() %>% as.character()
 }
 ```
 
-```{r ex-msp_to_bact}
+```{r ex-module_to_node}
 df_taxo<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
                     genus=c("A","B","C","D"),
                     species=c("A a","B a","C c","D b"))
 # Correspondence for one specific msp
-msp_to_bact("msp_1", taxo=df_taxo, col_msp_id = "msp_name")
+module_to_node("msp_1", annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species")
 # or for several msps
-msp_to_bact(c("msp_1","msp_3","msp_4"), taxo=df_taxo, col_msp_id = "msp_name")
+module_to_node(c("msp_1","msp_3","msp_4"), annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species")
 # and if one msp is repeated
-msp_to_bact(c("msp_1","msp_1","msp_2"), taxo=df_taxo, col_msp_id = "msp_name")
+module_to_node(c("msp_1","msp_1","msp_2"), annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="genus")
 ```
 
-```{r test-msp_to_bact}
-test_that("msp_to_bact works", {
+```{r test-module_to_node}
+test_that("module_to_node works", {
   df_taxo<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
                     genus=c("A","B","C","D"),
                     species=c("A a","B a","C c","D b"))
-  expect_equal(msp_to_bact("msp_1", taxo=df_taxo, col_msp_id = "msp_name"), "A a")
+  expect_equal(module_to_node("msp_1", annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species"), "A a")
 })
 ```
 
-# List the msps corresponding to a given species of interest
+# List the modules corresponding to a given object of interest
 
-```{r fun-identify_msp}
-#' List the msps corresponding to a given species of interest
+```{r fun-identify_module}
+#' List the modules corresponding to a given object of interest
 #' 
-#' @param bact_of_interest String. The name of the bacteria or species of interest
-#' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo. Default value is set to the species level
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
+#' @param annotation_table Dataframe. The dataframe gathering the taxonomic or functional module correspondence information 
+#' @param col_module_id String. The name of the column with the module names in the annotation table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1. Default value is set to the species level
 #'
-#' @return List of string. The msps names of the corresponding species of interest
+#' @return List of string. The module names of the corresponding object of interest
 #' @export
 
-identify_msp <-function(bact_of_interest = "prausnitzii", taxo, col_msp_id, taxo_level = "species"){
-  res<-taxo %>% 
-    dplyr::filter(stringr::str_detect(!!rlang::sym(taxo_level), bact_of_interest)) %>% 
-    dplyr::pull(paste(col_msp_id)) %>% 
+identify_module <-function(object_of_interest, annotation_table, col_module_id, annotation_level = "species"){
+  res<-annotation_table %>% 
+    dplyr::filter(stringr::str_detect(!!rlang::sym(annotation_level), object_of_interest)) %>% 
+    dplyr::pull(paste(col_module_id)) %>% 
     as.character()
-  if (length(res)==0) {stop("ERROR: Please check spelling of bact_of_interest :)")}
+  if (length(res)==0) {stop("ERROR: Please check spelling of object_of_interest :)")}
   else {res}
 }
 ```
 
-```{r ex-identify_msp}
+```{r ex-identify_module}
 df_taxo<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
                     genus=c("One","One","One","Two"),
                     species=c("One bacteria","One bacterium L","One bacterium G","Two bact"))
-identify_msp("bacterium", taxo=df_taxo, col_msp_id = "msp_name")
-identify_msp("One", taxo=df_taxo, col_msp_id = "msp_name")
+identify_module(object_of_interest="bacterium", annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species")
+identify_module(object_of_interest="One", annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species")
 ```
 
-```{r test-identify_msp}
-test_that("identify_msp works", {
+```{r test-identify_module}
+test_that("identify_module works", {
   df_taxo<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
                     genus=c("One","One","One","Two"),
                     species=c("One bacteria","One bacterium L","One bacterium G","Two bact"))
-  expect_equal(identify_msp("One", taxo=df_taxo, col_msp_id = "msp_name"), c("msp_1", "msp_2", "msp_3"))
+  expect_equal(identify_module(object_of_interest="One", annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species"), c("msp_1", "msp_2", "msp_3"))
 })
 ```
 
@@ -196,30 +198,31 @@ test_that("identify_msp works", {
 ```{r fun-graph_step}
 #' Generate a graph
 #' 
-#' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words in 'type' argument: "comptage","couverture","coverage"
+#' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
+#' @param col_module_id String. The name of the column with the module names in the annotation table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate in 'type' argument: "coverage"
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
 
-graph_step<-function(data_with_taxo, col_msp_id, type="fpkm"){
-  if (type %in% c("couverture","coverage","comptage")){
-    prev_df <- data_with_taxo %>%
-      dplyr::mutate(prev = data_with_taxo %>% dplyr::select(-species, -all_of(col_msp_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
+graph_step<-function(data_with_annotation, col_module_id, annotation_level, type="fpkm"){
+  if (type %in% c("coverage")){
+    prev_df <- data_with_annotation %>%
+      dplyr::mutate(prev = data_with_annotation %>% dplyr::select(-!!sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
     df <- prev_df %>% dplyr::filter(prev>0.15) %>% 
-      dplyr::select(-species, -all_of(col_msp_id), -prev) %>% t() 
-    colnames(df) <- prev_df %>% dplyr::filter(prev>0.15) %>% dplyr::pull(paste(col_msp_id))
+      dplyr::select(-!!sym(annotation_level), -all_of(col_module_id), -prev) %>% t() 
+    colnames(df) <- prev_df %>% dplyr::filter(prev>0.15) %>% dplyr::pull(paste(col_module_id))
     G <- OneNet::new_synth_data(df, n=50, plot=FALSE, verbose=FALSE)$G
     dimnames(G) <- list(colnames(df), colnames(df))
   }
   if (type %in% c("fpkm")){
-    counts <- OneNet::get_count_table(abund.table = data_with_taxo %>% dplyr::select(-species), sample_id=colnames(data_with_taxo), prev.min=0.15, verbatim=FALSE)$data
+    counts <- OneNet::get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!sym(annotation_level)), sample_id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
     G <- OneNet::new_synth_data(counts, n=50, plot=FALSE, verbose=FALSE)$G
     dimnames(G) <- list(colnames(counts), colnames(counts))
   }
   G <- G %>% as.data.frame() %>% 
-    dplyr::mutate(species=msp_to_bact(rownames(G), taxo=data_with_taxo, col_msp_id=col_msp_id))
+    dplyr::mutate(!!sym(annotation_level):=module_to_node(rownames(G), annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level))
   G
 }
 ```
@@ -232,14 +235,14 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") %>% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
 ```
 
 ```{r test-graph_step}
 test_that("graph_step works", {
   data(data)
   data(graphs)
-  expect_equal(graph_step(data$CRC_JPN_CHN_EUR, col_msp_id="msp_id"), graphs$CRC_JPN_CHN_EUR)
+  expect_equal(graph_step(data$CRC_JPN_CHN_EUR, col_module_id="msp_id", annotation_level="species"), graphs$CRC_JPN_CHN_EUR)
 })
 ```
 
@@ -248,32 +251,33 @@ test_that("graph_step works", {
 ```{r fun-simulate_by_prevalence}
 #' List the simulated count tables by level of prevalence
 #' 
-#' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
+#' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence.
 #' @param graph_file Dataframe. The object generated by graph_step() function
-#' @param col_msp_id String. The name of the column with the msp names in data_with_taxo
+#' @param col_module_id String. The name of the column with the module names in data_with_annotation
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param sample_size Numeric. The size to be considerated, the value of 500 is recommended
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #'
 #' @return List of dataframes. Each element of the list corresponds to a level of prevalence and is a simulated abundance table
 #' @export
 
-simulate_by_prevalence <- function(data_with_taxo, prev_list, graph_file=NULL, col_msp_id, sample_size=500, seed) {
+simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed) {
   set.seed(seed)
   if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
   else {G <- graph_file}  
   cat("Generating simulated tables for each level of prevalence...\n")
   
-  abund_table <- data_with_taxo %>% dplyr::select(-all_of(col_msp_id), -species)
-  mgs <- data_with_taxo %>% dplyr::pull(col_msp_id)
+  abund_table <- data_with_annotation %>% dplyr::select(-all_of(col_module_id), -!!sym(annotation_level))
+  modules <- data_with_annotation %>% dplyr::pull(col_module_id)
   sample_id <- abund_table %>% colnames()
   
   sim_one_prev <- function(prev) {
     cat(glue::glue("p{100*prev}"), sep = "\n")
     # Generating count table
-    df_counts <- OneNet::get_count_table(abund.table=abund_table, sample_id=sample_id, mgs=mgs, prev.min=prev, verbatim=FALSE)
+    df_counts <- OneNet::get_count_table(abund.table=abund_table, sample_id=sample_id, mgs=modules, prev.min=prev, verbatim=FALSE)
     # Simulation of count table
-    df_sim <- OneNet::new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-species)), plot=FALSE, verbose=FALSE, seed=seed)
+    df_sim <- OneNet::new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!sym(annotation_level))), plot=FALSE, verbose=FALSE, seed=seed)
     #Transformed matrix with mclr
     df_norm <- SPRING::mclr(df_sim$counts)
     colnames(df_norm)<-colnames(df_counts$data)
@@ -292,9 +296,9 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") %>% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
 
-tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_msp_id="msp_name", sample_size=500, seed=20232024)
+tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=500, seed=20232024)
 ```
 
 ```{r test-simulate_by_prevalence}
@@ -305,8 +309,8 @@ test_that("simulate_by_prevalence works", {
                         SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
                         SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                         SAMPLE4=c(0,0,2.98320e-05,0))
-  tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") %>% suppressWarnings()
-  computed_sims <- simulate_by_prevalence(tiny_data, prev_list=c(0.20), graph_file=tiny_graph, col_msp_id="msp_name", sample_size=2, seed=10010)
+  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
+  computed_sims <- simulate_by_prevalence(tiny_data, prev_list=c(0.20), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=2, seed=10010)
   
   expected_sims <- list(`0.2` = structure(c(0, 0, 1, 0, 2.17557332980424, 0, 0, 0), .Dim = c(2L, 4L), 
                                           .Dimnames = list(NULL, c("msp_1", "msp_2", "msp_3", "msp_4"))))
@@ -314,44 +318,45 @@ test_that("simulate_by_prevalence works", {
 })
 ```
 
-# Extract edges in graph involving any msp in bact_of_interest set
+# Extract edges in graph involving any module in object_of_interest set
 
 ```{r fun-prev_for_selected_nodes}
-#' Extract edges in graph involving any msp in bact_of_interest set
+#' Extract edges in graph involving any module in object_of_interest set
 #' 
-#' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
+#' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param graph_file Dataframe. The object generated by graph_step() function
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param bact_of_interest String. The name of the bacteria or species of interest
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
 #'
-#' @return Dataframe. The dataframe of edges in the graph involving msps corresponding to bact_of_interest and their corresponding prevalences.
+#' @return Dataframe. The dataframe of edges in the graph involving modules corresponding to object_of_interest and their corresponding prevalences.
 #' @export
 
-prev_for_selected_nodes <- function(data_with_taxo, graph_file, col_msp_id, bact_of_interest=NULL) {
+prev_for_selected_nodes <- function(data_with_annotation, graph_file, col_module_id, annotation_level, object_of_interest=NULL) {
   if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
   else {G <- graph_file} 
   
-  ## Compute prevalence of all species
-  prev_df <- tibble::tibble(id_msp = data_with_taxo %>% dplyr::pull(paste(col_msp_id)),
-                    prev = data_with_taxo %>% dplyr::select(-species, -all_of(col_msp_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
+  ## Compute prevalence of all modules at the studied level
+  prev_df <- tibble::tibble(id_module = data_with_annotation %>% dplyr::pull(paste(col_module_id)),
+                    prev = data_with_annotation %>% dplyr::select(-!!sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
   
-  ## Extract edges starting or ending from bacteria of interest
-  if (is.null(bact_of_interest)) {bact_index <- seq_along(G$species)} 
-  else {bact_index <- G$species %>% stringr::str_detect(paste(bact_of_interest))}
+  ## Extract edges starting or ending from the object of interest
+  if (is.null(object_of_interest)) {object_index <- seq_along(G %>% dplyr::pull(!!sym(annotation_level)))} 
+  else {object_index <- G %>% dplyr::pull(!!sym(annotation_level)) %>% stringr::str_detect(paste(object_of_interest))}
   
-  G_bact <- G[bact_index, ] %>% dplyr::select(-species) 
+  G_object <- G[object_index, ] %>% dplyr::select(-!!sym(annotation_level)) 
   
-  if (!nrow(G_bact)){return(tibble::tibble())}
+  if (!nrow(G_object)){return(tibble::tibble())}
   
-  truth <- G_bact[, colSums(G_bact) != 0] %>% tibble::as_tibble(rownames = "msp1") %>% 
-    tidyr::pivot_longer(-msp1, values_to = "Edge", names_to = "msp2") %>% 
+  truth <- G_object[, colSums(G_object) != 0] %>% tibble::as_tibble(rownames = "node1") %>% 
+    tidyr::pivot_longer(-node1, values_to = "Edge", names_to = "node2") %>% 
     dplyr::select(order(colnames(.))) %>% 
     dplyr::filter(Edge!=0) %>% dplyr::select(-Edge) 
-  ## Add prevalences for msp1 and msp2
+  ## Add prevalences for node1 and node2
   truth <- truth %>% 
-    dplyr::left_join(prev_df, by = dplyr::join_by(msp1 == id_msp)) %>% 
+    dplyr::left_join(prev_df, by = dplyr::join_by(node1 == id_module)) %>% 
     ## and rename prev with suffix matching corresponding msp
-    dplyr::left_join(prev_df, by = dplyr::join_by(msp2 == id_msp), suffix = c("1", "2"))
+    dplyr::left_join(prev_df, by = dplyr::join_by(node2 == id_module), suffix = c("1", "2"))
   truth
 }
 ```
@@ -363,9 +368,9 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
-tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") %>% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
 
-tiny_truth <-prev_for_selected_nodes(tiny_data, tiny_graph, col_msp_id="msp_name", bact_of_interest="bacterium")
+tiny_truth <-prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id="msp_name", annotation_level="species", object_of_interest="bacterium")
 ```
 
 ```{r test-prev_for_selected_nodes}
@@ -376,13 +381,13 @@ test_that("prev_for_selected_nodes works", {
                         SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
                         SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                         SAMPLE4=c(0,0,2.98320e-05,0))
-  tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") %>% suppressWarnings()
+  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
   
-  expected_truth <- tibble::tibble(msp1=c("msp_2","msp_2","msp_2","msp_3","msp_3"),
-                                   msp2=c("msp_1","msp_3","msp_4","msp_2","msp_4"),
+  expected_truth <- tibble::tibble(node1=c("msp_2","msp_2","msp_2","msp_3","msp_3"),
+                                   node2=c("msp_1","msp_3","msp_4","msp_2","msp_4"),
                                    prev1=c(0.5,0.5,0.5,0.75,0.75),
                                    prev2=c(0.25,0.75,0.5,0.5,0.5))
-  expect_equal(prev_for_selected_nodes(tiny_data, tiny_graph, col_msp_id="msp_name", bact_of_interest="bacterium"), expected_truth)
+  expect_equal(prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id="msp_name", annotation_level="species", object_of_interest="bacterium"), expected_truth)
 })
 ```
 
@@ -415,22 +420,22 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") %>% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
 
-tiny_truth <-prev_for_selected_nodes(tiny_data, tiny_graph, col_msp_id="msp_name", bact_of_interest="bacterium")
+tiny_truth <-prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id="msp_name", annotation_level="species", object_of_interest="bacterium")
 
 tiny_true_edges<-truth_by_prevalence(tiny_truth, c(0.20,0.30))
 ```
 
 ```{r test-truth_by_prevalence}
 test_that("truth_by_prevalence works", {
-  tiny_truth <-tibble::tibble(msp1=c("msp_2","msp_2","msp_2","msp_3","msp_3"),
-                              msp2=c("msp_1","msp_3","msp_4","msp_2","msp_4"),
+  tiny_truth <-tibble::tibble(node1=c("msp_2","msp_2","msp_2","msp_3","msp_3"),
+                              node2=c("msp_1","msp_3","msp_4","msp_2","msp_4"),
                               prev1=c(0.5,0.5,0.5,0.75,0.75),
                               prev2=c(0.25,0.75,0.5,0.5,0.5))
   
-  expected_true_edges0.3 <- tibble::tibble(msp1=c("msp_2", "msp_2", "msp_3", "msp_3"),
-                                           msp2=c("msp_3","msp_4","msp_2","msp_4"),
+  expected_true_edges0.3 <- tibble::tibble(node1=c("msp_2", "msp_2", "msp_3", "msp_3"),
+                                           node2=c("msp_3","msp_4","msp_2","msp_4"),
                                            prev1=c(0.5,0.5,0.75,0.75),
                                            prev2=c(0.75,0.5,0.5,0.5))
   expect_equal(truth_by_prevalence(tiny_truth, c(0.30))[[1]], expected_true_edges0.3)
@@ -442,31 +447,31 @@ test_that("truth_by_prevalence works", {
 ```{r fun-norm_data}
 #' Normalize data and filters it by prevalence level
 #' 
-#' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
-#' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
+#' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
-#' @param type String. If your dataset is not of type "fpkm", indicate one of the following equivalent words in 'type' argument: "comptage","couverture","coverage"
+#' @param type String. If your dataset is not of type "fpkm", indicate in 'type' argument: "coverage"
 #' 
-#' @return List of dataframes. Each element of the list corresponds to a normalized 'data_with_taxo', by level of prevalence
+#' @return List of dataframes. Each element of the list corresponds to a normalized 'data_with_annotation', by level of prevalence
 #' @export
 
-norm_data<-function(data_with_taxo, col_msp_id, prev_list=c(0.30), type){
+norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level, type){
   list_norm<-list()
   res<-tibble::tibble()
   #Normalizing for each level of prevalence if prev_list is a list
   cat("Normalizing data...\n")
   for (prev in prev_list){
-    if (type %in% c("couverture","coverage","comptage")){
+    if (type %in% c("coverage")){
       #Arranging data
-      df <- data_with_taxo %>% dplyr::select(-species, -paste(col_msp_id)) %>% t() 
-      colnames(df) <- data_with_taxo %>% dplyr::pull(paste(col_msp_id))
+      df <- data_with_annotation %>% dplyr::select(-!!sym(annotation_level), -paste(col_module_id)) %>% t() 
+      colnames(df) <- data_with_annotation %>% dplyr::pull(paste(col_module_id))
       #Transformed matrix with mclr
       df_norm <- SPRING::mclr(df)
       colnames(df_norm)<-colnames(df) 
     }
     if (type %in% c("fpkm")){
       #Creating count table
-      df_counts <- OneNet::get_count_table(abund.table = data_with_taxo[,-1], sample_id=colnames(data_with_taxo), prev.min=prev, verbatim=FALSE)
+      df_counts <- OneNet::get_count_table(abund.table = data_with_annotation[,-1], sample_id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
       #Transformed matrix with mclr
       df_norm <- SPRING::mclr(df_counts$data)
       colnames(df_norm)<-colnames(df_counts$data) 
@@ -486,7 +491,7 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_normed <-norm_data(tiny_data, col_msp_id="msp_name", prev_list=c(0.20, 0.30), type="fpkm")
+tiny_normed <-norm_data(tiny_data, col_module_id="msp_name", annotation_level="species", prev_list=c(0.20, 0.30), type="fpkm")
 ```
 
 ```{r test-norm_data}
@@ -503,26 +508,26 @@ test_that("norm_data works", {
                                   msp_3=c(0.000000,5.303984,1.000000,4.520268),
                                   msp_4=c(3.438051,0.000000,8.040536,0.000000))  
   rownames(expected_normed0.2)<-c("SAMPLE1","SAMPLE2","SAMPLE3","SAMPLE4")
-  expect_equal(norm_data(tiny_data, col_msp_id="msp_name", prev_list=c(0.20), type="fpkm")[[1]] %>% as.data.frame() %>% round(digits=5), expected_normed0.2 %>% round(digits=5))
+  expect_equal(norm_data(tiny_data, col_module_id="msp_name",annotation_level="species", prev_list=c(0.20), type="fpkm")[[1]] %>% as.data.frame() %>% round(digits=5), expected_normed0.2 %>% round(digits=5))
 })
 ```
 
-# Apply cv.glmnet() for a given msp
+# Apply cv.glmnet() for a given module ID
 
-```{r fun-find_msp_neighbors}
-#' Apply cv.glmnet() for a given msp
+```{r fun-find_module_neighbors}
+#' Apply cv.glmnet() for a given mmodule ID
 #' 
 #' @param df Dataframe. A normalized dataframe
-#' @param msp String. The msp name
+#' @param module String. The module ID name
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
 #' @param meta_df Dataframe. The dataframe giving metadata information
 #' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
 #' 
-#' @return Dataframe. Returns the msp, its detected neighbor and the corresponding coefficient 
+#' @return Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient 
 #' @export
 
-find_msp_neighbors <- function(df, msp, seed = NULL, covar = NULL, meta_df = NULL, sample_col = NULL) {
+find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df = NULL, sample_col = NULL) {
   if (is.null(seed)) {
     stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")
   } 
@@ -559,95 +564,95 @@ find_msp_neighbors <- function(df, msp, seed = NULL, covar = NULL, meta_df = NUL
     penalty_factor <- c(penalty_factor, rep(0, p_covar))
   }
   
-  col <- which(msp == colnames(df))
+  col <- which(module == colnames(df))
   if (!length(col)) {return(tibble::tibble(.rows = 0))}
   res_glm <- glmnet::cv.glmnet(df[,-col], df[,col], penalty.factor = penalty_factor) %>% coef(s = "lambda.min")
-  tibble::tibble(msp1 = msp, msp2 = rownames(res_glm), coef = as.numeric(res_glm)) %>%
-    dplyr::filter(coef!=0, msp2 %in% penalized_features) 
+  tibble::tibble(node1 = module, node2 = rownames(res_glm), coef = as.numeric(res_glm)) %>%
+   dplyr::filter(coef!=0, node2 %in% penalized_features) 
 }
 ```
 
-```{r ex-find_msp_neighbors}
+```{r ex-find_module_neighbors}
 data(data)
 data(metadata)
 #Simple example
 x <- norm_data(data$CRC_JPN, 0.30, type="fpkm")[[1]]
-neighbors_JPN<-find_msp_neighbors(df=x, msp="msp_0030", seed=20232024)
+neighbors_JPN<-find_module_neighbors(df=x, module="msp_0030", seed=20232024)
 #Example with covariate
 x <- norm_data(data$CRC_CHN, 0.30, type="fpkm")[[1]]
-neighbors_CHN<-find_msp_neighbors(df=x, msp="msp_0030", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
-# Apply cv.glmnet() for a list of msps
+# Apply cv.glmnet() for a list of module IDs
 
-```{r fun-find_all_msp_neighbors}
-#' Apply cv.glmnet() for a list of msps
+```{r fun-find_all_module_neighbors}
+#' Apply cv.glmnet() for a list of module IDs
 #' 
 #' @param df Dataframe. A normalized dataframe
-#' @param test_msp List of string. The msp names
+#' @param test_module List of string. The module IDs 
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
 #' @param meta_df Dataframe. The dataframe giving metadata information
 #' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
 #' 
-#' @return Dataframe. Returns the msp, its detected neighbor and the corresponding coefficient 
+#' @return Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient 
 #' @export
 
-find_all_msp_neighbors <- function(df, test_msp, seed=NULL, ...) {
-  purrr::map(test_msp, function(x) find_msp_neighbors(df, x, seed, ...)) %>% dplyr::bind_rows()
+find_all_module_neighbors <- function(df, test_module, seed=NULL, ...) {
+  purrr::map(test_module, function(x) find_module_neighbors(df, x, seed, ...)) %>% dplyr::bind_rows()
 }
 ```
 
-```{r ex-find_all_msp_neighbors}
+```{r ex-find_all_module_neighbors}
 data(data)
 data(metadata)
 #Simple example
-x <- norm_data(data$CRC_JPN, 0.30, type="fpkm")[[1]]
-neighbors_JPN<-find_all_msp_neighbors(df=x, test_msp=c("msp_0030","msp_0345"), seed=20232024)
+x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species", type="fpkm")[[1]]
+neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024)
 # Example with covariate
-x <- norm_data(data$CRC_CHN, 0.30, type="fpkm")[[1]]
-neighbors_CHN<-find_all_msp_neighbors(df=x, test_msp=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species", type="fpkm")[[1]]
+neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
 # Apply cv.glmnet() for a list of msps and for each prevalence level
 
-```{r fun-cvglm_to_coeffs_by_bact}
-#' Apply cv.glmnet() for a list of msps and for each prevalence level
+```{r fun-cvglm_to_coeffs_by_object}
+#' Apply cv.glmnet() for a list of modules and for each prevalence level
 #' 
 #' @param list_dfs List of dataframe. A normalized dataframe
-#' @param test_msp List of string. The msp names
+#' @param test_module List of string. The module IDs
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
 #' @param meta_df Dataframe. The dataframe giving metadata information
 #' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
 #' 
-#' @return Dataframe. Returns the msp, its detected neighbor and the corresponding coefficient 
+#' @return Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient 
 #' @export
 
-cvglm_to_coeffs_by_bact<-function(list_dfs, test_msp = identify_msp(), seed=NULL, ...){
+cvglm_to_coeffs_by_object<-function(list_dfs, test_module = identify_module(), seed=NULL, ...){
   cat("Applying NeighborFinder to detect neighbors...\n")
-  purrr::map(list_dfs, function(df) find_all_msp_neighbors(df, test_msp, seed, ...)) %>% 
+  purrr::map(list_dfs, function(df) find_all_module_neighbors(df, test_module, seed, ...)) %>% 
     dplyr::bind_rows(.id = "prev_level")
 }
 ```
 
-```{r ex-cvglm_to_coeffs_by_bact}
+```{r ex-cvglm_to_coeffs_by_object}
 data(data)
 data(metadata)
 #Simple example
-normed_JPN <-norm_data(data$CRC_JPN, col_msp_id="msp_id", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
-neighbors_JPN<-cvglm_to_coeffs_by_bact(list_dfs=normed_JPN, test_msp=c("msp_0030","msp_0345"), seed=20232024)
+normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20232024)
 #Example with covariate
-normed_CHN <-norm_data(data$CRC_CHN, col_msp_id="msp_id", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
-neighbors_CHN<-cvglm_to_coeffs_by_bact(list_dfs=normed_CHN, test_msp=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
-# Give results from cvglm_to_coeffs_by_bact() for each filtering top percentage
+# Give results from cvglm_to_coeffs_by_object() for each filtering top percentage
 
 ```{r fun-res_by_filtering}
-#' Give results from cvglm_to_coeffs_by_bact() for each filtering top percentage
+#' Give results from cvglm_to_coeffs_by_object() for each filtering top percentage
 #' 
-#' @param res_glm Dataframe. The one resulting from cvglm_to_coeffs_by_bact()
+#' @param res_glm Dataframe. The one resulting from cvglm_to_coeffs_by_object()
 #' @param filtering_list List of numeric. The filtering top percentages to be studied. Required format is: 10 for the top 10% 
 #' 
 #' @return List of dataframes. Each element of the list corresponds to a dataframe of detected edges by filtering top percentage
@@ -668,8 +673,8 @@ res_by_filtering<-function(res_glm, filtering_list){
 ```{r ex-res_by_filtering}
 data(data)
 #Simple example
-normed_JPN <-norm_data(data$CRC_JPN, col_msp_id="msp_id", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
-neighbors_JPN<-cvglm_to_coeffs_by_bact(list_dfs=normed_JPN, test_msp=c("msp_0030","msp_0345"), seed=20232024)
+normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20232024)
 filtered_neighbors_JPN<-res_by_filtering(neighbors_JPN, filtering_list=c(10,15,20))
 ```
 
@@ -689,25 +694,25 @@ test_that("norm_data works", {
 #' Gather lists of neighbors of true ones from the graph and detected ones from cv.glmnet()
 #' 
 #' @param df_truth Dataframe. The one resulting from truth_by_prevalence()
-#' @param df_glm Dataframe. The one resulting from cvglm_to_coeffs_by_bact()
+#' @param df_glm Dataframe. The one resulting from cvglm_to_coeffs_by_object()
 #' 
 #' @return Dataframe. Returns for each level of prevalence and msp, the list of true and/or detected neighbors and the corresponding list of coefficients 
 #' @export
 
 final_step<-function(df_truth, df_glm){
  truth <- df_truth %>% dplyr::bind_rows(.id = "prev_level") %>% 
-  dplyr::summarize(msp2_true = list(msp2), .by = c(prev_level, msp1))
+  dplyr::summarize(node2_true = list(node2), .by = c(prev_level, node1))
  if (class(df_glm)[[1]]!="list"){inference <- df_glm %>% 
-  dplyr::summarize(msp2_detected = list(msp2), 
-                   msp2_coef     = list(coef), 
-                   .by = c(prev_level, msp1))
+  dplyr::summarize(node2_detected = list(node2), 
+                   node2_coef     = list(coef), 
+                   .by = c(prev_level, node1))
  }
  else {inference <- df_glm %>% dplyr::bind_rows(.id = "filtering_top") %>% 
-  dplyr::summarize(msp2_detected = list(msp2), 
-                   msp2_coef     = list(coef), 
-                   .by = c(prev_level, filtering_top, msp1))
+  dplyr::summarize(node2_detected = list(node2), 
+                   node2_coef     = list(coef), 
+                   .by = c(prev_level, filtering_top, node1))
  }
- dplyr::full_join(truth, inference, by = c("prev_level", "msp1")) %>% 
+ dplyr::full_join(truth, inference, by = c("prev_level", "node1")) %>% 
   lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
   tibble::as_tibble()
 }
@@ -715,11 +720,11 @@ final_step<-function(df_truth, df_glm){
 
 ```{r ex-final_step}
 #Generate dataframe with true neighbors
-df_true<-list(tibble::tibble(msp1=c("msp_1","msp_1","msp_2","msp_3"), msp2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
-          tibble::tibble(msp1=c("msp_2","msp_3"), msp2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
+df_true<-list(tibble::tibble(node1=c("msp_1","msp_1","msp_2","msp_3"), node2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
+          tibble::tibble(node1=c("msp_2","msp_3"), node2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
 names(df_true)<-c("0.20","0.30")
 #Generate dataframe with detected neighbors
-df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), msp1=c("msp_2","msp_2","msp_3","msp_3"), msp2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
+df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), node1=c("msp_2","msp_2","msp_3","msp_3"), node2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
 #Use final_step() to gather both
 neighbors<-final_step(df_true, df_detected)
 ```
@@ -798,15 +803,15 @@ test_that("compute_recall works", {c(
 
 test_filter<-function(df_before, df_after, prevs = NULL){
   scores_before <- df_before %>%  dplyr::mutate(
-    precision_before = purrr::pmap_dbl(list(msp2_true, msp2_detected), compute_precision),
-    recall_before = purrr::pmap_dbl(list(msp2_true, msp2_detected), compute_recall))
+    precision_before = purrr::pmap_dbl(list(node2_true, node2_detected), compute_precision),
+    recall_before = purrr::pmap_dbl(list(node2_true, node2_detected), compute_recall))
   scores_after <- df_after %>%  dplyr::mutate(
-    precision_after  = purrr::pmap_dbl(list(msp2_true, msp2_detected), compute_precision),
-    recall_after = purrr::pmap_dbl(list(msp2_true, msp2_detected), compute_recall))
+    precision_after  = purrr::pmap_dbl(list(node2_true, node2_detected), compute_precision),
+    recall_after = purrr::pmap_dbl(list(node2_true, node2_detected), compute_recall))
   
   if(!nrow(scores_before) | !nrow(scores_after)){ return(tibble::tibble()) }
   else{
-  score_table <-  dplyr::full_join(scores_before, scores_after, by=c("prev_level","msp1")) %>% 
+  score_table <-  dplyr::full_join(scores_before, scores_after, by=c("prev_level","node1")) %>% 
      dplyr::select(prev_level, filtering_top, precision_before, recall_before, precision_after, recall_after) %>% 
      dplyr::mutate_all(~ replace(., is.na(.), 0))
   
@@ -822,10 +827,10 @@ data(data)
 data(taxo)
 data(graphs)
 #Generate dataframe with true neighbors
-df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella"), prev_list=c(0.20,0.30))
+df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella", annotation_level="species"), prev_list=c(0.20,0.30))
 #Generate dataframe with detected neighbors
-normed_JPN<-norm_data(data$CRC_JPN, col_msp_id="msp_id", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
-df_detected<-cvglm_to_coeffs_by_bact(list_dfs=normed_JPN, test_msp=identify_msp("Klebsiella",taxo,"msp_id"), seed=20232024)
+normed_JPN<-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+df_detected<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=identify_module("Klebsiella",taxo,"msp_id", annotation_level="species"), seed=20232024)
 #Use final_step() to gather both
 neighbors<-final_step(df_true, df_detected)
 
@@ -839,33 +844,34 @@ scores<-test_filter(neighbors, neighbors_modif, prevs=names(df_true))
 ```{r fun-choose_params_values}
 #' Render a table to give an indication of the values to choose for the prevalence level and the top filtering percentage
 #' 
-#' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
-#' @param bact_of_interest String. The name of the bacteria or species of interest
+#' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
 #' @param list_sims List of dataframes. The result of simulate_by_prevalence()
 #' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_list List of numeric. The filtering top percentages to be studied. Required format is: 10 for the top 10% 
 #' @param graph_file Dataframe. The object generated by graph_step() function
-#' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #'  
-#' @return Dataframe. Returns precision and recall rates before and after using NeighborFinder()
+#' @return Dataframe. Returns F1 rates before and after using NeighborFinder()
 #' @export
 
-choose_params_values <- function(data_with_taxo, bact_of_interest, list_sims, prev_list=NULL, filtering_list=c(0.20), graph_file=NULL, col_msp_id, seed=NULL){
+choose_params_values <- function(data_with_annotation, object_of_interest, list_sims, prev_list=NULL, filtering_list=c(0.20), graph_file=NULL, col_module_id, annotation_level, seed=NULL){
  
  #Loading graph
  if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
  else {G <- graph_file}
  
  # Extract edge_prevalence table for species of interest
- true_edges <- prev_for_selected_nodes(data_with_taxo, graph_file, col_msp_id, bact_of_interest)
+ true_edges <- prev_for_selected_nodes(data_with_annotation, graph_file, col_module_id, annotation_level, object_of_interest)
  if(!nrow(true_edges)){return(tibble::tibble())}
  
  prevs<-as.numeric(names(list_sims))
  list_truth <- truth_by_prevalence(true_edges, prevs)
  
  #Applying  glmnet
- df_glm<-cvglm_to_coeffs_by_bact(list_sims, test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id), seed=seed)
+ df_glm<-cvglm_to_coeffs_by_object(list_sims, test_module=identify_module(object_of_interest=object_of_interest, annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level), seed=seed)
  if(!nrow(df_glm)){return(tibble::tibble())}
  
  #Filtering results & rendering table
@@ -895,16 +901,16 @@ choose_params_values <- function(data_with_taxo, bact_of_interest, list_sims, pr
 ```{r ex-choose_params_values}
 data(data)
 data(graphs)
-simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_msp_id="msp_id", seed=20232024)
-choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(10,20), graph_file = graphs$CRC_JPN, col_msp_id="msp_id", seed = 20232024)
+simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed=20232024)
+choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(10,20), graph_file = graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed = 20232024)
 ```
 
 ```{r test-choose_params_values}
 test_that("choose_params_values works", {
   data(data)
   data(graphs)
-  simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_msp_id="msp_id", seed=20232024)
-  scores<-choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(15,20), graph_file = graphs$CRC_JPN, col_msp_id="msp_id", seed = 20232024)
+  simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed=20232024)
+  scores<-choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(15,20), graph_file = graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed = 20232024)
   expect_equal(scores$F1_after %>% round(digits=2), c(1, 0.80, 0.67, 0.67))
 })
 ```
@@ -914,27 +920,28 @@ test_that("choose_params_values works", {
 ```{r fun-apply_NeighborFinder}
 #' Apply NeighborFinder on raw data
 #' 
-#' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
-#' @param bact_of_interest String. The name of the bacteria or species of interest
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
-#' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words: "comptage","couverture","coverage"
+#' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate "coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
 #' @param meta_df Dataframe. The dataframe giving metadata information
-#' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'#'  
-#' @return Dataframe. Returns results after using NeighborFinder(): for each msp from 'bact_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
+#' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+#' 
+#' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 
-apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, taxo_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
+apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
   if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 
   #Normalize data
-  normed_data <- norm_data(data_with_taxo=data_with_taxo, col_msp_id=col_msp_id, type=data_type, prev_list=c(prev_level))
+  normed_data <- norm_data(data_with_annotation=data_with_annotation, col_module_id=col_module_id, type=data_type, prev_list=c(prev_level))
   #Find neighbors with cv.glmnet
-  df_glm <- cvglm_to_coeffs_by_bact(list_dfs=normed_data, 
-                                    test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id, taxo_level=taxo_level),
+  df_glm <- cvglm_to_coeffs_by_object(list_dfs=normed_data, 
+                                    test_module=identify_module(object_of_interest=object_of_interest, annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level),
                                     seed=seed, ...)
   if (!nrow(df_glm)) {return(tibble::tibble(.rows = 0))}
   #Filter results, keeping top 20% of coefficients
@@ -944,14 +951,14 @@ apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, tax
 
 ```{r ex-apply_NeighborFinder}
 data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
 ```
 
 ```{r test-apply_NeighborFinder}
 test_that("apply_NeighborFinder works", {
   data(data)
-  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
-  expect_equal(res_CRC_JPN$msp2, c("msp_0103", "msp_0208", "msp_0030", "msp_2448"))
+  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+  expect_equal(res_CRC_JPN$node2, c("msp_0103", "msp_0208", "msp_0030", "msp_2448"))
 })
 ```
 
@@ -961,28 +968,28 @@ test_that("apply_NeighborFinder works", {
 #' Display network after applying NeighborFinder
 #' 
 #' @param res_NeighborFinder Dataframe. The result from apply_NeighborFinder()
-#' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
-#' @param bact_of_interest String. The name of the bacteria or species of interest
-#' @param taxo_option Boolean. Default value is False. If True: labels on nodes become species names instead of msps names
+#' @param annotation_table Dataframe. The dataframe gathering the taxonomic or functional module correspondence information
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
+#' @param annotation_option Boolean. Default value is False. If True: labels on nodes become module names instead of module IDs 
 #' @param node_size Numeric. The parameter to adjust size of nodes
 #' @param label_size Numeric. The parameter to adjust size of labels
-#' @param species_color String. The name of the color to differentiate the nodes corresponding to 'bact_of_interest' from the other msps
+#' @param object_color String. The name of the color to differentiate the nodes corresponding to 'object_of_interest' from the other module IDs
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' 
 #' @return Network. Visualization of NeighborFinder results
 #' @export
 
-visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, taxo_level, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
+visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
   if (!nrow(res_NeighborFinder)) {return(message("No neighbors were found."))}
-  if (!taxo_option){
+  if (!annotation_option){
     #Give more visual weight to edges
     res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10)
     #Build network
     net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -992,13 +999,13 @@ visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, taxo_level, ba
   else{
     #Give taxonomic correspondence
     res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10) %>% 
-       dplyr::mutate(msp1=msp_to_bact(msp=msp1, taxo=taxo, col_msp_id=col_msp_id), 
-             msp2=msp_to_bact(msp=msp2, taxo=taxo, col_msp_id=col_msp_id)) 
+       dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+             node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
     net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), 
-                                                                  taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                                                                  annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -1011,13 +1018,13 @@ visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, taxo_level, ba
 ```{r ex-visualize_network}
 data(taxo)
 data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
 
-visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5)
-#With species names instead of msps names
-visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=2)
+visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5)
+#With species names instead of msp names
+visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
 #With esthetic changes
-visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", taxo_option=TRUE, node_size=15, label_size=6, species_color= "orange", seed=2)
+visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
 ```
 
 # Display the intersection network from 2 or more datasets
@@ -1027,36 +1034,36 @@ visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_ms
 #' 
 #' @param res_list List of dataframes. The results from apply_NeighborFinder() on several datasets
 #' @param threshold Numeric. Integer corresponding to the minimum number of datasets in which you want neighbors to have been found
-#' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
-#' @param bact_of_interest String. The name of the bacteria or species of interest
-#' @param taxo_option Boolean. Default value is False. If True: labels on nodes become species names instead of msps names
+#' @param annotation_table Dataframe. The dataframe gathering the taxonomic or functional module correspondence information
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
+#' @param annotation_option Boolean. Default value is False. If True: labels on nodes become module names instead of module IDs 
 #' @param node_size Numeric. The parameter to adjust size of nodes
 #' @param label_size Numeric. The parameter to adjust size of labels
-#' @param species_color String. The name of the color to differentiate the nodes corresponding to 'bact_of_interest' from the other msps
+#' @param object_color String. The name of the color to differentiate the nodes corresponding to 'object_of_interest' from the other module IDs
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' 
 #' @return Network. Visualization of NeighborFinder results from several datasets
 #' @export
 
-intersections_network<-function(res_list, threshold, taxo, col_msp_id, taxo_level, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
+intersections_network<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
   #Gathering all results from datasets
   for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=l)}
   inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
-     dplyr::summarize(datasets=list(dataset), .by=c(msp1,msp2))
+     dplyr::summarize(datasets=list(dataset), .by=c(node1,node2))
   #Counting in how many cohorts each neighbor was found
   res_intersections <- inter %>%  dplyr::rowwise() %>% 
      dplyr::mutate(intersections = datasets %>% unlist() %>% length()) 
   #Keeping only neighbors found in more than n cohort(s)
-  res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) %>%  dplyr::select(msp1,msp2,intersections)
+  res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) %>%  dplyr::select(node1,node2,intersections)
   if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
-  if (!taxo_option){
+  if (!annotation_option){
     #Build network
     net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -1066,14 +1073,14 @@ intersections_network<-function(res_list, threshold, taxo, col_msp_id, taxo_leve
   }
   else{
     #Give taxonomic correspondence
-    res_intersections <- res_intersections %>%  dplyr::mutate(msp1=msp_to_bact(msp=msp1, taxo=taxo, col_msp_id=col_msp_id), 
-                                                      msp2=msp_to_bact(msp=msp2, taxo=taxo, col_msp_id=col_msp_id)) 
+    res_intersections <- res_intersections %>%  dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                                                      node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
     net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), 
-                                                                  taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                                                                  annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -1088,11 +1095,11 @@ intersections_network<-function(res_list, threshold, taxo, col_msp_id, taxo_leve
 data(taxo)
 data(data)
 data(metadata)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
-res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 
-intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=3)
+intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=3)
 ```
 
 # Display the intersection table summarizing the results from 2 or more datasets
@@ -1102,18 +1109,19 @@ intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo
 #' 
 #' @param res_list List of dataframes. The results from apply_NeighborFinder() on several datasets
 #' @param threshold Numeric. Integer corresponding to the minimum number of datasets in which you want neighbors to have been found
-#' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param bact_of_interest String. The name of the bacteria or species of interest
+#' @param annotation_table Dataframe. The dataframe gathering the taxonomic or functional module correspondence information
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
 #' 
 #' @return Dataframe. Table gathering the intersection of NeighborFinder results from several datasets. The column 'datasets' indicates the datasets in which the same neighbor has been found, the column 'intersections' indicates the number of datasets in which the same neighbor has been found
 #' @export
 
-intersections_table<-function(res_list, threshold, taxo, col_msp_id, bact_of_interest){
+intersections_table<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest){
   #Gathering all results from datasets
   for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=paste("n_",l))}
   inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
-     dplyr::summarize(datasets=list(dataset), .by=c(msp1,msp2))
+     dplyr::summarize(datasets=list(dataset), .by=c(node1,node2))
   #Counting in how many cohorts each neighbor was found
   res_intersections <- inter %>%  dplyr::rowwise() %>% 
      dplyr::mutate(intersections = datasets %>% unlist() %>% length()) 
@@ -1121,9 +1129,9 @@ intersections_table<-function(res_list, threshold, taxo, col_msp_id, bact_of_int
   res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) 
   if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
   #Give taxonomic correspondence
-  res_intersections %>%  dplyr::mutate(bact1=msp_to_bact(msp=msp1, taxo=taxo, col_msp_id=col_msp_id), 
-                               bact2=msp_to_bact(msp=msp2, taxo=taxo, col_msp_id=col_msp_id)) %>% 
-     dplyr::select(msp1,bact1,msp2,bact2,datasets,intersections) %>% as.data.frame()
+  res_intersections %>%  dplyr::mutate(module1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                               module2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) %>% 
+     dplyr::select(node1,module1,node2,module2,datasets,intersections) %>% as.data.frame()
 }
 ```
 
@@ -1131,11 +1139,11 @@ intersections_table<-function(res_list, threshold, taxo, col_msp_id, bact_of_int
 data(taxo)
 data(data)
 data(metadata)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
-res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 
-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_msp_id="msp_id", "Escherichia coli")
+intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", annotation_level="species", "Escherichia coli")
 ```
 
 ```{r test-intersections_table}
@@ -1143,11 +1151,11 @@ test_that("intersections_table works", {
   data(taxo)
   data(data)
   data(metadata)
-  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
-  res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-  res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+  res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+  res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
   
-  table<-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_msp_id="msp_id", "Escherichia coli")
+  table<-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", "Escherichia coli")
   expect_equal(table$msp2, c("msp_0103", "msp_0208", "msp_0030"))
 })
 ```
