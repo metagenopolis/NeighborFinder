@@ -159,13 +159,14 @@ test_that("msp_to_bact works", {
 #' @param bact_of_interest String. The name of the bacteria or species of interest
 #' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
 #' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo. Default value is set to the species level
 #'
 #' @return List of string. The msps names of the corresponding species of interest
 #' @export
 
-identify_msp <-function(bact_of_interest = "prausnitzii", taxo, col_msp_id){
+identify_msp <-function(bact_of_interest = "prausnitzii", taxo, col_msp_id, taxo_level = "species"){
   res<-taxo %>% 
-    dplyr::filter(stringr::str_detect(species, bact_of_interest)) %>% 
+    dplyr::filter(stringr::str_detect(!!rlang::sym(taxo_level), bact_of_interest)) %>% 
     dplyr::pull(paste(col_msp_id)) %>% 
     as.character()
   if (length(res)==0) {stop("ERROR: Please check spelling of bact_of_interest :)")}
@@ -916,6 +917,7 @@ test_that("choose_params_values works", {
 #' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
 #' @param bact_of_interest String. The name of the bacteria or species of interest
 #' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
 #' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words: "comptage","couverture","coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
@@ -926,13 +928,13 @@ test_that("choose_params_values works", {
 #' @return Dataframe. Returns results after using NeighborFinder(): for each msp from 'bact_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 
-apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
+apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, taxo_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
   if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 
   #Normalize data
   normed_data <- norm_data(data_with_taxo=data_with_taxo, col_msp_id=col_msp_id, type=data_type, prev_list=c(prev_level))
   #Find neighbors with cv.glmnet
   df_glm <- cvglm_to_coeffs_by_bact(list_dfs=normed_data, 
-                                    test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id),
+                                    test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id, taxo_level=taxo_level),
                                     seed=seed, ...)
   if (!nrow(df_glm)) {return(tibble::tibble(.rows = 0))}
   #Filter results, keeping top 20% of coefficients
@@ -961,6 +963,7 @@ test_that("apply_NeighborFinder works", {
 #' @param res_NeighborFinder Dataframe. The result from apply_NeighborFinder()
 #' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
 #' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
 #' @param bact_of_interest String. The name of the bacteria or species of interest
 #' @param taxo_option Boolean. Default value is False. If True: labels on nodes become species names instead of msps names
 #' @param node_size Numeric. The parameter to adjust size of nodes
@@ -971,7 +974,7 @@ test_that("apply_NeighborFinder works", {
 #' @return Network. Visualization of NeighborFinder results
 #' @export
 
-visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
+visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, taxo_level, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
   if (!nrow(res_NeighborFinder)) {return(message("No neighbors were found."))}
   if (!taxo_option){
     #Give more visual weight to edges
@@ -979,7 +982,7 @@ visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, bact_of_intere
     #Build network
     net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), species_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -994,7 +997,7 @@ visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, bact_of_intere
     #Build network
     net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id), 
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), 
                                                                   taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
@@ -1026,6 +1029,7 @@ visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_ms
 #' @param threshold Numeric. Integer corresponding to the minimum number of datasets in which you want neighbors to have been found
 #' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
 #' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
 #' @param bact_of_interest String. The name of the bacteria or species of interest
 #' @param taxo_option Boolean. Default value is False. If True: labels on nodes become species names instead of msps names
 #' @param node_size Numeric. The parameter to adjust size of nodes
@@ -1036,7 +1040,7 @@ visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_ms
 #' @return Network. Visualization of NeighborFinder results from several datasets
 #' @export
 
-intersections_network<-function(res_list, threshold, taxo, col_msp_id, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
+intersections_network<-function(res_list, threshold, taxo, col_msp_id, taxo_level, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
   #Gathering all results from datasets
   for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=l)}
   inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
@@ -1052,7 +1056,7 @@ intersections_network<-function(res_list, threshold, taxo, col_msp_id, bact_of_i
     net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), species_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -1068,7 +1072,7 @@ intersections_network<-function(res_list, threshold, taxo, col_msp_id, bact_of_i
     net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id), 
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), 
                                                                   taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}

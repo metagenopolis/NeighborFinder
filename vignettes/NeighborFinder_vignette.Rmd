@@ -63,7 +63,7 @@ The required data format in input is as follows: species are the rows and sample
 
 ```{r apply-JPN}
 # JAPAN
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024)
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
 
 res_CRC_JPN %>% download_this(output_name = "res_CRC_JPN", output_extension = ".csv",
     button_label = "Download results as csv file", button_type = "default",
@@ -76,9 +76,9 @@ Here is a proposition of visualization of NeighborFinder results.
 It is possible to adjust the size of nodes and labels. One can also define the color of nodes corresponding to their species of interest. The 'taxo_option' generates the same network but with species names instead of msps ones.
 
 ```{r network-JPN, fig.height=4, fig.width=7}
-visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", label_size=5)
+visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5)
 
-visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", label_size=5, taxo_option=TRUE, seed=2)
+visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=2)
 ```
 
 ## Apply NeighborFinder with covariate option
@@ -94,10 +94,10 @@ To include a covariate, the function would run only if the following all 3 argum
 ```{r apply-covariate}
 # On CRC patients
 # CHINA
-res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 
 # EUROPE
-res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 ```
 
 ## Look at the intersection of neighbors found in the 3 subgroups
@@ -106,7 +106,7 @@ This operation can be performed with 2 or more datasets. One can choose the visu
 Another function used here is equivalent to the network thanks to a summary table, indicating in which datasets intersections were found above the set threshold.
 
 ```{r intersections-network, fig.height=4, fig.width=7}
-intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_msp_id="msp_id", label_size=5, taxo_option=TRUE, seed=3)
+intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=3)
 ```
 
 One of the main links is with Klebsiella pneumoniae. It is also a bacteria associated with CRC, and produces the same toxin: https://www.sciencedirect.com/science/article/pii/S0041010121001112
