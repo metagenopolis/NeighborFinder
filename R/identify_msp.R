@@ -5,6 +5,7 @@
 #' @param bact_of_interest String. The name of the bacteria or species of interest
 #' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
 #' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo. Default value is set to the species level
 #'
 #' @return List of string. The msps names of the corresponding species of interest
 #' @export
@@ -15,9 +16,9 @@
 #' identify_msp("bacterium", taxo=df_taxo, col_msp_id = "msp_name")
 #' identify_msp("One", taxo=df_taxo, col_msp_id = "msp_name")
 
-identify_msp <-function(bact_of_interest = "prausnitzii", taxo, col_msp_id){
+identify_msp <-function(bact_of_interest = "prausnitzii", taxo, col_msp_id, taxo_level = "species"){
   res<-taxo %>% 
-    dplyr::filter(stringr::str_detect(species, bact_of_interest)) %>% 
+    dplyr::filter(stringr::str_detect(!!rlang::sym(taxo_level), bact_of_interest)) %>% 
     dplyr::pull(paste(col_msp_id)) %>% 
     as.character()
   if (length(res)==0) {stop("ERROR: Please check spelling of bact_of_interest :)")}

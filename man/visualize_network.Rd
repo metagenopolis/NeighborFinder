@@ -8,6 +8,7 @@ visualize_network(
   res_NeighborFinder,
   taxo,
   col_msp_id,
+  taxo_level,
   bact_of_interest,
   taxo_option = FALSE,
   node_size = 12,
@@ -22,6 +23,8 @@ visualize_network(
 \item{taxo}{Dataframe. The dataframe gathering the taxonomic correspondence information}
 
 \item{col_msp_id}{String. The name of the column with the msp names in taxo}
+
+\item{taxo_level}{String. The name of the column of the taxonomic level to be studied in taxo}
 
 \item{bact_of_interest}{String. The name of the bacteria or species of interest}
 
@@ -44,11 +47,11 @@ Display network after applying NeighborFinder
 \examples{
 data(taxo)
 data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024)
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
 
-visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", label_size=5)
+visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5)
 #With species names instead of msps names
-visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", label_size=5, taxo_option=TRUE, seed=2)
+visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=2)
 #With esthetic changes
-visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_option=TRUE, node_size=15, label_size=6, species_color= "orange", seed=2)
+visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", taxo_option=TRUE, node_size=15, label_size=6, species_color= "orange", seed=2)
 }

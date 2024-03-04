@@ -8,6 +8,7 @@ apply_NeighborFinder(
   data_with_taxo,
   bact_of_interest,
   col_msp_id,
+  taxo_level,
   data_type = "fpkm",
   prev_level = 0.3,
   filtering_top = 20,
@@ -21,6 +22,8 @@ apply_NeighborFinder(
 \item{bact_of_interest}{String. The name of the bacteria or species of interest}
 
 \item{col_msp_id}{String. The name of the column with the msp names in taxo}
+
+\item{taxo_level}{String. The name of the column of the taxonomic level to be studied in taxo}
 
 \item{data_type}{String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words: "comptage","couverture","coverage"}
 
@@ -44,5 +47,5 @@ Apply NeighborFinder on raw data
 }
 \examples{
 data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024)
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
 }

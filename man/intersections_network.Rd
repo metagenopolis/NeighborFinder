@@ -9,6 +9,7 @@ intersections_network(
   threshold,
   taxo,
   col_msp_id,
+  taxo_level,
   bact_of_interest,
   taxo_option = FALSE,
   node_size = 12,
@@ -25,6 +26,8 @@ intersections_network(
 \item{taxo}{Dataframe. The dataframe gathering the taxonomic correspondence information}
 
 \item{col_msp_id}{String. The name of the column with the msp names in taxo}
+
+\item{taxo_level}{String. The name of the column of the taxonomic level to be studied in taxo}
 
 \item{bact_of_interest}{String. The name of the bacteria or species of interest}
 
@@ -48,9 +51,9 @@ Display the intersection network from 2 or more datasets
 data(taxo)
 data(data)
 data(metadata)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024)
-res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
+res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 
-intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_msp_id="msp_id", label_size=5, taxo_option=TRUE, seed=3)
+intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=3)
 }

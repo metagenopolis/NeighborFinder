@@ -5,6 +5,7 @@
 #' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
 #' @param bact_of_interest String. The name of the bacteria or species of interest
 #' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
 #' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words: "comptage","couverture","coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
@@ -16,15 +17,15 @@
 #' @export
 #' @examples
 #' data(data)
-#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024)
+#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
 
-apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
+apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, taxo_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
   if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 
   #Normalize data
   normed_data <- norm_data(data_with_taxo=data_with_taxo, col_msp_id=col_msp_id, type=data_type, prev_list=c(prev_level))
   #Find neighbors with cv.glmnet
   df_glm <- cvglm_to_coeffs_by_bact(list_dfs=normed_data, 
-                                    test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id),
+                                    test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id, taxo_level=taxo_level),
                                     seed=seed, ...)
   if (!nrow(df_glm)) {return(tibble::tibble(.rows = 0))}
   #Filter results, keeping top 20% of coefficients

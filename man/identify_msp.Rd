@@ -4,7 +4,12 @@
 \alias{identify_msp}
 \title{List the msps corresponding to a given species of interest}
 \usage{
-identify_msp(bact_of_interest = "prausnitzii", taxo, col_msp_id)
+identify_msp(
+  bact_of_interest = "prausnitzii",
+  taxo,
+  col_msp_id,
+  taxo_level = "species"
+)
 }
 \arguments{
 \item{bact_of_interest}{String. The name of the bacteria or species of interest}
@@ -12,6 +17,8 @@ identify_msp(bact_of_interest = "prausnitzii", taxo, col_msp_id)
 \item{taxo}{Dataframe. The dataframe gathering the taxonomic correspondence information}
 
 \item{col_msp_id}{String. The name of the column with the msp names in taxo}
+
+\item{taxo_level}{String. The name of the column of the taxonomic level to be studied in taxo. Default value is set to the species level}
 }
 \value{
 List of string. The msps names of the corresponding species of interest

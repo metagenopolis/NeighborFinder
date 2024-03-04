@@ -6,6 +6,7 @@
 #' @param threshold Numeric. Integer corresponding to the minimum number of datasets in which you want neighbors to have been found
 #' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
 #' @param col_msp_id String. The name of the column with the msp names in taxo
+#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
 #' @param bact_of_interest String. The name of the bacteria or species of interest
 #' @param taxo_option Boolean. Default value is False. If True: labels on nodes become species names instead of msps names
 #' @param node_size Numeric. The parameter to adjust size of nodes
@@ -19,13 +20,13 @@
 #' data(taxo)
 #' data(data)
 #' data(metadata)
-#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024)
-#' res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-#' res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
+#' res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+#' res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 #'
-#' intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_msp_id="msp_id", label_size=5, taxo_option=TRUE, seed=3)
+#' intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=3)
 
-intersections_network<-function(res_list, threshold, taxo, col_msp_id, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
+intersections_network<-function(res_list, threshold, taxo, col_msp_id, taxo_level, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
   #Gathering all results from datasets
   for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=l)}
   inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
@@ -41,7 +42,7 @@ intersections_network<-function(res_list, threshold, taxo, col_msp_id, bact_of_i
     net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), species_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -57,7 +58,7 @@ intersections_network<-function(res_list, threshold, taxo, col_msp_id, bact_of_i
     net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id), 
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), 
                                                                   taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}

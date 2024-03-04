@@ -4,9 +4,9 @@ test_that("intersections_table works", {
   data(taxo)
   data(data)
   data(metadata)
-  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024)
-  res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-  res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
+  res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+  res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
   
   table<-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_msp_id="msp_id", "Escherichia coli")
   expect_equal(table$msp2, c("msp_0103", "msp_0208", "msp_0030"))
