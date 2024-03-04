@@ -2,9 +2,10 @@
 
 #' Generate a graph
 #' 
-#' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words in 'type' argument: "comptage","couverture","coverage"
+#' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
+#' @param col_module_id String. The name of the column with the module names in the annotation table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate in 'type' argument: "coverage"
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
@@ -16,24 +17,24 @@
 #'                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
 #'                       SAMPLE4=c(0,0,2.98320e-05,0))
 #'
-#' tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") %>% suppressWarnings()
+#' tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
 
-graph_step<-function(data_with_taxo, col_msp_id, type="fpkm"){
-  if (type %in% c("couverture","coverage","comptage")){
-    prev_df <- data_with_taxo %>%
-      dplyr::mutate(prev = data_with_taxo %>% dplyr::select(-species, -all_of(col_msp_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
+graph_step<-function(data_with_annotation, col_module_id, annotation_level, type="fpkm"){
+  if (type %in% c("coverage")){
+    prev_df <- data_with_annotation %>%
+      dplyr::mutate(prev = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
     df <- prev_df %>% dplyr::filter(prev>0.15) %>% 
-      dplyr::select(-species, -all_of(col_msp_id), -prev) %>% t() 
-    colnames(df) <- prev_df %>% dplyr::filter(prev>0.15) %>% dplyr::pull(paste(col_msp_id))
+      dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id), -prev) %>% t() 
+    colnames(df) <- prev_df %>% dplyr::filter(prev>0.15) %>% dplyr::pull(paste(col_module_id))
     G <- OneNet::new_synth_data(df, n=50, plot=FALSE, verbose=FALSE)$G
     dimnames(G) <- list(colnames(df), colnames(df))
   }
   if (type %in% c("fpkm")){
-    counts <- OneNet::get_count_table(abund.table = data_with_taxo %>% dplyr::select(-species), sample_id=colnames(data_with_taxo), prev.min=0.15, verbatim=FALSE)$data
+    counts <- OneNet::get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample_id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
     G <- OneNet::new_synth_data(counts, n=50, plot=FALSE, verbose=FALSE)$G
     dimnames(G) <- list(colnames(counts), colnames(counts))
   }
   G <- G %>% as.data.frame() %>% 
-    dplyr::mutate(species=msp_to_bact(rownames(G), taxo=data_with_taxo, col_msp_id=col_msp_id))
+    dplyr::mutate(!!rlang::sym(annotation_level):=module_to_node(rownames(G), annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level))
   G
 }

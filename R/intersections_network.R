@@ -4,14 +4,14 @@
 #' 
 #' @param res_list List of dataframes. The results from apply_NeighborFinder() on several datasets
 #' @param threshold Numeric. Integer corresponding to the minimum number of datasets in which you want neighbors to have been found
-#' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
-#' @param bact_of_interest String. The name of the bacteria or species of interest
-#' @param taxo_option Boolean. Default value is False. If True: labels on nodes become species names instead of msps names
+#' @param annotation_table Dataframe. The dataframe gathering the taxonomic or functional module correspondence information
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
+#' @param annotation_option Boolean. Default value is False. If True: labels on nodes become module names instead of module IDs 
 #' @param node_size Numeric. The parameter to adjust size of nodes
 #' @param label_size Numeric. The parameter to adjust size of labels
-#' @param species_color String. The name of the color to differentiate the nodes corresponding to 'bact_of_interest' from the other msps
+#' @param object_color String. The name of the color to differentiate the nodes corresponding to 'object_of_interest' from the other module IDs
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' 
 #' @return Network. Visualization of NeighborFinder results from several datasets
@@ -20,29 +20,29 @@
 #' data(taxo)
 #' data(data)
 #' data(metadata)
-#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
-#' res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-#' res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+#' res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+#' res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 #'
-#' intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=3)
+#' intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=3)
 
-intersections_network<-function(res_list, threshold, taxo, col_msp_id, taxo_level, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
+intersections_network<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
   #Gathering all results from datasets
   for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=l)}
   inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
-     dplyr::summarize(datasets=list(dataset), .by=c(msp1,msp2))
+     dplyr::summarize(datasets=list(dataset), .by=c(node1,node2))
   #Counting in how many cohorts each neighbor was found
   res_intersections <- inter %>%  dplyr::rowwise() %>% 
      dplyr::mutate(intersections = datasets %>% unlist() %>% length()) 
   #Keeping only neighbors found in more than n cohort(s)
-  res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) %>%  dplyr::select(msp1,msp2,intersections)
+  res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) %>%  dplyr::select(node1,node2,intersections)
   if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
-  if (!taxo_option){
+  if (!annotation_option){
     #Build network
     net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -52,14 +52,14 @@ intersections_network<-function(res_list, threshold, taxo, col_msp_id, taxo_leve
   }
   else{
     #Give taxonomic correspondence
-    res_intersections <- res_intersections %>%  dplyr::mutate(msp1=msp_to_bact(msp=msp1, taxo=taxo, col_msp_id=col_msp_id), 
-                                                      msp2=msp_to_bact(msp=msp2, taxo=taxo, col_msp_id=col_msp_id)) 
+    res_intersections <- res_intersections %>%  dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                                                      node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
     net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), 
-                                                                  taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                                                                  annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 

@@ -5,10 +5,10 @@
 \title{Apply NeighborFinder on raw data}
 \usage{
 apply_NeighborFinder(
-  data_with_taxo,
-  bact_of_interest,
-  col_msp_id,
-  taxo_level,
+  data_with_annotation,
+  object_of_interest,
+  col_module_id,
+  annotation_level,
   data_type = "fpkm",
   prev_level = 0.3,
   filtering_top = 20,
@@ -17,15 +17,15 @@ apply_NeighborFinder(
 )
 }
 \arguments{
-\item{data_with_taxo}{Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample}
+\item{data_with_annotation}{Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample}
 
-\item{bact_of_interest}{String. The name of the bacteria or species of interest}
+\item{object_of_interest}{String. The name of the bacteria or species of interest or a key word in the functional module definition}
 
-\item{col_msp_id}{String. The name of the column with the msp names in taxo}
+\item{col_module_id}{String. The name of the column with the module names in annotation_table}
 
-\item{taxo_level}{String. The name of the column of the taxonomic level to be studied in taxo}
+\item{annotation_level}{String. The name of the column with the level to be studied. Examples: species, genus, level_1}
 
-\item{data_type}{String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words: "comptage","couverture","coverage"}
+\item{data_type}{String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate "coverage"}
 
 \item{prev_level}{Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20\% of prevalence}
 
@@ -37,15 +37,15 @@ apply_NeighborFinder(
 
 \item{meta_df}{Dataframe. The dataframe giving metadata information}
 
-\item{sample_col}{String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'#'}
+\item{sample_col}{String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'}
 }
 \value{
-Dataframe. Returns results after using NeighborFinder(): for each msp from 'bact_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
+Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 }
 \description{
 Apply NeighborFinder on raw data
 }
 \examples{
 data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
 }

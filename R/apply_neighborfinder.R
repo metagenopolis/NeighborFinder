@@ -2,30 +2,31 @@
 
 #' Apply NeighborFinder on raw data
 #' 
-#' @param data_with_taxo Dataframe. The abundance table merged with the species names. Required format: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample
-#' @param bact_of_interest String. The name of the bacteria or species of interest
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
-#' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate one of the following equivalent words: "comptage","couverture","coverage"
+#' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate "coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
 #' @param meta_df Dataframe. The dataframe giving metadata information
-#' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'#'  
-#' @return Dataframe. Returns results after using NeighborFinder(): for each msp from 'bact_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
+#' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+#' 
+#' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 #' @examples
 #' data(data)
-#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
+#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
 
-apply_NeighborFinder<-function(data_with_taxo, bact_of_interest, col_msp_id, taxo_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
+apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
   if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 
   #Normalize data
-  normed_data <- norm_data(data_with_taxo=data_with_taxo, col_msp_id=col_msp_id, type=data_type, prev_list=c(prev_level))
+  normed_data <- norm_data(data_with_annotation=data_with_annotation, col_module_id=col_module_id, type=data_type, prev_list=c(prev_level))
   #Find neighbors with cv.glmnet
-  df_glm <- cvglm_to_coeffs_by_bact(list_dfs=normed_data, 
-                                    test_msp=identify_msp(bact_of_interest=bact_of_interest, taxo=data_with_taxo, col_msp_id=col_msp_id, taxo_level=taxo_level),
+  df_glm <- cvglm_to_coeffs_by_object(list_dfs=normed_data, 
+                                    test_module=identify_module(object_of_interest=object_of_interest, annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level),
                                     seed=seed, ...)
   if (!nrow(df_glm)) {return(tibble::tibble(.rows = 0))}
   #Filter results, keeping top 20% of coefficients

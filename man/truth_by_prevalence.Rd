@@ -25,9 +25,9 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") \%>\% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") \%>\% suppressWarnings()
 
-tiny_truth <-prev_for_selected_nodes(tiny_data, tiny_graph, col_msp_id="msp_name", bact_of_interest="bacterium")
+tiny_truth <-prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id="msp_name", annotation_level="species", object_of_interest="bacterium")
 
 tiny_true_edges<-truth_by_prevalence(tiny_truth, c(0.20,0.30))
 }

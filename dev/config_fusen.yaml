@@ -19,15 +19,15 @@ NeighborFinder_flat.Rmd:
   - R/choose_params_values.R
   - R/compute_precision.R
   - R/compute_recall.R
-  - R/cvglm_to_coeffs_by_bact.R
+  - R/cvglm_to_coeffs_by_object.R
   - R/final_step.R
-  - R/find_all_msp_neighbors.R
-  - R/find_msp_neighbors.R
+  - R/find_all_module_neighbors.R
+  - R/find_module_neighbors.R
   - R/graph_step.R
-  - R/identify_msp.R
+  - R/identify_module.R
   - R/intersections_network.R
   - R/intersections_table.R
-  - R/msp_to_bact.R
+  - R/module_to_node.R
   - R/norm_data.R
   - R/prev_for_selected_nodes.R
   - R/res_by_filtering.R
@@ -41,8 +41,8 @@ NeighborFinder_flat.Rmd:
   - R/graphs-for-crc-patients.R
   - R/pipe-function.R
   tests:
-  - tests/testthat/test-msp_to_bact.R
-  - tests/testthat/test-identify_msp.R
+  - tests/testthat/test-module_to_node.R
+  - tests/testthat/test-identify_module.R
   - tests/testthat/test-graph_step.R
   - tests/testthat/test-simulate_by_prevalence.R
   - tests/testthat/test-prev_for_selected_nodes.R

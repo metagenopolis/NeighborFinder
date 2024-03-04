@@ -13,5 +13,5 @@ test_that("norm_data works", {
                                   msp_3=c(0.000000,5.303984,1.000000,4.520268),
                                   msp_4=c(3.438051,0.000000,8.040536,0.000000))  
   rownames(expected_normed0.2)<-c("SAMPLE1","SAMPLE2","SAMPLE3","SAMPLE4")
-  expect_equal(norm_data(tiny_data, col_msp_id="msp_name", prev_list=c(0.20), type="fpkm")[[1]] %>% as.data.frame() %>% round(digits=5), expected_normed0.2 %>% round(digits=5))
+  expect_equal(norm_data(tiny_data, col_module_id="msp_name",annotation_level="species", prev_list=c(0.20), type="fpkm")[[1]] %>% as.data.frame() %>% round(digits=5), expected_normed0.2 %>% round(digits=5))
 })

@@ -3,7 +3,7 @@
 test_that("choose_params_values works", {
   data(data)
   data(graphs)
-  simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_msp_id="msp_id", seed=20232024)
-  scores<-choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(15,20), graph_file = graphs$CRC_JPN, col_msp_id="msp_id", seed = 20232024)
+  simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed=20232024)
+  scores<-choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(15,20), graph_file = graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed = 20232024)
   expect_equal(scores$F1_after %>% round(digits=2), c(1, 0.80, 0.67, 0.67))
 })

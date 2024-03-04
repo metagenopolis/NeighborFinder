@@ -9,21 +9,21 @@ final_step(df_truth, df_glm)
 \arguments{
 \item{df_truth}{Dataframe. The one resulting from truth_by_prevalence()}
 
-\item{df_glm}{Dataframe. The one resulting from cvglm_to_coeffs_by_bact()}
+\item{df_glm}{Dataframe. The one resulting from cvglm_to_coeffs_by_object()}
 }
 \value{
-Dataframe. Returns for each level of prevalence and msp, the list of true and/or detected neighbors and the corresponding list of coefficients
+Dataframe. Returns for each level of prevalence and module ID, the list of true and/or detected neighbors and the corresponding list of coefficients
 }
 \description{
 Gather lists of neighbors of true ones from the graph and detected ones from cv.glmnet()
 }
 \examples{
 #Generate dataframe with true neighbors
-df_true<-list(tibble::tibble(msp1=c("msp_1","msp_1","msp_2","msp_3"), msp2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
-          tibble::tibble(msp1=c("msp_2","msp_3"), msp2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
+df_true<-list(tibble::tibble(node1=c("msp_1","msp_1","msp_2","msp_3"), node2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
+          tibble::tibble(node1=c("msp_2","msp_3"), node2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
 names(df_true)<-c("0.20","0.30")
 #Generate dataframe with detected neighbors
-df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), msp1=c("msp_2","msp_2","msp_3","msp_3"), msp2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
+df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), node1=c("msp_2","msp_2","msp_3","msp_3"), node2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
 #Use final_step() to gather both
 neighbors<-final_step(df_true, df_detected)
 }

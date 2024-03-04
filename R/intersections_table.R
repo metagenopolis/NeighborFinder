@@ -4,9 +4,10 @@
 #' 
 #' @param res_list List of dataframes. The results from apply_NeighborFinder() on several datasets
 #' @param threshold Numeric. Integer corresponding to the minimum number of datasets in which you want neighbors to have been found
-#' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param bact_of_interest String. The name of the bacteria or species of interest
+#' @param annotation_table Dataframe. The dataframe gathering the taxonomic or functional module correspondence information
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
 #' 
 #' @return Dataframe. Table gathering the intersection of NeighborFinder results from several datasets. The column 'datasets' indicates the datasets in which the same neighbor has been found, the column 'intersections' indicates the number of datasets in which the same neighbor has been found
 #' @export
@@ -14,17 +15,17 @@
 #' data(taxo)
 #' data(data)
 #' data(metadata)
-#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
-#' res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-#' res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+#' res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+#' res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 #'
-#' intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_msp_id="msp_id", "Escherichia coli")
+#' intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", annotation_level="species", "Escherichia coli")
 
-intersections_table<-function(res_list, threshold, taxo, col_msp_id, bact_of_interest){
+intersections_table<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest){
   #Gathering all results from datasets
   for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=paste("n_",l))}
   inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
-     dplyr::summarize(datasets=list(dataset), .by=c(msp1,msp2))
+     dplyr::summarize(datasets=list(dataset), .by=c(node1,node2))
   #Counting in how many cohorts each neighbor was found
   res_intersections <- inter %>%  dplyr::rowwise() %>% 
      dplyr::mutate(intersections = datasets %>% unlist() %>% length()) 
@@ -32,7 +33,7 @@ intersections_table<-function(res_list, threshold, taxo, col_msp_id, bact_of_int
   res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) 
   if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
   #Give taxonomic correspondence
-  res_intersections %>%  dplyr::mutate(bact1=msp_to_bact(msp=msp1, taxo=taxo, col_msp_id=col_msp_id), 
-                               bact2=msp_to_bact(msp=msp2, taxo=taxo, col_msp_id=col_msp_id)) %>% 
-     dplyr::select(msp1,bact1,msp2,bact2,datasets,intersections) %>% as.data.frame()
+  res_intersections %>%  dplyr::mutate(module1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                               module2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) %>% 
+     dplyr::select(node1,module1,node2,module2,datasets,intersections) %>% as.data.frame()
 }

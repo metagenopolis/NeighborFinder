@@ -7,11 +7,11 @@ test_that("prev_for_selected_nodes works", {
                         SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
                         SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                         SAMPLE4=c(0,0,2.98320e-05,0))
-  tiny_graph<-graph_step(tiny_data, col_msp_id="msp_name", type="fpkm") %>% suppressWarnings()
+  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
   
-  expected_truth <- tibble::tibble(msp1=c("msp_2","msp_2","msp_2","msp_3","msp_3"),
-                                   msp2=c("msp_1","msp_3","msp_4","msp_2","msp_4"),
+  expected_truth <- tibble::tibble(node1=c("msp_2","msp_2","msp_2","msp_3","msp_3"),
+                                   node2=c("msp_1","msp_3","msp_4","msp_2","msp_4"),
                                    prev1=c(0.5,0.5,0.5,0.75,0.75),
                                    prev2=c(0.25,0.75,0.5,0.5,0.5))
-  expect_equal(prev_for_selected_nodes(tiny_data, tiny_graph, col_msp_id="msp_name", bact_of_interest="bacterium"), expected_truth)
+  expect_equal(prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id="msp_name", annotation_level="species", object_of_interest="bacterium"), expected_truth)
 })

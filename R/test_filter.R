@@ -13,10 +13,10 @@
 #' data(taxo)
 #' data(graphs)
 #' #Generate dataframe with true neighbors
-#' df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella"), prev_list=c(0.20,0.30))
+#' df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella", annotation_level="species"), prev_list=c(0.20,0.30))
 #' #Generate dataframe with detected neighbors
-#' normed_JPN<-norm_data(data$CRC_JPN, col_msp_id="msp_id", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
-#' df_detected<-cvglm_to_coeffs_by_bact(list_dfs=normed_JPN, test_msp=identify_msp("Klebsiella",taxo,"msp_id"), seed=20232024)
+#' normed_JPN<-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+#' df_detected<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=identify_module("Klebsiella",taxo,"msp_id", annotation_level="species"), seed=20232024)
 #' #Use final_step() to gather both
 #' neighbors<-final_step(df_true, df_detected)
 #'
@@ -26,15 +26,15 @@
 
 test_filter<-function(df_before, df_after, prevs = NULL){
   scores_before <- df_before %>%  dplyr::mutate(
-    precision_before = purrr::pmap_dbl(list(msp2_true, msp2_detected), compute_precision),
-    recall_before = purrr::pmap_dbl(list(msp2_true, msp2_detected), compute_recall))
+    precision_before = purrr::pmap_dbl(list(node2_true, node2_detected), compute_precision),
+    recall_before = purrr::pmap_dbl(list(node2_true, node2_detected), compute_recall))
   scores_after <- df_after %>%  dplyr::mutate(
-    precision_after  = purrr::pmap_dbl(list(msp2_true, msp2_detected), compute_precision),
-    recall_after = purrr::pmap_dbl(list(msp2_true, msp2_detected), compute_recall))
+    precision_after  = purrr::pmap_dbl(list(node2_true, node2_detected), compute_precision),
+    recall_after = purrr::pmap_dbl(list(node2_true, node2_detected), compute_recall))
   
   if(!nrow(scores_before) | !nrow(scores_after)){ return(tibble::tibble()) }
   else{
-  score_table <-  dplyr::full_join(scores_before, scores_after, by=c("prev_level","msp1")) %>% 
+  score_table <-  dplyr::full_join(scores_before, scores_after, by=c("prev_level","node1")) %>% 
      dplyr::select(prev_level, filtering_top, precision_before, recall_before, precision_after, recall_after) %>% 
      dplyr::mutate_all(~ replace(., is.na(.), 0))
   

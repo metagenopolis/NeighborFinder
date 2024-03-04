@@ -3,34 +3,34 @@
 #' Gather lists of neighbors of true ones from the graph and detected ones from cv.glmnet()
 #' 
 #' @param df_truth Dataframe. The one resulting from truth_by_prevalence()
-#' @param df_glm Dataframe. The one resulting from cvglm_to_coeffs_by_bact()
+#' @param df_glm Dataframe. The one resulting from cvglm_to_coeffs_by_object()
 #' 
-#' @return Dataframe. Returns for each level of prevalence and msp, the list of true and/or detected neighbors and the corresponding list of coefficients 
+#' @return Dataframe. Returns for each level of prevalence and module ID, the list of true and/or detected neighbors and the corresponding list of coefficients 
 #' @export
 #' @examples
 #' #Generate dataframe with true neighbors
-#' df_true<-list(tibble::tibble(msp1=c("msp_1","msp_1","msp_2","msp_3"), msp2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
-#'           tibble::tibble(msp1=c("msp_2","msp_3"), msp2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
+#' df_true<-list(tibble::tibble(node1=c("msp_1","msp_1","msp_2","msp_3"), node2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
+#'           tibble::tibble(node1=c("msp_2","msp_3"), node2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
 #' names(df_true)<-c("0.20","0.30")
 #' #Generate dataframe with detected neighbors
-#' df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), msp1=c("msp_2","msp_2","msp_3","msp_3"), msp2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
+#' df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), node1=c("msp_2","msp_2","msp_3","msp_3"), node2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
 #' #Use final_step() to gather both
 #' neighbors<-final_step(df_true, df_detected)
 
 final_step<-function(df_truth, df_glm){
  truth <- df_truth %>% dplyr::bind_rows(.id = "prev_level") %>% 
-  dplyr::summarize(msp2_true = list(msp2), .by = c(prev_level, msp1))
+  dplyr::summarize(node2_true = list(node2), .by = c(prev_level, node1))
  if (class(df_glm)[[1]]!="list"){inference <- df_glm %>% 
-  dplyr::summarize(msp2_detected = list(msp2), 
-                   msp2_coef     = list(coef), 
-                   .by = c(prev_level, msp1))
+  dplyr::summarize(node2_detected = list(node2), 
+                   node2_coef     = list(coef), 
+                   .by = c(prev_level, node1))
  }
  else {inference <- df_glm %>% dplyr::bind_rows(.id = "filtering_top") %>% 
-  dplyr::summarize(msp2_detected = list(msp2), 
-                   msp2_coef     = list(coef), 
-                   .by = c(prev_level, filtering_top, msp1))
+  dplyr::summarize(node2_detected = list(node2), 
+                   node2_coef     = list(coef), 
+                   .by = c(prev_level, filtering_top, node1))
  }
- dplyr::full_join(truth, inference, by = c("prev_level", "msp1")) %>% 
+ dplyr::full_join(truth, inference, by = c("prev_level", "node1")) %>% 
   lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
   tibble::as_tibble()
 }

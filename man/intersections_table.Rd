@@ -4,18 +4,27 @@
 \alias{intersections_table}
 \title{Display the intersection table summarizing the results from 2 or more datasets}
 \usage{
-intersections_table(res_list, threshold, taxo, col_msp_id, bact_of_interest)
+intersections_table(
+  res_list,
+  threshold,
+  annotation_table,
+  col_module_id,
+  annotation_level,
+  object_of_interest
+)
 }
 \arguments{
 \item{res_list}{List of dataframes. The results from apply_NeighborFinder() on several datasets}
 
 \item{threshold}{Numeric. Integer corresponding to the minimum number of datasets in which you want neighbors to have been found}
 
-\item{taxo}{Dataframe. The dataframe gathering the taxonomic correspondence information}
+\item{annotation_table}{Dataframe. The dataframe gathering the taxonomic or functional module correspondence information}
 
-\item{col_msp_id}{String. The name of the column with the msp names in taxo}
+\item{col_module_id}{String. The name of the column with the module names in annotation_table}
 
-\item{bact_of_interest}{String. The name of the bacteria or species of interest}
+\item{annotation_level}{String. The name of the column with the level to be studied. Examples: species, genus, level_1}
+
+\item{object_of_interest}{String. The name of the bacteria or species of interest or a key word in the functional module definition}
 }
 \value{
 Dataframe. Table gathering the intersection of NeighborFinder results from several datasets. The column 'datasets' indicates the datasets in which the same neighbor has been found, the column 'intersections' indicates the number of datasets in which the same neighbor has been found
@@ -27,9 +36,9 @@ Display the intersection table summarizing the results from 2 or more datasets
 data(taxo)
 data(data)
 data(metadata)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
-res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 
-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_msp_id="msp_id", "Escherichia coli")
+intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", annotation_level="species", "Escherichia coli")
 }

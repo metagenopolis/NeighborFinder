@@ -127,7 +127,7 @@ NULL
 
 module_to_node<-function (module, annotation_table, col_module_id = "id_mgs", annotation_level){
     node_dict <- annotation_table %>% dplyr::select(all_of(col_module_id),
-        !!sym(annotation_level)) %>% tibble::deframe()
+        !!rlang::sym(annotation_level)) %>% tibble::deframe()
     node_dict[module] %>% unname() %>% as.character()
 }
 ```
@@ -209,20 +209,20 @@ test_that("identify_module works", {
 graph_step<-function(data_with_annotation, col_module_id, annotation_level, type="fpkm"){
   if (type %in% c("coverage")){
     prev_df <- data_with_annotation %>%
-      dplyr::mutate(prev = data_with_annotation %>% dplyr::select(-!!sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
+      dplyr::mutate(prev = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
     df <- prev_df %>% dplyr::filter(prev>0.15) %>% 
-      dplyr::select(-!!sym(annotation_level), -all_of(col_module_id), -prev) %>% t() 
+      dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id), -prev) %>% t() 
     colnames(df) <- prev_df %>% dplyr::filter(prev>0.15) %>% dplyr::pull(paste(col_module_id))
     G <- OneNet::new_synth_data(df, n=50, plot=FALSE, verbose=FALSE)$G
     dimnames(G) <- list(colnames(df), colnames(df))
   }
   if (type %in% c("fpkm")){
-    counts <- OneNet::get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!sym(annotation_level)), sample_id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
+    counts <- OneNet::get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample_id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
     G <- OneNet::new_synth_data(counts, n=50, plot=FALSE, verbose=FALSE)$G
     dimnames(G) <- list(colnames(counts), colnames(counts))
   }
   G <- G %>% as.data.frame() %>% 
-    dplyr::mutate(!!sym(annotation_level):=module_to_node(rownames(G), annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level))
+    dplyr::mutate(!!rlang::sym(annotation_level):=module_to_node(rownames(G), annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level))
   G
 }
 ```
@@ -268,7 +268,7 @@ simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=N
   else {G <- graph_file}  
   cat("Generating simulated tables for each level of prevalence...\n")
   
-  abund_table <- data_with_annotation %>% dplyr::select(-all_of(col_module_id), -!!sym(annotation_level))
+  abund_table <- data_with_annotation %>% dplyr::select(-all_of(col_module_id), -!!rlang::sym(annotation_level))
   modules <- data_with_annotation %>% dplyr::pull(col_module_id)
   sample_id <- abund_table %>% colnames()
   
@@ -277,7 +277,7 @@ simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=N
     # Generating count table
     df_counts <- OneNet::get_count_table(abund.table=abund_table, sample_id=sample_id, mgs=modules, prev.min=prev, verbatim=FALSE)
     # Simulation of count table
-    df_sim <- OneNet::new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!sym(annotation_level))), plot=FALSE, verbose=FALSE, seed=seed)
+    df_sim <- OneNet::new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), plot=FALSE, verbose=FALSE, seed=seed)
     #Transformed matrix with mclr
     df_norm <- SPRING::mclr(df_sim$counts)
     colnames(df_norm)<-colnames(df_counts$data)
@@ -338,13 +338,13 @@ prev_for_selected_nodes <- function(data_with_annotation, graph_file, col_module
   
   ## Compute prevalence of all modules at the studied level
   prev_df <- tibble::tibble(id_module = data_with_annotation %>% dplyr::pull(paste(col_module_id)),
-                    prev = data_with_annotation %>% dplyr::select(-!!sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
+                    prev = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
   
   ## Extract edges starting or ending from the object of interest
-  if (is.null(object_of_interest)) {object_index <- seq_along(G %>% dplyr::pull(!!sym(annotation_level)))} 
-  else {object_index <- G %>% dplyr::pull(!!sym(annotation_level)) %>% stringr::str_detect(paste(object_of_interest))}
+  if (is.null(object_of_interest)) {object_index <- seq_along(G %>% dplyr::pull(!!rlang::sym(annotation_level)))} 
+  else {object_index <- G %>% dplyr::pull(!!rlang::sym(annotation_level)) %>% stringr::str_detect(paste(object_of_interest))}
   
-  G_object <- G[object_index, ] %>% dplyr::select(-!!sym(annotation_level)) 
+  G_object <- G[object_index, ] %>% dplyr::select(-!!rlang::sym(annotation_level)) 
   
   if (!nrow(G_object)){return(tibble::tibble())}
   
@@ -355,7 +355,7 @@ prev_for_selected_nodes <- function(data_with_annotation, graph_file, col_module
   ## Add prevalences for node1 and node2
   truth <- truth %>% 
     dplyr::left_join(prev_df, by = dplyr::join_by(node1 == id_module)) %>% 
-    ## and rename prev with suffix matching corresponding msp
+    ## and rename prev with suffix matching corresponding module
     dplyr::left_join(prev_df, by = dplyr::join_by(node2 == id_module), suffix = c("1", "2"))
   truth
 }
@@ -463,7 +463,7 @@ norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), anno
   for (prev in prev_list){
     if (type %in% c("coverage")){
       #Arranging data
-      df <- data_with_annotation %>% dplyr::select(-!!sym(annotation_level), -paste(col_module_id)) %>% t() 
+      df <- data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -paste(col_module_id)) %>% t() 
       colnames(df) <- data_with_annotation %>% dplyr::pull(paste(col_module_id))
       #Transformed matrix with mclr
       df_norm <- SPRING::mclr(df)
@@ -614,10 +614,10 @@ x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species", type="fpkm")[[1]]
 neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
-# Apply cv.glmnet() for a list of msps and for each prevalence level
+# Apply cv.glmnet() for a list of module IDs and for each prevalence level
 
 ```{r fun-cvglm_to_coeffs_by_object}
-#' Apply cv.glmnet() for a list of modules and for each prevalence level
+#' Apply cv.glmnet() for a list of module IDs and for each prevalence level
 #' 
 #' @param list_dfs List of dataframe. A normalized dataframe
 #' @param test_module List of string. The module IDs
@@ -696,7 +696,7 @@ test_that("norm_data works", {
 #' @param df_truth Dataframe. The one resulting from truth_by_prevalence()
 #' @param df_glm Dataframe. The one resulting from cvglm_to_coeffs_by_object()
 #' 
-#' @return Dataframe. Returns for each level of prevalence and msp, the list of true and/or detected neighbors and the corresponding list of coefficients 
+#' @return Dataframe. Returns for each level of prevalence and module ID, the list of true and/or detected neighbors and the corresponding list of coefficients 
 #' @export
 
 final_step<-function(df_truth, df_glm){
@@ -1155,8 +1155,8 @@ test_that("intersections_table works", {
   res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
   res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
   
-  table<-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", "Escherichia coli")
-  expect_equal(table$msp2, c("msp_0103", "msp_0208", "msp_0030"))
+  table<-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", annotation_level="species", "Escherichia coli")
+  expect_equal(table$node2, c("msp_0103", "msp_0208", "msp_0030"))
 })
 ```
 
@@ -1176,7 +1176,7 @@ fusen::inflate(flat_file = "dev/NeighborFinder_flat.Rmd", vignette_name = NA)
 
 ```{r development-vignette}
 #Generate template for vignette
-usethis::use_vignette("NeighborFinder_vignette")
+# usethis::use_vignette("NeighborFinder_vignette")
 ```
 
 

@@ -3,14 +3,14 @@
 #' Display network after applying NeighborFinder
 #' 
 #' @param res_NeighborFinder Dataframe. The result from apply_NeighborFinder()
-#' @param taxo Dataframe. The dataframe gathering the taxonomic correspondence information
-#' @param col_msp_id String. The name of the column with the msp names in taxo
-#' @param taxo_level String. The name of the column of the taxonomic level to be studied in taxo
-#' @param bact_of_interest String. The name of the bacteria or species of interest
-#' @param taxo_option Boolean. Default value is False. If True: labels on nodes become species names instead of msps names
+#' @param annotation_table Dataframe. The dataframe gathering the taxonomic or functional module correspondence information
+#' @param col_module_id String. The name of the column with the module names in annotation_table
+#' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
+#' @param annotation_option Boolean. Default value is False. If True: labels on nodes become module names instead of module IDs 
 #' @param node_size Numeric. The parameter to adjust size of nodes
 #' @param label_size Numeric. The parameter to adjust size of labels
-#' @param species_color String. The name of the color to differentiate the nodes corresponding to 'bact_of_interest' from the other msps
+#' @param object_color String. The name of the color to differentiate the nodes corresponding to 'object_of_interest' from the other module IDs
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' 
 #' @return Network. Visualization of NeighborFinder results
@@ -18,23 +18,23 @@
 #' @examples
 #' data(taxo)
 #' data(data)
-#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", seed=20232024)
+#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
 #'
-#' visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5)
-#' #With species names instead of msps names
-#' visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", label_size=5, taxo_option=TRUE, seed=2)
+#' visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5)
+#' #With species names instead of msp names
+#' visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
 #' #With esthetic changes
-#' visualize_network(res_CRC_JPN, taxo, bact_of_interest="Escherichia coli", col_msp_id="msp_id", taxo_level="species", taxo_option=TRUE, node_size=15, label_size=6, species_color= "orange", seed=2)
+#' visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
 
-visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, taxo_level, bact_of_interest, taxo_option=FALSE, node_size=12, label_size=4, species_color="cadetblue2", seed=NULL){
+visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
   if (!nrow(res_NeighborFinder)) {return(message("No neighbors were found."))}
-  if (!taxo_option){
+  if (!annotation_option){
     #Give more visual weight to edges
     res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10)
     #Build network
     net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
@@ -44,13 +44,13 @@ visualize_network<-function(res_NeighborFinder, taxo, col_msp_id, taxo_level, ba
   else{
     #Give taxonomic correspondence
     res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10) %>% 
-       dplyr::mutate(msp1=msp_to_bact(msp=msp1, taxo=taxo, col_msp_id=col_msp_id), 
-             msp2=msp_to_bact(msp=msp2, taxo=taxo, col_msp_id=col_msp_id)) 
+       dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+             node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
     net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
     #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% msp_to_bact(msp=identify_msp(bact_of_interest=bact_of_interest, taxo=taxo, col_msp_id=col_msp_id, taxo_level=taxo_level), 
-                                                                  taxo=taxo, col_msp_id=col_msp_id), species_color, "grey85")
+    palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                                                                  annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
     GGally::ggnet2(net, edge.size = "weights", 
