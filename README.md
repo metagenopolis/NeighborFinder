@@ -20,5 +20,6 @@ gitlab](metagenopolis/NeighborFinder) with:
 
 ``` r
 remotes::install_gitlab(repo = "metagenopolis/NeighborFinder", 
-                        host = "forgemia.inra.fr")
+                        host = "forgemia.inra.fr",
+                        auth_token = "Bydi4vK48srL38fzqhi6")
 ```
