@@ -1,0 +1,229 @@
+---
+title: "NeighborFinder_technical_report.Rmd"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rmarkdown)
+library(knitr)
+library(neighborfinder)
+```
+
+### What is NeighborFinder?
+
+* NeighborFinder uses the local approach to identify companion species of an object of interest (e.g. species, genus, functional module). 
+
+* From several abundance tables of metagenomic data, NeighborFinder suggests a shortlist of companion species based on the integration of results. 
+
+* A visualization via a network is proposed.
+
+
+### Why would I use it?
+
+* NeighborFinder helps you find the direct neighbors of a certain object of interest. 
+
+* With multiple datasets, NeighborFinder supports you in the design of probiotics and LBP (Live Biotherapeutic Products). 
+
+* NeighborFinder can also help to identify specific ecological niches linked to particular diseases.
+
+
+### How to use it?
+
+* Install package [README](~/neighborfinder/README.Rmd)
+
+* Apply it on abundance tables of metagenomic data gathering at least 100 samples.
+
+* See the [vignette](~/neighborfinder/vignettes/NeighborFinder_vignette.Rmd) included in the package. It reviews the main functions that are useful for making the most of the NeighborFinder's features.
+
+
+### Input dataframe format
+
+The required data format in input is as follows: module IDs are the rows and samples are the columns. The first column must be the <span style="color:#5594E5;"><strong>modules name</strong></span> (e.g. species), the second is the <span style="color:#FFD91D;"><strong>module ID</strong></span> (e.g. msp), and each subsequent column is a <span style="color:#7AD370;"><strong>sample</strong></span>. “X” is a numeric value corresponding to an abundance provided either as count, abundance, coverage or fpkm. Here is an example when the <span style="color:#5594E5;"><strong>modules name</strong></span> is the species name and the <span style="color:#FFD91D;"><strong>module ID</strong></span> is the MSP_name.
+
+```{r fig1, echo=FALSE, fig.align='center', out.width="80%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig1.jpg")
+```
+
+<center>Figure 1: Example of dataset and required format</center>
+
+
+### What is behind apply_NeighborFinder() ?
+
+#### 1)	Pre-processing: Counts & Normalization
+
+##### a)
+
+The first step of ```apply_NeighborFinder()``` is to transform the abundance data, provided in the above format, first by transposing the data (so that the samples are in rows and the module IDs are in columns). 
+Then, if the abundances are provided as type “fpkm” (rather than “coverage”), the abundances are transformed to counts using ```OneNet::get_count_table()```. This is done by dividing all values by the smallest positive abundance and rounding the results, so that the minimum count is 1. 
+
+$B_{ij} = \lfloor A_{ij}/A_{min}\rfloor$   where $A_{\text{min}} = \min_{\{i,j : A_{ij} \neq 0\}} A_{ij}$
+where $A$ is the abundance table and $B$ the resulting count table. Note that the rows of $A$ (and $B$) are samples $i \in \{1,...,n\}$ and the columns are module IDs $j \in \{1,...,p\}$.
+
+<br>
+
+##### b)
+
+The next step consists in applying a mclr normalization to the previously transformed abundance data.
+Here is the equation corresponding to the mclr transformation:
+
+$C_j = {mclr}_\epsilon   (B_j)$
+where $B$ is the count table and $C$ the resulting normalized count table.
+Unlike the clr normalization, mclr preserves the zeros in the dataset.
+
+The function ${mclr}_\epsilon$  is defined as follows. Consider a vector $x\in R_+^p$  of compositions, and and without loss of generality, assume that the ﬁrst $q$ elements of $x$ are zero, and that all other elements are positive. 
+
+Then ${mclr}_\epsilon(x)$ is defined by:
+
+$y= {mclr}_\epsilon(x)  = [0,...,0,\log\{{x_{q+1}/g(x)}\}+\epsilon  ,...,\log\{{x_j/g(x)}\}+\epsilon  ,...,\log\{{x_p/g(x)}\}+\epsilon ]$
+
+where $g(x) = {(\prod^{p}_{j=q+1}x_j)}^{1/(p-q)}$ is the geometric mean of the non-zero elements of $x$.
+
+When ${mclr}_\epsilon$ is applied to the abundance table $B$, we apply it rowwise (that is to each sample $B_i$) and use $\epsilon =∣ z_{min} ∣ + 1$
+
+where $z_{min} = {min }_{{ij:B}_{ij}\neq 0}{ log\{{B_{ij}/g(B_i)}}\}$.
+
+<br>
+
+#### 2)	Regularized linear regressions
+
+##### a)	Simple case: no covariates
+
+We consider a linear regression problem where we regress the abundance $C_{j0}$ of module $j0$ against the abundances of all others modules ${(C_j)}_{j\neq j0}$, using the model:
+
+$C_{j0} = \theta_1  C_1 +...+ \theta_{j0-1}  C_{j0-1} + \theta_{j0+1}  C_{j0+1} +...+ \theta_p  C_p +\epsilon$
+
+where $C$ is the normalized count table obtained at the end of step 1) and $j0$ designates the column of the module of interest in $C$. $\theta_j$  is the regression coefficient of $j0$ against $j$, and $\epsilon$ is the residual error, assumed to be gaussian with $\sigma^2  I_n$  covariance.
+
+Since $p$ is usually bigger than $n$ and we want a sparse vector $\theta$, we use $l_1$–regularization to select a small number of non null coefficients in $\theta$. The modules for which $\theta_j \neq 0$ corresponds to a potential neighbors of module $j0$.
+
+This translates to the following minimization problem:
+
+$argmin{_{\theta}{({‖C_{j0}-X\theta‖}^2+{\lambda‖\theta‖}_1)}}$
+
+where ${X=C}_{-j0}$  is the design matrix composed of the abundances of all modules but $j0$, and $\lambda$ is the penalization term enforcing the strength of the regularization and thus the number of non null coefficients. We solve this problem using ```glmnet::glasso()``` and use cross-validation to tune the parameter $\lambda$. 
+
+<br>
+
+##### b)	Handling covariates
+
+Covariates can be included in the model by considering an $X$ made of two distinct components: $C_{-j0}$ , previously defined, and $D$, the design matrix of the covariates. 
+
+$D$ the metadata matrix where some columns are considered as covariates.
+Here is the necessary transformation: 
+
+$[\matrix{D&C_{-j0}}] [\matrix{\alpha\\\theta}]$
+
+The penalization $\lambda$ only applies on coefficients $\theta_i$ and not on $\alpha$.
+
+Minimization of the objective function: 
+
+${minimize}_{\theta ,\alpha}  ({‖C_{j0}-C_{-j0}\theta -D\alpha ‖}_2+\lambda {‖\theta ‖}_1)$
+
+In practice, $D$ and $C_{-j0}$  are concatenated into a single matrix which is used as the input of ```cv.glmnet()``` and $D$ is constructed from a covariate dataframe using either *(i)* the formula interface, or *(ii)* specifying the name of a single column used as covariate. 
+
+To use covariates, 3 additional arguments are required: 
+
+* covar: takes a formula or the name of the column of the covariate in the metadata table. 
+
+* meta_df: the dataframe giving metadata information.
+
+* sample_col: the name of the column in metadata indicating the sample names.
+
+See part “Apply NeighborFinder with covariate option” in the [vignette](~/neighborfinder/vignettes/NeighborFinder_vignette.Rmd) for a detailed example.
+
+<br>
+
+#### 3)	Post-processing: Filtering the results
+
+This step enables NeighborFinder to have better performances than with the naive glmnet method (see below in the “What are the parameters default values?” part). 
+Only the top 20% of neighbors in terms of absolute value of the regression coefficient are conserved.
+
+```{r fig2, echo=FALSE, fig.align='center', out.width="100%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig2.jpg")
+```
+
+<center>Figure 2: Filtering process</center>
+
+### What are the parameters default values?
+
+* The prevalence filter: 30%
+
+* The filtering threshold: top 20%
+
+
+### How were the parameters defaults values calibrated ?
+
+Here is an illustration of the followed procedure. 
+
+```{r fig3, echo=FALSE, fig.align='center', out.width="100%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig3.jpg")
+```
+
+<center>Figure 3: Evaluation of performance procedure</center>
+<br>
+
+For each of the 8 large cohorts (ranging in size from n=200 to 3900 individuals), a graph with cluster-like structure was generated. A precision matrix $\Omega$ with non-null coefficients respecting the graph topology was produced and then inverted to produce a covariance matrix ${\Sigma}$. Five simulated datasets of size n=500 samples, each based on a different seed, were simulated using gaussian copula from the covariance matrix ${\Sigma}$ and the original count matrix to produce count tables that *(i)* have the same marginal counts distributions as the original cohort *(ii)* while enforcing the correlation between taxa encoded in ${\Sigma}$. 
+
+The graph edges are here considered as true edges. 
+
+Then, for each level of prevalence tested (from 20% to 35%, by increment of 5%) and for each bacterial genus (p=666), the ```cv.glmnet()``` function was applied to each simulated dataset (via the function ```cvglm_to_coeffs_by_bact()``` from the NeighborFinder package).
+
+The results are then filtered as in the procedure of ```apply_NeighborFinder()``` to keep only a percentage filtering_top of the coefficients, ranging from the top 10% to the top 30% coefficients (see Fig. 2 on filtering results).
+
+Finally, performance scores (F1) are calculated by comparing the true edges of the graph with the detected neighbors listed in:
+
+* the results of ```cvglm_to_coeffs_by_bact()``` (i.e. without the filtering step) ⇾ “F1_before” ;
+
+* the filtered results, for each value of filtering_top tested ⇾ “F1_after”
+
+and averaged over genera. 
+
+<br>
+
+The following figure summarizes the performance scores, highlighting why the couple prevalence 30% – filtering top 20% was chosen as the default values of ```apply_NeighborFinder()```.
+
+Setting the prevalence threshold at 30% is quite satisfactory, as it preserves as much information as possible (i.e. keeping species present in at least a third of all samples).
+
+```{r fig4, echo=FALSE, fig.align='center', out.width="100%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig4.jpg")
+```
+
+<center>Figure 4: Performance results of NeighborFinder</center>
+<br>
+
+The function ```choose_params_values()``` has been designed to allow the user to obtain a more specific indication based on the dataset provided and the genus or species of interest. This function works in the same way as the procedure described previously:
+
+*	Generation of a graph
+
+*	Simulation of a dataset respecting the dependencies between taxa encoded in the graph, for different prevalence levels
+
+*	Application of ```apply_NeighborFinder()``` with and without filtering (testing different percentages)
+
+*	Comparison and computation of F1 score before and after filtering
+
+The user can then decide which values of these parameters to use for downstream analysis and pass them on to ```apply_NeighborFinder()``` using the arguments ‘prev_level’ and ‘filtering_top’. 
+
+### How many samples should my dataset contain ?
+
+The procedure presented previously was tested here with the default values of ‘prevalence_level’ and ‘filtering_top’. Only the sample size of the simulated datasets was evaluated.
+
+```{r fig5, echo=FALSE, fig.align='center', out.width="25%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig5.jpg")
+```
+
+<center>Figure 5: Impact of the sample size on NeighborFinder performance</center>
+<br>
+
+The performance results from synthetic data show here that a sample size n greater than or equal to 250 is recommended to ensure a good performance (F1 > 50%).
+
+<br>
+<br>
