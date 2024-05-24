@@ -20,7 +20,7 @@
 #' simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed=20232024)
 #' choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(10,20), graph_file = graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed = 20232024)
 
-choose_params_values <- function(data_with_annotation, object_of_interest, list_sims, prev_list=NULL, filtering_list=c(0.20), graph_file=NULL, col_module_id, annotation_level, seed=NULL){
+choose_params_values <- function(data_with_annotation, object_of_interest, list_sims, prev_list=NULL, filtering_list=c(20), graph_file=NULL, col_module_id, annotation_level, seed=NULL){
  
  #Loading graph
  if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}

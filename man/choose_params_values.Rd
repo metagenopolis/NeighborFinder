@@ -9,7 +9,7 @@ choose_params_values(
   object_of_interest,
   list_sims,
   prev_list = NULL,
-  filtering_list = c(0.2),
+  filtering_list = c(20),
   graph_file = NULL,
   col_module_id,
   annotation_level,

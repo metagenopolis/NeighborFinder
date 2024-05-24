@@ -857,7 +857,7 @@ scores<-test_filter(neighbors, neighbors_modif, prevs=names(df_true))
 #' @return Dataframe. Returns F1 rates before and after using NeighborFinder()
 #' @export
 
-choose_params_values <- function(data_with_annotation, object_of_interest, list_sims, prev_list=NULL, filtering_list=c(0.20), graph_file=NULL, col_module_id, annotation_level, seed=NULL){
+choose_params_values <- function(data_with_annotation, object_of_interest, list_sims, prev_list=NULL, filtering_list=c(20), graph_file=NULL, col_module_id, annotation_level, seed=NULL){
  
  #Loading graph
  if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
