@@ -16,6 +16,7 @@ library(tibble)
 library(knitr)
 library(GGally)
 library(network)
+library(sna)
 ```
 
 ```{r description, eval=TRUE}
@@ -532,10 +533,9 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
     stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")
   } 
   else {set.seed(seed)}
-  
+  #browser()
   ## Build default penalty factor (in the absence of covariates)
-  p <- ncol(df)-1 ## number of predictors
-  penalty_factor <- rep(1, 1+p)
+  penalty_factor <- rep(1, ncol(df))
   penalized_features <- colnames(df)
   if (!is.null(covar)) {
     ## Stop if no metadata provided
@@ -566,7 +566,7 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
   
   col <- which(module == colnames(df))
   if (!length(col)) {return(tibble::tibble(.rows = 0))}
-  res_glm <- glmnet::cv.glmnet(df[,-col], df[,col], penalty.factor = penalty_factor) %>% coef(s = "lambda.min")
+  res_glm <- glmnet::cv.glmnet(df[,-col], df[,col], penalty.factor = penalty_factor[-col]) %>% coef(s = "lambda.min")
   tibble::tibble(node1 = module, node2 = rownames(res_glm), coef = as.numeric(res_glm)) %>%
    dplyr::filter(coef!=0, node2 %in% penalized_features) 
 }
@@ -987,7 +987,8 @@ visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id,
     #Give more visual weight to edges
     res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10)
     #Build network
-    net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res, matrix.type = "edgelist")
+    network::set.edge.attribute(net, "weights", res$coef)
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
@@ -1002,7 +1003,8 @@ visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id,
        dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
              node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
-    net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
+    network::set.edge.attribute(net, "weights", res$coef)
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
                                                                   annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
@@ -1060,7 +1062,8 @@ intersections_network<-function(res_list, threshold, annotation_table, col_modul
   if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
   if (!annotation_option){
     #Build network
-    net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res_intersections, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
+    network::set.edge.attribute(net, "weights", res_intersections$intersections)
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
@@ -1076,7 +1079,8 @@ intersections_network<-function(res_list, threshold, annotation_table, col_modul
     res_intersections <- res_intersections %>%  dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
                                                       node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
-    net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res_intersections, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
+    network::set.edge.attribute(net, "weights", res_intersections$intersections)
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 

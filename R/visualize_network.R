@@ -32,7 +32,8 @@ visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id,
     #Give more visual weight to edges
     res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10)
     #Build network
-    net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res, matrix.type = "edgelist")
+    network::set.edge.attribute(net, "weights", res$coef)
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
@@ -47,7 +48,8 @@ visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id,
        dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
              node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
-    net <- network::network(res, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
+    network::set.edge.attribute(net, "weights", res$coef)
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
                                                                   annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")

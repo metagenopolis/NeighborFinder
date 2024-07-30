@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 library(rmarkdown)
 library(knitr)
 library(neighborfinder)
-library(downloadthis)
+#library(downloadthis)
 ```
 
 ## Presentation of dataset: CRC Example
@@ -65,9 +65,9 @@ The required data format in input is as follows: species are the rows and sample
 # JAPAN
 res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
 
-res_CRC_JPN %>% download_this(output_name = "res_CRC_JPN", output_extension = ".csv",
-    button_label = "Download results as csv file", button_type = "default",
-    has_icon = TRUE, icon = "fa fa-save")
+# res_CRC_JPN %>% download_this(output_name = "res_CRC_JPN", output_extension = ".csv",
+#     button_label = "Download results as csv file", button_type = "default",
+#     has_icon = TRUE, icon = "fa fa-save")
 ```
 
 ## Visualize the corresponding network

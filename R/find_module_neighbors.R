@@ -26,10 +26,9 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
     stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")
   } 
   else {set.seed(seed)}
-  
+  #browser()
   ## Build default penalty factor (in the absence of covariates)
-  p <- ncol(df)-1 ## number of predictors
-  penalty_factor <- rep(1, 1+p)
+  penalty_factor <- rep(1, ncol(df))
   penalized_features <- colnames(df)
   if (!is.null(covar)) {
     ## Stop if no metadata provided
@@ -60,7 +59,7 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
   
   col <- which(module == colnames(df))
   if (!length(col)) {return(tibble::tibble(.rows = 0))}
-  res_glm <- glmnet::cv.glmnet(df[,-col], df[,col], penalty.factor = penalty_factor) %>% coef(s = "lambda.min")
+  res_glm <- glmnet::cv.glmnet(df[,-col], df[,col], penalty.factor = penalty_factor[-col]) %>% coef(s = "lambda.min")
   tibble::tibble(node1 = module, node2 = rownames(res_glm), coef = as.numeric(res_glm)) %>%
    dplyr::filter(coef!=0, node2 %in% penalized_features) 
 }

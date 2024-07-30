@@ -39,7 +39,8 @@ intersections_network<-function(res_list, threshold, annotation_table, col_modul
   if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
   if (!annotation_option){
     #Build network
-    net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res_intersections, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
+    network::set.edge.attribute(net, "weights", res_intersections$intersections)
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
@@ -55,7 +56,8 @@ intersections_network<-function(res_list, threshold, annotation_table, col_modul
     res_intersections <- res_intersections %>%  dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
                                                       node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
-    net <- network::network(res_intersections, matrix.type = "edgelist", ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res_intersections, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
+    network::set.edge.attribute(net, "weights", res_intersections$intersections)
     edges<-res_intersections$intersections
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
