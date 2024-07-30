@@ -9,7 +9,6 @@
 #' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate "coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
-#' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
 #' @param meta_df Dataframe. The dataframe giving metadata information
 #' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
@@ -18,17 +17,31 @@
 #' @export
 #' @examples
 #' data(data)
-#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+#' res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
 
-apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
-  if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 
-  #Normalize data
-  normed_data <- norm_data(data_with_annotation=data_with_annotation, col_module_id=col_module_id, prev_list=c(prev_level), annotation_level=annotation_level, type=data_type)
-  #Find neighbors with cv.glmnet
-  df_glm <- cvglm_to_coeffs_by_object(list_dfs=normed_data, 
-                                    test_module=identify_module(object_of_interest=object_of_interest, annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level),
-                                    seed=seed, ...)
-  if (!nrow(df_glm)) {return(tibble::tibble(.rows = 0))}
-  #Filter results, keeping top 20% of coefficients
-  df_glm %>% dplyr::filter(abs(coef) > quantile(abs(coef),1-filtering_top/100)) %>%  dplyr::select(-prev_level)
+apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, data_type="fpkm", prev_level=0.30, filtering_top=20, ...){
+
+ # Behaviour depends on the number of samples in the dataset
+ # When the dataset size is small (n=50), the function runs for one seed
+ if (ncol(data_with_annotation)-2<=50){
+  apply_NF_simple(data_with_annotation, object_of_interest, col_module_id,
+                                          annotation_level, data_type, prev_level, filtering_top, seed = 20232024, ...)
+ }
+  # When the dataset size is bigger (n>50), the function runs for 10 seed and filters results if found in more than half the seeds to return robust results
+ else {
+  set.seed(seed=1)
+  seeds10<-sample(1:1000,10)
+  res_repet_seeds<-data.frame()
+  
+  for (graine in seeds10) {
+   res_repet_seeds<-rbind(res_repet_seeds, 
+                          apply_NF_simple(data_with_annotation, object_of_interest, col_module_id,
+                                          annotation_level, data_type, prev_level, filtering_top, seed = graine, ...) %>% 
+                           dplyr::mutate(SEED=graine))
+  } 
+  res_repet_seeds %>% dplyr::mutate(pair=paste(node1,node2,sep="_")) %>% dplyr::group_by(pair) %>% unique() %>% 
+   dplyr::summarize(seeds_detect = dplyr::n(), med=median(coef)) %>% dplyr::filter(seeds_detect>=5) %>% dplyr::select(-seeds_detect) %>%
+   unique() %>% dplyr::ungroup() %>% tidyr::separate(pair, into = c("node1", "node2"), sep="_msp") %>%
+   dplyr::mutate(node2=paste0("msp",node2)) %>% dplyr::rename(coef=med)
+ }
 }

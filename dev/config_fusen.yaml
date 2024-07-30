@@ -16,6 +16,7 @@ NeighborFinder_flat.Rmd:
   state: active
   R:
   - R/apply_neighborfinder.R
+  - R/apply_nf_simple.R
   - R/choose_params_values.R
   - R/compute_precision.R
   - R/compute_recall.R
@@ -52,6 +53,7 @@ NeighborFinder_flat.Rmd:
   - tests/testthat/test-compute_precision.R
   - tests/testthat/test-compute_recall.R
   - tests/testthat/test-choose_params_values.R
+  - tests/testthat/test-apply_nf_simple.R
   - tests/testthat/test-apply_neighborfinder.R
   - tests/testthat/test-intersections_table.R
   vignettes: []

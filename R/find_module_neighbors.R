@@ -26,7 +26,6 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
     stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")
   } 
   else {set.seed(seed)}
-  #browser()
   ## Build default penalty factor (in the absence of covariates)
   penalty_factor <- rep(1, ncol(df))
   penalized_features <- colnames(df)

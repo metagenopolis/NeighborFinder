@@ -47,7 +47,7 @@ Display network after applying NeighborFinder
 \examples{
 data(taxo)
 data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
 
 # visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5)
 # #With species names instead of msp names
