@@ -23,7 +23,7 @@ norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), anno
   list_norm<-list()
   res<-tibble::tibble()
   #Normalizing for each level of prevalence if prev_list is a list
-  cat("Normalizing data...\n")
+  # cat("Normalizing data...\n")
   for (prev in prev_list){
     if (type %in% c("coverage")){
       #Arranging data

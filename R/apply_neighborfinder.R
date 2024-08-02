@@ -30,7 +30,7 @@ apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_mod
   # When the dataset size is bigger (n>50), the function runs for 10 seed and filters results if found in more than half the seeds to return robust results
  else {
   set.seed(seed=1)
-  seeds10<-sample(1:1000,10)
+  seeds10<-sample(1:1000000,10)
   res_repet_seeds<-data.frame()
   
   for (graine in seeds10) {

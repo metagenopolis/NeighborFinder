@@ -22,7 +22,7 @@
 #' neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 
 cvglm_to_coeffs_by_object<-function(list_dfs, test_module = identify_module(), seed=NULL, ...){
-  cat("Applying NeighborFinder to detect neighbors...\n")
+  # cat("Applying NeighborFinder to detect neighbors...\n")
   purrr::map(list_dfs, function(df) find_all_module_neighbors(df, test_module, seed, ...)) %>% 
     dplyr::bind_rows(.id = "prev_level")
 }
