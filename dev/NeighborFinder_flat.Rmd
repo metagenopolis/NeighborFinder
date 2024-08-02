@@ -460,7 +460,7 @@ norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), anno
   list_norm<-list()
   res<-tibble::tibble()
   #Normalizing for each level of prevalence if prev_list is a list
-  cat("Normalizing data...\n")
+  # cat("Normalizing data...\n")
   for (prev in prev_list){
     if (type %in% c("coverage")){
       #Arranging data
@@ -629,7 +629,7 @@ neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_034
 #' @export
 
 cvglm_to_coeffs_by_object<-function(list_dfs, test_module = identify_module(), seed=NULL, ...){
-  cat("Applying NeighborFinder to detect neighbors...\n")
+  # cat("Applying NeighborFinder to detect neighbors...\n")
   purrr::map(list_dfs, function(df) find_all_module_neighbors(df, test_module, seed, ...)) %>% 
     dplyr::bind_rows(.id = "prev_level")
 }
@@ -991,7 +991,7 @@ apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_mod
   # When the dataset size is bigger (n>50), the function runs for 10 seed and filters results if found in more than half the seeds to return robust results
  else {
   set.seed(seed=1)
-  seeds10<-sample(1:1000,10)
+  seeds10<-sample(1:1000000,10)
   res_repet_seeds<-data.frame()
   
   for (graine in seeds10) {
