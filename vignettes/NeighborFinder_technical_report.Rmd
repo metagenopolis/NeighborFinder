@@ -142,7 +142,9 @@ See part “Apply NeighborFinder with covariate option” in the [vignette](~/ne
 
 <br>
 
-#### 3)	Post-processing: Filtering the results
+#### 3)	Post-processing
+
+##### a)	Filtering the results
 
 This step enables NeighborFinder to have better performances than with the naive glmnet method (see below in the “What are the parameters default values?” part). 
 Only the top 20% of neighbors in terms of absolute value of the regression coefficient are conserved.
@@ -152,6 +154,21 @@ knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig
 ```
 
 <center>Figure 2: Filtering process</center>
+
+##### b)	Increasing robusteness
+
+The function ```apply_NF_simple()``` is run on 10 seeds and results found are kept if only found in at least half of the seeds. 
+This processe ensures more robust results. This was tested on simulated data with 500 samples with different sets of seeds (10 - 20 - 50) :
+
+```{r fig nseeds, echo=FALSE, fig.align='center', out.width="100%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig nseeds.jpg")
+```
+
+<center>Figure 3: Choice of the size of the set of seeds</center>
+<br>
+
+Performance scores were way better with this repetition approach than running the developed method on a single seed.
+Since results were equally satisfying for each set of seeds, the minimal number of 10 seeds was chosen.
 
 ### What are the parameters default values?
 
@@ -168,7 +185,7 @@ Here is an illustration of the followed procedure.
 knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig3.jpg")
 ```
 
-<center>Figure 3: Evaluation of performance procedure</center>
+<center>Figure 4: Evaluation of performance procedure</center>
 <br>
 
 For each of the 8 large cohorts (ranging in size from n=200 to 3900 individuals), a graph with cluster-like structure was generated. A precision matrix $\Omega$ with non-null coefficients respecting the graph topology was produced and then inverted to produce a covariance matrix ${\Sigma}$. Five simulated datasets of size n=500 samples, each based on a different seed, were simulated using gaussian copula from the covariance matrix ${\Sigma}$ and the original count matrix to produce count tables that *(i)* have the same marginal counts distributions as the original cohort *(ii)* while enforcing the correlation between taxa encoded in ${\Sigma}$. 
@@ -197,7 +214,7 @@ Setting the prevalence threshold at 30% is quite satisfactory, as it preserves a
 knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig4.jpg")
 ```
 
-<center>Figure 4: Performance results of NeighborFinder</center>
+<center>Figure 5: Performance results of NeighborFinder</center>
 <br>
 
 The function ```choose_params_values()``` has been designed to allow the user to obtain a more specific indication based on the dataset provided and the genus or species of interest. This function works in the same way as the procedure described previously:
@@ -215,15 +232,30 @@ The user can then decide which values of these parameters to use for downstream 
 ### How many samples should my dataset contain ?
 
 The procedure presented previously was tested here with the default values of ‘prevalence_level’ and ‘filtering_top’. Only the sample size of the simulated datasets was evaluated.
+The next figure shows the gain of performance provided by the repetition of the method on 10 seeds versus one. Below a sample size of n=100, the gain is no longer noticeable. This is why the behavior of the method depends on the number of samples:
 
-```{r fig5, echo=FALSE, fig.align='center', out.width="25%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig5.jpg")
+ * when n is greater than 50 samples, ```apply_NeighborFinder()``` is the result of ```apply_NF_simple()``` ran 10 times and neighbors found in more than half of the seeds are kept
+ 
+ * when n is smaller or equal to 50 samples, ```apply_NeighborFinder()``` is equivalent to ```apply_NF_simple()``` since it is run one only one seed
+
+
+```{r fig nsize, echo=FALSE, fig.align='center', out.width="100%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig nsize.jpg")
 ```
 
-<center>Figure 5: Impact of the sample size on NeighborFinder performance</center>
+<center>Figure 6: Performance of the difference between the two behaviors of NeighborFinder</center>
 <br>
 
-The performance results from synthetic data show here that a sample size n greater than or equal to 250 is recommended to ensure a good performance (F1 > 50%).
+Here are the final performance results of the NeighborFinder method for each sample size tested:
+
+```{r fig5new, echo=FALSE, fig.align='center', out.width="25%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig5new.jpg")
+```
+
+<center>Figure 7: Impact of the sample size on NeighborFinder performance</center>
+<br>
+
+The performance results from synthetic data show here that a sample size n greater than or equal to 100 is recommended to ensure a good performance (F1 > 50%).
 
 <br>
 <br>
