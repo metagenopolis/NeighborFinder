@@ -1000,6 +1000,7 @@ apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_mod
                                           annotation_level, data_type, prev_level, filtering_top, seed = graine, ...) %>% 
                            dplyr::mutate(SEED=graine))
   } 
+ if (!nrow(res_repet_seeds)){return(tibble::tibble())}
   res_repet_seeds %>% dplyr::mutate(pair=paste(node1,node2,sep="_")) %>% dplyr::group_by(pair) %>% unique() %>% 
    dplyr::summarize(seeds_detect = dplyr::n(), med=median(coef)) %>% dplyr::filter(seeds_detect>=5) %>% dplyr::select(-seeds_detect) %>%
    unique() %>% dplyr::ungroup() %>% tidyr::separate(pair, into = c("node1", "node2"), sep="_msp") %>%
