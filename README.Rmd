@@ -30,5 +30,5 @@ You can install NeighborFinder from the [forgemia gitlab](metagenopolis/Neighbor
 ```{r install, eval=FALSE}
 remotes::install_gitlab(repo = "metagenopolis/NeighborFinder", 
                         host = "forgemia.inra.fr",
-                        auth_token = "Bydi4vK48srL38fzqhi6")
+                        auth_token = "nFp2JVVouQzas-MyBwS2")
 ```
