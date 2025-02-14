@@ -28,6 +28,9 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
+Remotes: 
+    github::GraceYoon/SPRING@v1.0.4,
+    github::metagenopolis/OneNet
 Config/fusen/version: 0.6.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
