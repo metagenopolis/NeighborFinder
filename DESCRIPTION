@@ -15,12 +15,15 @@ Imports:
     GGally,
     glmnet,
     glue,
+    igraph,
     magrittr,
+    Matrix,
+    mvtnorm,
     network,
-    OneNet,
     purrr,
     rlang,
     SPRING,
+    stats,
     stringr,
     tibble,
     tidyr
@@ -29,8 +32,7 @@ Suggests:
     rmarkdown,
     testthat
 Remotes: 
-    github::GraceYoon/SPRING@v1.0.4,
-    github::metagenopolis/OneNet
+    github::GraceYoon/SPRING@v1.0.4
 Config/fusen/version: 0.6.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

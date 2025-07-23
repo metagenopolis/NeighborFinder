@@ -3,5 +3,5 @@
 test_that("graph_step works", {
   data(data)
   data(graphs)
-  expect_equal(graph_step(data$CRC_JPN_CHN_EUR, col_module_id="msp_id", annotation_level="species"), graphs$CRC_JPN_CHN_EUR)
+  expect_equal(graph_step(data$CRC_JPN_CHN_EUR, col_module_id="msp_id", annotation_level="species", seed=10010), graphs$CRC_JPN_CHN_EUR)
 })

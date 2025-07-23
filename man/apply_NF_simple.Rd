@@ -9,7 +9,6 @@ apply_NF_simple(
   object_of_interest,
   col_module_id,
   annotation_level,
-  data_type = "fpkm",
   prev_level = 0.3,
   filtering_top = 20,
   seed = NULL,
@@ -24,8 +23,6 @@ apply_NF_simple(
 \item{col_module_id}{String. The name of the column with the module names in annotation_table}
 
 \item{annotation_level}{String. The name of the column with the level to be studied. Examples: species, genus, level_1}
-
-\item{data_type}{String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate "coverage"}
 
 \item{prev_level}{Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20\% of prevalence}
 

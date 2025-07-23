@@ -20,7 +20,7 @@
 #' # and if one msp is repeated
 #' module_to_node(c("msp_1","msp_1","msp_2"), annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="genus")
 
-module_to_node<-function (module, annotation_table, col_module_id = "id_mgs", annotation_level){
+module_to_node<-function (module, annotation_table, col_module_id = "msp_name", annotation_level){
     node_dict <- annotation_table %>% dplyr::select(all_of(col_module_id),
         !!rlang::sym(annotation_level)) %>% tibble::deframe()
     node_dict[module] %>% unname() %>% as.character()

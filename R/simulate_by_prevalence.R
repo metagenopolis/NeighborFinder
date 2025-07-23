@@ -9,6 +9,7 @@
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param sample_size Numeric. The size to be considerated, the value of 500 is recommended
 #' @param seed Numeric. The seed number, ensuring reproducibility
+#' @param verbatim Boolean. Controls verbosity
 #'
 #' @return List of dataframes. Each element of the list corresponds to a level of prevalence and is a simulated abundance table
 #' @export
@@ -20,26 +21,26 @@
 #'                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
 #'                       SAMPLE4=c(0,0,2.98320e-05,0))
 #'
-#' tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
+#' tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) %>% suppressWarnings()
 #'
-#' tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=500, seed=20232024)
+#' tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=500, seed=20242025)
 
-simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed) {
+simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed, verbatim=FALSE) {
   set.seed(seed)
   if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
   else {G <- graph_file}  
-  cat("Generating simulated tables for each level of prevalence...\n")
+  if (verbatim) {cat("Generating simulated tables for each level of prevalence...\n")}
   
   abund_table <- data_with_annotation %>% dplyr::select(-all_of(col_module_id), -!!rlang::sym(annotation_level))
   modules <- data_with_annotation %>% dplyr::pull(col_module_id)
   sample_id <- abund_table %>% colnames()
   
   sim_one_prev <- function(prev) {
-    cat(glue::glue("p{100*prev}"), sep = "\n")
+    if (verbatim) {cat(glue::glue("p{100*prev}"), sep = "\n")}
     # Generating count table
-    df_counts <- OneNet::get_count_table(abund.table=abund_table, sample_id=sample_id, mgs=modules, prev.min=prev, verbatim=FALSE)
+    df_counts <- get_count_table(abund.table=abund_table, sample.id=sample_id, msp=modules, prev.min=prev, verbatim=FALSE)
     # Simulation of count table
-    df_sim <- OneNet::new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), plot=FALSE, verbose=FALSE, seed=seed)
+    df_sim <- new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), verbatim=FALSE, seed=seed)
     #Transformed matrix with mclr
     df_norm <- SPRING::mclr(df_sim$counts)
     colnames(df_norm)<-colnames(df_counts$data)

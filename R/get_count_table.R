@@ -22,7 +22,7 @@
 #'                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
 #'                       SAMPLE4=c(0,0,2.98320e-05,0))
 #' # Applying a prevalence filter of 30% on the new count_table
-#' get_count_table(abund.table=tiny_data, sample.id=colnames(tiny_data), prev.min=0.3)
+#' count_table<-get_count_table(abund.table=tiny_data, sample.id=colnames(tiny_data), prev.min=0.3)
 
 get_count_table<-function(abund.path=NULL, abund.table=NULL, sample.id=NULL, prev.min, verbatim=TRUE, msp=NULL){
   if(!is.null(abund.path)){
@@ -63,4 +63,3 @@ get_count_table<-function(abund.path=NULL, abund.table=NULL, sample.id=NULL, pre
 
   return(list(data=counts, prevalences=prevs))
 }
-

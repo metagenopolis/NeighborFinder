@@ -11,7 +11,8 @@ simulate_by_prevalence(
   col_module_id,
   annotation_level,
   sample_size = 500,
-  seed
+  seed,
+  verbatim = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ simulate_by_prevalence(
 \item{sample_size}{Numeric. The size to be considerated, the value of 500 is recommended}
 
 \item{seed}{Numeric. The seed number, ensuring reproducibility}
+
+\item{verbatim}{Boolean. Controls verbosity}
 }
 \value{
 List of dataframes. Each element of the list corresponds to a level of prevalence and is a simulated abundance table
@@ -43,7 +46,7 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") \%>\% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) \%>\% suppressWarnings()
 
-tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=500, seed=20232024)
+tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=500, seed=20242025)
 }

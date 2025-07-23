@@ -43,5 +43,5 @@ tiny_data<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 # Applying a prevalence filter of 30\% on the new count_table
-get_count_table(abund.table=tiny_data, sample.id=colnames(tiny_data), prev.min=0.3)
+count_table<-get_count_table(abund.table=tiny_data, sample.id=colnames(tiny_data), prev.min=0.3)
 }

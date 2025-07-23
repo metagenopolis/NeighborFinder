@@ -6,7 +6,6 @@
 #' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
 #' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
-#' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate "coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
 #' @param seed Numeric. The seed number, ensuring reproducibility
@@ -20,10 +19,10 @@
 #' data(data)
 #' res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
 
-apply_NF_simple<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
+apply_NF_simple<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, prev_level=0.30, filtering_top=20, seed=NULL, ...){
   if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 
   #Normalize data
-  normed_data <- norm_data(data_with_annotation=data_with_annotation, col_module_id=col_module_id, prev_list=c(prev_level), annotation_level=annotation_level, type=data_type)
+  normed_data <- norm_data(data_with_annotation=data_with_annotation, col_module_id=col_module_id, prev_list=c(prev_level), annotation_level=annotation_level)
   #Find neighbors with cv.glmnet
   df_glm <- cvglm_to_coeffs_by_object(list_dfs=normed_data, 
                                     test_module=identify_module(object_of_interest=object_of_interest, annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level),

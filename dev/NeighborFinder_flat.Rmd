@@ -10,10 +10,11 @@ library(testthat)
 
 library(glmnet)
 # remotes::install_gitlab(repo = "metagenopolis/OneNet", host = "forgemia.inra.fr")
-library(OneNet)
+library(Matrix)
 library(tidyverse)
 library(tibble)
 library(knitr)
+library(igraph)
 library(GGally)
 library(network)
 library(sna)
@@ -113,6 +114,87 @@ usethis::use_mit_license("Mathilde Sola")
 NULL
 ```
 
+# Conversion to count table function with prevalence filter
+
+```{r fun-get_count_table}
+#' Conversion to count table function with prevalence filter (Extracted from OneNet package)
+#' 
+#' @param abund.path String. Path to the abundance table
+#' @param abund.table Dataframe. Abundance table, it should have the bacterial species names as first column
+#' @param sample.id String vector. IDs of samples to keep in the final table
+#' @param prev.min Numeric. The value is between 0 and 1 and corresponds to the minimal prevalence threshold of bacterial species to keep in the final table
+#' @param msp String vector. It indicates bacterial species names, if they are not specified in the abundance table first column
+#' @param verbatim Boolean. Controls verbosity
+#'
+#' @return A list containing
+#' \itemize{
+#'  \item{data: }{the final count table (tibble)}
+#'  \item{prevalences: }{a tibble gathering the prevalence of each bacterial species}
+#'}
+#' @export
+
+get_count_table<-function(abund.path=NULL, abund.table=NULL, sample.id=NULL, prev.min, verbatim=TRUE, msp=NULL){
+  if(!is.null(abund.path)){
+    metaformat<-tail(strsplit(abund.path,"[.]")[[1]],1)
+    if(metaformat=="rds"){ data_table <- as.matrix(readRDS(abund.path)) }
+    else{ data_table <- as.matrix(read.delim(abund.path)) }
+  }
+ else{ data_table<-abund.table }
+ 
+  if(is.null(msp)){
+    species<-data_table[,1]
+    data_table<-data_table[,-1]
+  }
+ else{ species<-msp }
+
+  data_table<-apply(data_table,2,function(x){ as.numeric(x) })
+  pct_zero_before=sum(data_table==0)/length(data_table)
+  data_table<-tibble::as_tibble(data_table)
+
+  if(!is.null(sample.id)){ data_table<-data_table[,colnames(data_table)%in%sample.id] }
+
+  #Prevalence filtering
+  counts<-data_table %>% dplyr::mutate(prev=rowMeans(.>0),msp=species) %>% dplyr::filter(prev>prev.min)
+  prevs<-counts %>% dplyr::select(prev, msp)
+  counts=counts %>% dplyr::select(-msp, -prev) %>% t(.)
+  colnames(counts)<-prevs$msp
+  #Set minimal positive value to 1
+  cst=1/min(counts[counts!=0])
+  counts=round(counts*cst)
+  
+  #Verbatim
+  pct_zero_after=sum(counts==0)/length(counts)
+  if(verbatim){cat(paste0("Preprocessing step output for species prevalence>",
+                          prev.min*100,"% : \n   -from ", length(species),
+                          " to ", ncol(counts)," species","\n   -from ",
+                          round(pct_zero_before*100,1),"% to ",
+                          round(pct_zero_after*100,1),"% zero values."))}
+
+  return(list(data=counts, prevalences=prevs))
+}
+```
+
+```{r ex-get_count_table}
+tiny_data<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
+                      SAMPLE1=c(0,1.328425e-06,0,1.527688e-07),
+                      SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
+                      SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
+                      SAMPLE4=c(0,0,2.98320e-05,0))
+# Applying a prevalence filter of 30% on the new count_table
+count_table<-get_count_table(abund.table=tiny_data, sample.id=colnames(tiny_data), prev.min=0.3)
+```
+
+```{r test-module_to_node}
+test_that("get_count_table works", {
+  tiny_data<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
+                      SAMPLE1=c(0,1.328425e-06,0,1.527688e-07),
+                      SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
+                      SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
+                      SAMPLE4=c(0,0,2.98320e-05,0))
+  expect_equal(get_count_table(abund.table=tiny_data, sample.id=colnames(tiny_data), prev.min=0.3, verbatim=FALSE)$prevalences$msp, c("msp_2","msp_3","msp_4"))
+})
+```
+
 # Correspondence between the module ID (msp or functional module) and its name (bacteria or function)
 
 ```{r fun-module_to_node}
@@ -126,7 +208,7 @@ NULL
 #' @return Dictionary. The name of the module, can be a single one or a list
 #' @export
 
-module_to_node<-function (module, annotation_table, col_module_id = "id_mgs", annotation_level){
+module_to_node<-function (module, annotation_table, col_module_id = "msp_name", annotation_level){
     node_dict <- annotation_table %>% dplyr::select(all_of(col_module_id),
         !!rlang::sym(annotation_level)) %>% tibble::deframe()
     node_dict[module] %>% unname() %>% as.character()
@@ -194,6 +276,164 @@ test_that("identify_module works", {
 })
 ```
 
+# Simulate data
+
+```{r fun-simulate_from_ecdf}
+#' Simulate data (extracted from OneNet package)
+#' Generates synthetic count data based on empirical cumulative distribution (ecdf) of real count data
+#'
+#' @param real_data Matrix. Contains real count data of size n by p
+#' @param Sigma Matrix. Covariance structure of size p by p
+#' @param n Numeric. Number of samples
+#' @param seed Numeric. Seed number for data generation
+#' @param verbatim Boolean. If TRUE: iteration and index calculation for each step are printed out
+#' 
+#' @return Matrix. The vector from the upper triangular part of A.mat
+#' @export
+
+simulate_from_ecdf <- function (real_data, Sigma, n, seed=10010, verbatim=FALSE){
+  p <- ncol(real_data)
+  if (!is.null(seed)) { set.seed(seed) }
+  mv_norm <- mvtnorm::rmvnorm(n, mean=rep(0, p), sigma=stats::cov2cor(Sigma))
+  mv_unif <- stats::pnorm(mv_norm)
+  ## Matrix of simulated counts
+  sim_counts <- matrix(0, n, p)
+  ## For each species, apply the inverse of the empirical distribution
+  ## function to the uniform r.v.
+  for (j in 1:p) {
+    ## quantile(x, ., type = 1) is the inverse of the empirical distribution function of x
+    sim_counts[, j] <- quantile(x=real_data[, j], probs=mv_unif[, j], names=FALSE, type=1)
+  }
+  sim_counts
+}
+```
+
+# Create synthetic data from an empirical dataset
+
+```{r fun-new_synth_data}
+#' Simulate data from some empirical count dataset
+#'
+#' @param real_data Matrix. Empirical count table 
+#' @param graph_type String. Structure type for the conditional dependency structure. Here only "cluster" was kept, see EMtree package for more options
+#' @param graph Boolean. Optional graph to be used, must have rownames and colnames and reference all features from real_data
+#' @param n Numeric. Number of samples to simulate
+#' @param r Numeric. For cluster structure, controls the within/between ratio connection probability
+#' @param dens Numeric. Graph density (for cluster graphs) or edges probability (for erdös-renyi graphs)
+#' @param seed Numeric. Seed number for data generation (rmvnorm)
+#' @param must_connect Boolean. TRUE to force the output graph to be connected
+#' @param k Numeric. For cluster structure, number of groups
+#' @param verbatim Boolean. Controls verbosity
+#' @param signed Boolean. TRUE for simulating both positive and negative partial correlations. Default is to FALSE, which implies only negative partial correlations
+#'
+#' @return List. Containing the simulated discrete counts, the corresponding true partial correlation matrix from the latent Gaussian layer of the model and the original graph structure that was used
+#' @export
+
+new_synth_data<-function(real_data, graph_type="cluster", must_connect=TRUE, graph=NULL, n=300,
+                         seed=10010, r=50, dens=4, k=3, verbatim=TRUE, signed=FALSE){
+ 
+ p=ncol(real_data)
+ species <- colnames(real_data)
+ 
+ #Functions extracted from EMtree package to remove dependency
+ ToSym<-function(A.vec){
+  n <- (1 + sqrt(1 + 8*length(A.vec)))/2
+  A.mat <- matrix(0, n, n)
+  A.mat[upper.tri(A.mat)] <- A.vec
+  A.mat <- A.mat + t(A.mat)
+  A.mat
+ }
+ ToVec<-function(A.mat){ 
+  return(suppressMessages(A.mat[upper.tri(A.mat)])) 
+ }
+ SimCluster<-function (p, k, dens, r){
+  beta <- dens/(r/k + (k-1)/k)
+  alpha <- r*beta
+  while (alpha>1) {
+   r <- 0.9*r
+   beta <- dens/(r/k + (k-1)/k)
+   alpha <- r*beta
+  }
+  Z <- t(stats::rmultinom(p, 1, rep(1/k, k)))
+  groupe <- Z %*% 1:k
+  Z <- Z %*% t(Z)
+  diag(Z) <- 0
+  ZZ <- ToVec(Z)
+  G <- ToSym(rbinom(p*(p-1)/2, 1, alpha*ZZ + beta*(1-ZZ)))
+  G
+ }
+ generator_graph<- function(p=20, graph="cluster", dens=0.3, r=2, k=3){
+  theta <- matrix(0, p, p)
+  if (graph=="cluster") { theta <- SimCluster(p, k=k, dens, r) }
+  return(theta=Matrix::Matrix(theta, sparse=TRUE))
+ }
+ generator_param<-function(G, signed=FALSE, v=0.01){
+  lambda <- 1
+  p <- ncol(G)
+  sumlignes <- rowSums(matrix(G, p, p))
+  if (sum(sumlignes==0)!=0) 
+   sumlignes[sumlignes==0] <- 0.1
+  D <- diag(sumlignes + v)
+  if (signed) {
+   Gsign <- ToSym(ToVec(G*matrix(2*stats::rbinom(p^2, 1, 0.3)-1, p, p)))
+   omega <- lambda*D + Gsign
+   while (min(eigen(omega)$values)<1e-10 & lambda<1000) {
+    lambda <- 1.1*lambda
+    omega <- lambda*D+Gsign
+   }}
+  else {
+   omega <- lambda*D+G
+   while (min(eigen(omega)$values) < 1e-10) {
+    lambda <- 1.1*lambda
+    omega <- lambda*D+G
+   }}
+  sigma <- solve(omega)
+  sim <- list(Sigma=sigma, Omega=omega, Lambda=lambda)
+  sim
+ }
+ 
+ if (is.null(graph)) {
+  if(!must_connect){
+   set.seed(seed)
+   G<-as.matrix(generator_graph(p=p, graph=graph_type, dens=dens/p,r,k))
+  }else{
+   i<-0; connect<-FALSE
+   while(!connect){
+    i<-i+1
+    set.seed(i)
+    G<-as.matrix(generator_graph(p=p, graph=graph_type, dens=dens/p,r,k))
+    graph<-igraph::graph_from_adjacency_matrix (G)
+    connect<-igraph::is_connected(graph)
+   }
+  }
+ } else {
+  if (!all(species %in% colnames(graph)) || !all(species %in% rownames(graph))) stop("Some species in the abundance dataset do not appear in the provided graph.")
+  G <- graph[species, species]
+ }
+ dimnames(G) <- list(species, species)
+ faithful_param<-generator_param(G=G, signed=signed)
+ parcor<- -cov2cor(as.matrix(faithful_param$Omega))
+ 
+ if(verbatim) cat("Simulation from real data ecdf...")
+ 
+ simu_counts <- simulate_from_ecdf(real_data, Sigma=faithful_param$Sigma, n=n, seed=seed, verbatim=verbatim)
+ simulated_data<-list(counts=simu_counts, par.cor=parcor, G=G)
+ simulated_data
+}
+```
+
+```{r ex-new_synth_data}
+tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium G","Two bact"),
+                      msp_name=c("msp_1","msp_2","msp_3","msp_4"),
+                      SAMPLE1=c(0,1.328425e-06,0,1.527688e-07),
+                      SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
+                      SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
+                      SAMPLE4=c(0,0,2.98320e-05,0))
+
+count_table<-get_count_table(abund.table=tiny_data %>% dplyr::select(-species), sample.id=colnames(tiny_data), prev.min=0.1)
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) %>% suppressWarnings()
+sim_data<-new_synth_data(count_table$data, n=50, graph=as.matrix(tiny_graph %>% dplyr::select(-species)), verbatim=FALSE, seed=20242025)
+```
+
 # Generate a graph
 
 ```{r fun-graph_step}
@@ -202,29 +442,18 @@ test_that("identify_module works", {
 #' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param col_module_id String. The name of the column with the module names in the annotation table
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
-#' @param type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate in 'type' argument: "coverage"
+#' @param seed Numeric. Seed number for data generation (new_synth_data)
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
 
-graph_step<-function(data_with_annotation, col_module_id, annotation_level, type="fpkm"){
-  if (type %in% c("coverage")){
-    prev_df <- data_with_annotation %>%
-      dplyr::mutate(prev = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans())
-    df <- prev_df %>% dplyr::filter(prev>0.15) %>% 
-      dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id), -prev) %>% t() 
-    colnames(df) <- prev_df %>% dplyr::filter(prev>0.15) %>% dplyr::pull(paste(col_module_id))
-    G <- OneNet::new_synth_data(df, n=50, plot=FALSE, verbose=FALSE)$G
-    dimnames(G) <- list(colnames(df), colnames(df))
-  }
-  if (type %in% c("fpkm")){
-    counts <- OneNet::get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample_id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
-    G <- OneNet::new_synth_data(counts, n=50, plot=FALSE, verbose=FALSE)$G
-    dimnames(G) <- list(colnames(counts), colnames(counts))
-  }
-  G <- G %>% as.data.frame() %>% 
-    dplyr::mutate(!!rlang::sym(annotation_level):=module_to_node(rownames(G), annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level))
-  G
+graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed){
+ counts <- get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample.id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
+ G <- new_synth_data(counts, n=50, verbatim=FALSE, seed=seed)$G
+ dimnames(G) <- list(colnames(counts), colnames(counts))
+ G <- G %>% as.data.frame() %>% 
+  dplyr::mutate(!!rlang::sym(annotation_level):=module_to_node(rownames(G), annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level))
+ G
 }
 ```
 
@@ -236,14 +465,14 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) %>% suppressWarnings()
 ```
 
 ```{r test-graph_step}
 test_that("graph_step works", {
   data(data)
   data(graphs)
-  expect_equal(graph_step(data$CRC_JPN_CHN_EUR, col_module_id="msp_id", annotation_level="species"), graphs$CRC_JPN_CHN_EUR)
+  expect_equal(graph_step(data$CRC_JPN_CHN_EUR, col_module_id="msp_id", annotation_level="species", seed=10010), graphs$CRC_JPN_CHN_EUR)
 })
 ```
 
@@ -259,26 +488,27 @@ test_that("graph_step works", {
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param sample_size Numeric. The size to be considerated, the value of 500 is recommended
 #' @param seed Numeric. The seed number, ensuring reproducibility
+#' @param verbatim Boolean. Controls verbosity
 #'
 #' @return List of dataframes. Each element of the list corresponds to a level of prevalence and is a simulated abundance table
 #' @export
 
-simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed) {
+simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed, verbatim=FALSE) {
   set.seed(seed)
   if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
   else {G <- graph_file}  
-  cat("Generating simulated tables for each level of prevalence...\n")
+  if (verbatim) {cat("Generating simulated tables for each level of prevalence...\n")}
   
   abund_table <- data_with_annotation %>% dplyr::select(-all_of(col_module_id), -!!rlang::sym(annotation_level))
   modules <- data_with_annotation %>% dplyr::pull(col_module_id)
   sample_id <- abund_table %>% colnames()
   
   sim_one_prev <- function(prev) {
-    cat(glue::glue("p{100*prev}"), sep = "\n")
+    if (verbatim) {cat(glue::glue("p{100*prev}"), sep = "\n")}
     # Generating count table
-    df_counts <- OneNet::get_count_table(abund.table=abund_table, sample_id=sample_id, mgs=modules, prev.min=prev, verbatim=FALSE)
+    df_counts <- get_count_table(abund.table=abund_table, sample.id=sample_id, msp=modules, prev.min=prev, verbatim=FALSE)
     # Simulation of count table
-    df_sim <- OneNet::new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), plot=FALSE, verbose=FALSE, seed=seed)
+    df_sim <- new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), verbatim=FALSE, seed=seed)
     #Transformed matrix with mclr
     df_norm <- SPRING::mclr(df_sim$counts)
     colnames(df_norm)<-colnames(df_counts$data)
@@ -297,9 +527,9 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) %>% suppressWarnings()
 
-tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=500, seed=20232024)
+tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=500, seed=20242025)
 ```
 
 ```{r test-simulate_by_prevalence}
@@ -310,10 +540,10 @@ test_that("simulate_by_prevalence works", {
                         SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
                         SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                         SAMPLE4=c(0,0,2.98320e-05,0))
-  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
-  computed_sims <- simulate_by_prevalence(tiny_data, prev_list=c(0.20), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=2, seed=10010)
+  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species",seed=20242025) %>% suppressWarnings()
+  computed_sims <- simulate_by_prevalence(tiny_data, prev_list=c(0.20), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=2, seed=20242025)
   
-  expected_sims <- list(`0.2` = structure(c(0, 0, 1, 0, 2.17557332980424, 0, 0, 0), .Dim = c(2L, 4L), 
+  expected_sims <- list(`0.2` = structure(c(0, 0, 0, 0, 1.48023097509365, 1.96046195018729, 0, 1), .Dim = c(2L, 4L), 
                                           .Dimnames = list(NULL, c("msp_1", "msp_2", "msp_3", "msp_4"))))
   expect_equal(computed_sims, expected_sims)
 })
@@ -369,7 +599,7 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
-tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) %>% suppressWarnings()
 
 tiny_truth <-prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id="msp_name", annotation_level="species", object_of_interest="bacterium")
 ```
@@ -382,7 +612,7 @@ test_that("prev_for_selected_nodes works", {
                         SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
                         SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                         SAMPLE4=c(0,0,2.98320e-05,0))
-  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
+  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species",seed=20242025) %>% suppressWarnings()
   
   expected_truth <- tibble::tibble(node1=c("msp_2","msp_2","msp_2","msp_3","msp_3"),
                                    node2=c("msp_1","msp_3","msp_4","msp_2","msp_4"),
@@ -421,7 +651,7 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) %>% suppressWarnings()
 
 tiny_truth <-prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id="msp_name", annotation_level="species", object_of_interest="bacterium")
 
@@ -451,34 +681,24 @@ test_that("truth_by_prevalence works", {
 #' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
-#' @param type String. If your dataset is not of type "fpkm", indicate in 'type' argument: "coverage"
 #' 
 #' @return List of dataframes. Each element of the list corresponds to a normalized 'data_with_annotation', by level of prevalence
 #' @export
 
-norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level, type){
+norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level){
   list_norm<-list()
   res<-tibble::tibble()
   #Normalizing for each level of prevalence if prev_list is a list
   # cat("Normalizing data...\n")
   for (prev in prev_list){
-    if (type %in% c("coverage")){
-      #Arranging data
-      df <- data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -paste(col_module_id)) %>% t() 
-      colnames(df) <- data_with_annotation %>% dplyr::pull(paste(col_module_id))
-      #Transformed matrix with mclr
-      df_norm <- SPRING::mclr(df)
-      colnames(df_norm)<-colnames(df) 
-    }
-    if (type %in% c("fpkm")){
-      #Creating count table
-      df_counts <- OneNet::get_count_table(abund.table = data_with_annotation[,-1], sample_id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
-      #Transformed matrix with mclr
-      df_norm <- SPRING::mclr(df_counts$data)
-      colnames(df_norm)<-colnames(df_counts$data) 
-    }
-    df_norm <- df_norm %>% as.matrix()
-    list_norm[[paste(prev)]] <- df_norm
+   #Creating count table
+   df_counts <- get_count_table(abund.table = data_with_annotation[,-1], sample.id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
+   #Transformed matrix with mclr
+   df_norm <- SPRING::mclr(df_counts$data)
+   colnames(df_norm)<-colnames(df_counts$data) 
+   
+   df_norm <- df_norm %>% as.matrix()
+   list_norm[[paste(prev)]] <- df_norm
   }
   return(list_norm)
 }
@@ -492,7 +712,7 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_normed <-norm_data(tiny_data, col_module_id="msp_name", annotation_level="species", prev_list=c(0.20, 0.30), type="fpkm")
+tiny_normed <-norm_data(tiny_data, col_module_id="msp_name", annotation_level="species", prev_list=c(0.20, 0.30))
 ```
 
 ```{r test-norm_data}
@@ -509,7 +729,7 @@ test_that("norm_data works", {
                                   msp_3=c(0.000000,5.303984,1.000000,4.520268),
                                   msp_4=c(3.438051,0.000000,8.040536,0.000000))  
   rownames(expected_normed0.2)<-c("SAMPLE1","SAMPLE2","SAMPLE3","SAMPLE4")
-  expect_equal(norm_data(tiny_data, col_module_id="msp_name",annotation_level="species", prev_list=c(0.20), type="fpkm")[[1]] %>% as.data.frame() %>% round(digits=5), expected_normed0.2 %>% round(digits=5))
+  expect_equal(norm_data(tiny_data, col_module_id="msp_name",annotation_level="species", prev_list=c(0.20))[[1]] %>% as.data.frame() %>% round(digits=5), expected_normed0.2 %>% round(digits=5))
 })
 ```
 
@@ -575,10 +795,10 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
 data(data)
 data(metadata)
 #Simple example
-x <- norm_data(data$CRC_JPN, 0.30, type="fpkm")[[1]]
+x <- norm_data(data$CRC_JPN, 0.30)[[1]]
 neighbors_JPN<-find_module_neighbors(df=x, module="msp_0030", seed=20232024)
 #Example with covariate
-x <- norm_data(data$CRC_CHN, 0.30, type="fpkm")[[1]]
+x <- norm_data(data$CRC_CHN, 0.30)[[1]]
 neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
@@ -606,10 +826,10 @@ find_all_module_neighbors <- function(df, test_module, seed=NULL, ...) {
 data(data)
 data(metadata)
 #Simple example
-x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species", type="fpkm")[[1]]
+x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species")[[1]]
 neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024)
 # Example with covariate
-x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species", type="fpkm")[[1]]
+x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species")[[1]]
 neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
@@ -639,10 +859,10 @@ cvglm_to_coeffs_by_object<-function(list_dfs, test_module = identify_module(), s
 data(data)
 data(metadata)
 #Simple example
-normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
 neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20232024)
 #Example with covariate
-normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
 neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
@@ -672,7 +892,7 @@ res_by_filtering<-function(res_glm, filtering_list){
 ```{r ex-res_by_filtering}
 data(data)
 #Simple example
-normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
 neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20232024)
 filtered_neighbors_JPN<-res_by_filtering(neighbors_JPN, filtering_list=c(10,15,20))
 ```
@@ -828,7 +1048,7 @@ data(graphs)
 #Generate dataframe with true neighbors
 df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella", annotation_level="species"), prev_list=c(0.20,0.30))
 #Generate dataframe with detected neighbors
-normed_JPN<-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+normed_JPN<-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
 df_detected<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=identify_module("Klebsiella",taxo,"msp_id", annotation_level="species"), seed=20232024)
 #Use final_step() to gather both
 neighbors<-final_step(df_true, df_detected)
@@ -923,7 +1143,6 @@ test_that("choose_params_values works", {
 #' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
 #' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
-#' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate "coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
 #' @param seed Numeric. The seed number, ensuring reproducibility
@@ -934,10 +1153,10 @@ test_that("choose_params_values works", {
 #' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 
-apply_NF_simple<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, data_type="fpkm", prev_level=0.30, filtering_top=20, seed=NULL, ...){
+apply_NF_simple<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, prev_level=0.30, filtering_top=20, seed=NULL, ...){
   if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 
   #Normalize data
-  normed_data <- norm_data(data_with_annotation=data_with_annotation, col_module_id=col_module_id, prev_list=c(prev_level), annotation_level=annotation_level, type=data_type)
+  normed_data <- norm_data(data_with_annotation=data_with_annotation, col_module_id=col_module_id, prev_list=c(prev_level), annotation_level=annotation_level)
   #Find neighbors with cv.glmnet
   df_glm <- cvglm_to_coeffs_by_object(list_dfs=normed_data, 
                                     test_module=identify_module(object_of_interest=object_of_interest, annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level),
@@ -970,7 +1189,6 @@ test_that("apply_NF_simple works", {
 #' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
 #' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
-#' @param data_type String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate "coverage"
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
 #' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
@@ -980,32 +1198,26 @@ test_that("apply_NF_simple works", {
 #' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 
-apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, data_type="fpkm", prev_level=0.30, filtering_top=20, ...){
-
- # Behaviour depends on the number of samples in the dataset
- # When the dataset size is small (n=50), the function runs for one seed
- if (ncol(data_with_annotation)-2<=50){
-  apply_NF_simple(data_with_annotation, object_of_interest, col_module_id,
-                                          annotation_level, data_type, prev_level, filtering_top, seed = 20232024, ...)
- }
-  # When the dataset size is bigger (n>50), the function runs for 10 seed and filters results if found in more than half the seeds to return robust results
- else {
-  set.seed(seed=1)
-  seeds10<-sample(1:1000000,10)
-  res_repet_seeds<-data.frame()
-  
-  for (graine in seeds10) {
-   res_repet_seeds<-rbind(res_repet_seeds, 
-                          apply_NF_simple(data_with_annotation, object_of_interest, col_module_id,
-                                          annotation_level, data_type, prev_level, filtering_top, seed = graine, ...) %>% 
-                           dplyr::mutate(SEED=graine))
-  } 
+apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, prev_level=0.30, filtering_top=20, ...){
+ 
+ # Performance depends on the number of samples in the dataset, please choose the good comination of prev_level and filtering_top
+ # The function runs for 10 seed and filters results if found in more than half the seeds to return robust results
+ set.seed(seed=1)
+ seeds10<-sample(1:1000000,10)
+ res_repet_seeds<-data.frame()
+ 
+ for (one_seed in seeds10) {
+  res_repet_seeds<-rbind(res_repet_seeds, 
+                         apply_NF_simple(data_with_annotation, object_of_interest, col_module_id,
+                                         annotation_level, prev_level, filtering_top, seed = one_seed, ...) %>% 
+                          dplyr::mutate(SEED=one_seed))
+ } 
  if (!nrow(res_repet_seeds)){return(tibble::tibble())}
-  res_repet_seeds %>% dplyr::mutate(pair=paste(node1,node2,sep="_")) %>% dplyr::group_by(pair) %>% unique() %>% 
-   dplyr::summarize(seeds_detect = dplyr::n(), med=median(coef)) %>% dplyr::filter(seeds_detect>=5) %>% dplyr::select(-seeds_detect) %>%
-   unique() %>% dplyr::ungroup() %>% tidyr::separate(pair, into = c("node1", "node2"), sep="_msp") %>%
-   dplyr::mutate(node2=paste0("msp",node2)) %>% dplyr::rename(coef=med)
- }
+ res_repet_seeds %>% dplyr::mutate(pair=paste(node1,node2,sep="_")) %>% dplyr::group_by(pair) %>% unique() %>% 
+  dplyr::summarize(seeds_detect = dplyr::n(), med=median(coef)) %>% dplyr::filter(seeds_detect>=5) %>% dplyr::select(-seeds_detect) %>%
+  unique() %>% dplyr::ungroup() %>% tidyr::separate(pair, into = c("node1", "node2"), sep="_msp") %>%
+  dplyr::mutate(node2=paste0("msp",node2)) %>% dplyr::rename(coef=med)
+ 
 }
 ```
 

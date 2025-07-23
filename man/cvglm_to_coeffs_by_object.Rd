@@ -34,9 +34,9 @@ Apply cv.glmnet() for a list of module IDs and for each prevalence level
 data(data)
 data(metadata)
 #Simple example
-normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
 neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20232024)
 #Example with covariate
-normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
 neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 }

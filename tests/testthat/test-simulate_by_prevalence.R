@@ -7,10 +7,10 @@ test_that("simulate_by_prevalence works", {
                         SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
                         SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                         SAMPLE4=c(0,0,2.98320e-05,0))
-  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") %>% suppressWarnings()
-  computed_sims <- simulate_by_prevalence(tiny_data, prev_list=c(0.20), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=2, seed=10010)
+  tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species",seed=20242025) %>% suppressWarnings()
+  computed_sims <- simulate_by_prevalence(tiny_data, prev_list=c(0.20), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=2, seed=20242025)
   
-  expected_sims <- list(`0.2` = structure(c(0, 0, 1, 0, 2.17557332980424, 0, 0, 0), .Dim = c(2L, 4L), 
+  expected_sims <- list(`0.2` = structure(c(0, 0, 0, 0, 1.48023097509365, 1.96046195018729, 0, 1), .Dim = c(2L, 4L), 
                                           .Dimnames = list(NULL, c("msp_1", "msp_2", "msp_3", "msp_4"))))
   expect_equal(computed_sims, expected_sims)
 })

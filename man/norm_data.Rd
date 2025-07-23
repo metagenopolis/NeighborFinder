@@ -8,8 +8,7 @@ norm_data(
   data_with_annotation,
   col_module_id,
   prev_list = c(0.3),
-  annotation_level,
-  type
+  annotation_level
 )
 }
 \arguments{
@@ -18,8 +17,6 @@ norm_data(
 \item{col_module_id}{String. The name of the column with the module names in annotation_table}
 
 \item{prev_list}{List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20\% of prevalence}
-
-\item{type}{String. If your dataset is not of type "fpkm", indicate in 'type' argument: "coverage"}
 }
 \value{
 List of dataframes. Each element of the list corresponds to a normalized 'data_with_annotation', by level of prevalence
@@ -35,5 +32,5 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_normed <-norm_data(tiny_data, col_module_id="msp_name", annotation_level="species", prev_list=c(0.20, 0.30), type="fpkm")
+tiny_normed <-norm_data(tiny_data, col_module_id="msp_name", annotation_level="species", prev_list=c(0.20, 0.30))
 }

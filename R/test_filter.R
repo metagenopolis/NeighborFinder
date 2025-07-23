@@ -15,7 +15,7 @@
 #' #Generate dataframe with true neighbors
 #' df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella", annotation_level="species"), prev_list=c(0.20,0.30))
 #' #Generate dataframe with detected neighbors
-#' normed_JPN<-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30), type="fpkm")
+#' normed_JPN<-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
 #' df_detected<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=identify_module("Klebsiella",taxo,"msp_id", annotation_level="species"), seed=20232024)
 #' #Use final_step() to gather both
 #' neighbors<-final_step(df_true, df_detected)

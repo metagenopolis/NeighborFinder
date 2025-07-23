@@ -7,7 +7,7 @@
 module_to_node(
   module,
   annotation_table,
-  col_module_id = "id_mgs",
+  col_module_id = "msp_name",
   annotation_level
 )
 }

@@ -24,15 +24,18 @@ NeighborFinder_flat.Rmd:
   - R/final_step.R
   - R/find_all_module_neighbors.R
   - R/find_module_neighbors.R
+  - R/get_count_table.R
   - R/graph_step.R
   - R/identify_module.R
   - R/intersections_network.R
   - R/intersections_table.R
   - R/module_to_node.R
+  - R/new_synth_data.R
   - R/norm_data.R
   - R/prev_for_selected_nodes.R
   - R/res_by_filtering.R
   - R/simulate_by_prevalence.R
+  - R/simulate_from_ecdf.R
   - R/test_filter.R
   - R/truth_by_prevalence.R
   - R/visualize_network.R
@@ -42,6 +45,7 @@ NeighborFinder_flat.Rmd:
   - R/graphs-for-crc-patients.R
   - R/pipe-function.R
   tests:
+  - tests/testthat/test-get_count_table.R
   - tests/testthat/test-module_to_node.R
   - tests/testthat/test-identify_module.R
   - tests/testthat/test-graph_step.R

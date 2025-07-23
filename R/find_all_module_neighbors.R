@@ -15,10 +15,10 @@
 #' data(data)
 #' data(metadata)
 #' #Simple example
-#' x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species", type="fpkm")[[1]]
+#' x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species")[[1]]
 #' neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024)
 #' # Example with covariate
-#' x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species", type="fpkm")[[1]]
+#' x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species")[[1]]
 #' neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 
 find_all_module_neighbors <- function(df, test_module, seed=NULL, ...) {

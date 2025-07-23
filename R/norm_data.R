@@ -5,7 +5,6 @@
 #' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
-#' @param type String. If your dataset is not of type "fpkm", indicate in 'type' argument: "coverage"
 #' 
 #' @return List of dataframes. Each element of the list corresponds to a normalized 'data_with_annotation', by level of prevalence
 #' @export
@@ -17,31 +16,22 @@
 #'                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
 #'                       SAMPLE4=c(0,0,2.98320e-05,0))
 #'
-#' tiny_normed <-norm_data(tiny_data, col_module_id="msp_name", annotation_level="species", prev_list=c(0.20, 0.30), type="fpkm")
+#' tiny_normed <-norm_data(tiny_data, col_module_id="msp_name", annotation_level="species", prev_list=c(0.20, 0.30))
 
-norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level, type){
+norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level){
   list_norm<-list()
   res<-tibble::tibble()
   #Normalizing for each level of prevalence if prev_list is a list
   # cat("Normalizing data...\n")
   for (prev in prev_list){
-    if (type %in% c("coverage")){
-      #Arranging data
-      df <- data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -paste(col_module_id)) %>% t() 
-      colnames(df) <- data_with_annotation %>% dplyr::pull(paste(col_module_id))
-      #Transformed matrix with mclr
-      df_norm <- SPRING::mclr(df)
-      colnames(df_norm)<-colnames(df) 
-    }
-    if (type %in% c("fpkm")){
-      #Creating count table
-      df_counts <- OneNet::get_count_table(abund.table = data_with_annotation[,-1], sample_id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
-      #Transformed matrix with mclr
-      df_norm <- SPRING::mclr(df_counts$data)
-      colnames(df_norm)<-colnames(df_counts$data) 
-    }
-    df_norm <- df_norm %>% as.matrix()
-    list_norm[[paste(prev)]] <- df_norm
+   #Creating count table
+   df_counts <- get_count_table(abund.table = data_with_annotation[,-1], sample.id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
+   #Transformed matrix with mclr
+   df_norm <- SPRING::mclr(df_counts$data)
+   colnames(df_norm)<-colnames(df_counts$data) 
+   
+   df_norm <- df_norm %>% as.matrix()
+   list_norm[[paste(prev)]] <- df_norm
   }
   return(list_norm)
 }

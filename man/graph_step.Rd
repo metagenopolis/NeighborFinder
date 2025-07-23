@@ -4,12 +4,7 @@
 \alias{graph_step}
 \title{Generate a graph}
 \usage{
-graph_step(
-  data_with_annotation,
-  col_module_id,
-  annotation_level,
-  type = "fpkm"
-)
+graph_step(data_with_annotation, col_module_id, annotation_level, seed)
 }
 \arguments{
 \item{data_with_annotation}{Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample}
@@ -18,7 +13,7 @@ graph_step(
 
 \item{annotation_level}{String. The name of the column with the level to be studied. Examples: species, genus, level_1}
 
-\item{type}{String. Default value is "fpkm". If your dataset is not of type "fpkm", indicate in 'type' argument: "coverage"}
+\item{seed}{Numeric. Seed number for data generation (new_synth_data)}
 }
 \value{
 Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
@@ -34,5 +29,5 @@ tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium 
                       SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
                       SAMPLE4=c(0,0,2.98320e-05,0))
 
-tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", type="fpkm") \%>\% suppressWarnings()
+tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) \%>\% suppressWarnings()
 }
