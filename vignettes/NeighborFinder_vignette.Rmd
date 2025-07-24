@@ -39,7 +39,7 @@ data(graphs)
 ## Explore if the default parameters of NeighborFinder are suitable for your bacteria of interest & dataset
 This function enables one to test the NeighborFinder method for different levels of prevalence thanks to simulated data based on the provided dataset. There will be different performance scores depending on the bacteria of interest and the dataset provided.
 
-To do this step, generating a graph is needed. If your dataset is not of type "fpkm", please indicate in 'type' argument: "coverage".
+To do this step, generating a graph is needed. 
 
 It is recommended to save it to make next steps quicker.
 This step was commented since it takes few minutes to execute and also because it is included in the 'graphs' object.
@@ -49,12 +49,11 @@ This step was commented since it takes few minutes to execute and also because i
 G <- graphs$CRC_JPN_CHN_EUR
 ```
 
-The displayed table indicates the precision and recall scores before and after applying the NeighborFinder method, for each level of prevalence and filtering top percentage tested.
-NeighborFinder uses by default the level of prevalence of 30% and the filtering top 20%. If the results from the table rendered by choose_params_values() indicate better performance scores at other values of these parameters, feel free to change the 'prev_level' and 'filtering_top' parameters in the function apply_NeighborFinder().
+The displayed table indicates the precision and recall scores before and after applying the NeighborFinder method, for each 'prev_level' and 'filtering_top' parameters tested.
+NeighborFinder uses by default the level of prevalence of 30% and the filtering top 20%. If the results from the table rendered by choose_params_values() indicate better performance scores at other values of these parameters, please feel free to change the 'prev_level' and 'filtering_top' parameters in the function apply_NeighborFinder().
 
 ```{r choose-params-values}
-simulations <- simulate_by_prevalence(data$CRC_JPN_CHN_EUR, prev_list=c(0.20,0.30), graph_file=G, col_module_id="msp_id", annotation_level="species", seed=20232024)
-choose_params_values(data$CRC_JPN_CHN_EUR, "Escherichia coli", simulations, filtering_list=c(10,20,30), graph_file=G, col_module_id="msp_id", annotation_level="species", seed = 20232024) %>% as.data.frame()
+choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.25,0.30), filtering_list=c(10,20,30), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species") %>% dplyr::mutate(filtering_top=as.numeric(filtering_top)) %>% as.data.frame() %>% kable()
 ```
 
 ## Apply NeighborFinder & look for Escherichia coli neighbors on CRC patients
@@ -105,8 +104,8 @@ Here is an example of how to merge the results of several datasets into a single
 This operation can be performed with 2 or more datasets. One can choose the visualization threshold, corresponding to the minimum number of datasets in which neighbors have been found.
 Another function used here is equivalent to the network thanks to a summary table, indicating in which datasets intersections were found above the set threshold.
 
-```{r intersections-network, fig.height=4, fig.width=7}
-intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=3)
+```{r intersections-network, fig.height=6, fig.width=7}
+intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=7, edge_label_size=4, node_size=15, annotation_option=TRUE, seed=3)
 ```
 
 One of the main links is with Klebsiella pneumoniae. It is also a bacteria associated with CRC, and produces the same toxin: https://www.sciencedirect.com/science/article/pii/S0041010121001112

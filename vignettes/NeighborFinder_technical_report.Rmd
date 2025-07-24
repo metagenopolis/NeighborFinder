@@ -40,7 +40,7 @@ library(neighborfinder)
 
 * Install package [README](~/neighborfinder/README.Rmd)
 
-* Apply it on abundance tables of metagenomic data gathering at least 100 samples.
+* Apply it on abundance tables of metagenomic data gathering at least 100 samples for better performance.
 
 * See the [vignette](~/neighborfinder/vignettes/NeighborFinder_vignette.Rmd) included in the package. It reviews the main functions that are useful for making the most of the NeighborFinder's features.
 
@@ -58,12 +58,21 @@ knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig
 
 ### What is behind apply_NeighborFinder() ?
 
+Here is a description of how the function works.
+
+```{r fig2, echo=FALSE, fig.align='center', out.width="100%"}
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/workflow_top_only.png")
+```
+
+<center>Figure 2: Description of the architecture of apply_NeighborFinder() </center>
+
 #### 1)	Pre-processing: Counts & Normalization
 
 ##### a)
 
-The first step of ```apply_NeighborFinder()``` is to transform the abundance data, provided in the above format, first by transposing the data (so that the samples are in rows and the module IDs are in columns). 
-Then, if the abundances are provided as type “fpkm” (rather than “coverage”), the abundances are transformed to counts using ```OneNet::get_count_table()```. This is done by dividing all values by the smallest positive abundance and rounding the results, so that the minimum count is 1. 
+The first step of ```apply_NeighborFinder()``` is to filter the input abundance data, provided in the above format, using the parameter ```prev_level```. This step helps simplify the dataset by filtering out rare species.
+
+The transformation of the abundance data into a count table consists in first transposing the data (so that the samples are in rows and the module IDs are in columns). Then, the abundances are transformed to counts using ```get_count_table()``` extracted from the ```OneNet``` package. This is done by dividing all values by the smallest positive abundance and rounding the results, so that the minimum count is 1. 
 
 $B_{ij} = \lfloor A_{ij}/A_{min}\rfloor$   where $A_{\text{min}} = \min_{\{i,j : A_{ij} \neq 0\}} A_{ij}$
 where $A$ is the abundance table and $B$ the resulting count table. Note that the rows of $A$ (and $B$) are samples $i \in \{1,...,n\}$ and the columns are module IDs $j \in \{1,...,p\}$.
@@ -97,7 +106,7 @@ where $z_{min} = {min }_{{ij:B}_{ij}\neq 0}{ log\{{B_{ij}/g(B_i)}}\}$.
 
 ##### a)	Simple case: no covariates
 
-We consider a linear regression problem where we regress the abundance $C_{j0}$ of module $j0$ against the abundances of all others modules ${(C_j)}_{j\neq j0}$, using the model:
+We consider a linear regression problem where we regress the abundance $C_{j0}$ of module $j0$ against the abundances of all others modules ${(C_j)}_{j\neq j0}$. The function ```glmnet::cv.glmnet()``` is applied on the normalized data 10 times, each time with a different seed. The following model is used:
 
 $C_{j0} = \theta_1  C_1 +...+ \theta_{j0-1}  C_{j0-1} + \theta_{j0+1}  C_{j0+1} +...+ \theta_p  C_p +\epsilon$
 
@@ -146,116 +155,63 @@ See part “Apply NeighborFinder with covariate option” in the [vignette](~/ne
 
 ##### a)	Filtering the results
 
-This step enables NeighborFinder to have better performances than with the naive glmnet method (see below in the “What are the parameters default values?” part). 
-Only the top 20% of neighbors in terms of absolute value of the regression coefficient are conserved.
-
-```{r fig2, echo=FALSE, fig.align='center', out.width="100%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig2.jpg")
-```
-
-<center>Figure 2: Filtering process</center>
-
-##### b)	Increasing robusteness
-
-The function ```apply_NF_simple()``` is run on 10 seeds and results found are kept if only found in at least half of the seeds. 
-This processe ensures more robust results. This was tested on simulated data with 500 samples with different sets of seeds (10 - 20 - 50) :
-
-```{r fig nseeds, echo=FALSE, fig.align='center', out.width="100%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig nseeds.jpg")
-```
-
-<center>Figure 3: Choice of the size of the set of seeds</center>
-<br>
-
-Performance scores were way better with this repetition approach than running the developed method on a single seed.
-Since results were equally satisfying for each set of seeds, the minimal number of 10 seeds was chosen.
-
-### What are the parameters default values?
-
-* The prevalence filter: 30%
-
-* The filtering threshold: top 20%
-
-
-### How were the parameters defaults values calibrated ?
-
-Here is an illustration of the followed procedure. 
+This step enables NeighborFinder to have better performances than with the naive glmnet method. For each seed-generated result, a filter is applied to increase the reliability of detected interactions. This is done with the ```top_filtering parameter```: it consists in keeping only the strongest coefficients. If ```top_filtering``` is set to 10%, the coefficients conserved must be greater in absolute value than the 90th quantile of all coefficients detected for the neighbors of a species of interest. 
 
 ```{r fig3, echo=FALSE, fig.align='center', out.width="100%"}
 knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig3.jpg")
 ```
 
-<center>Figure 4: Evaluation of performance procedure</center>
-<br>
+<center>Figure 3: Filtering process</center>
 
-For each of the 8 large cohorts (ranging in size from n=200 to 3900 individuals), a graph with cluster-like structure was generated. A precision matrix $\Omega$ with non-null coefficients respecting the graph topology was produced and then inverted to produce a covariance matrix ${\Sigma}$. Five simulated datasets of size n=500 samples, each based on a different seed, were simulated using gaussian copula from the covariance matrix ${\Sigma}$ and the original count matrix to produce count tables that *(i)* have the same marginal counts distributions as the original cohort *(ii)* while enforcing the correlation between taxa encoded in ${\Sigma}$. 
+##### b)	Increasing robusteness
 
-The graph edges are here considered as true edges. 
+To gain in robustness, only neighbors detected several times are kept. The function ```apply_NF_simple()``` is run on 10 seeds and results found are kept if only found in at least half of the seeds. 
+This process ensures more robust results. This step merges the 10 filtered results (each corresponding to a seed) and eliminates edges detected in less than half of the results. For a kept interaction, the median of the different coefficients is calculated and saved in the final output. The final result is an edge table of the interactions that were stronger and found in at least half of the 10 seed-generated results.
 
-Then, for each level of prevalence tested (from 20% to 35%, by increment of 5%) and for each bacterial genus (p=666), the ```cv.glmnet()``` function was applied to each simulated dataset (via the function ```cvglm_to_coeffs_by_bact()``` from the NeighborFinder package).
-
-The results are then filtered as in the procedure of ```apply_NeighborFinder()``` to keep only a percentage filtering_top of the coefficients, ranging from the top 10% to the top 30% coefficients (see Fig. 2 on filtering results).
-
-Finally, performance scores (F1) are calculated by comparing the true edges of the graph with the detected neighbors listed in:
-
-* the results of ```cvglm_to_coeffs_by_bact()``` (i.e. without the filtering step) ⇾ “F1_before” ;
-
-* the filtered results, for each value of filtering_top tested ⇾ “F1_after”
-
-and averaged over genera. 
+Performance scores were way better with this repetition approach than running the developed method on a single seed (see Figure 4).
 
 <br>
 
-The following figure summarizes the performance scores, highlighting why the couple prevalence 30% – filtering top 20% was chosen as the default values of ```apply_NeighborFinder()```.
+### How to calibrate the parameters values ?
 
-Setting the prevalence threshold at 30% is quite satisfactory, as it preserves as much information as possible (i.e. keeping species present in at least a third of all samples).
+For each of the eight large cohorts (ranging in size from n=347 to 1084 individuals), a graph with cluster-like structure was generated. A precision matrix $\Omega$ with non-null coefficients respecting the graph topology was produced and then inverted to produce a covariance matrix ${\Sigma}$. Simulated datasets of sizes n=100, n=250, n=500, and n=1000 samples were generated using gaussian copula from the covariance matrix ${\Sigma}$ and the original count matrix to produce count tables that *(i)* have the same marginal counts distributions as the original cohort *(ii)* while enforcing the correlation between taxa encoded in ${\Sigma}$. The graph edges are here considered as true edges (ground truth).
+
+On 10 different seeds, for each value of prev_level tested (from 15% to 35%, by increment of 5%), and for each bacterial species, the ```cv.glmnet()``` function was applied to each simulated dataset (via the function ```cvglm_to_coeffs_by_object()``` from the ```NeighborFinder``` package). This part corresponds to the first steps of the method (see Figure 2, step 1 and step 2 at top). 
+The results were then filtered as in the procedure of ```apply_NeighborFinder()``` (see Figure 2, step 2 at bottom) to keep only a filtering_top percentage of the coefficients, ranging from 5% to 30% in 5% increments, and 100% corresponding to not filtering results. 
+The final results were obtained by going through the last step of the method (see Figure 2 step 3) with the selection of interactions if they were detected in at least 5 of the 10 results (each corresponding to a seed) for each pre-mentioned case.
+
+Performance scores (F1) were calculated by comparing the true edges of the graph with the detected neighbors, averaging on bacterial species and cohort datasets. 
+The same procedure was done on simulated datasets of size n=50, but with a prev_level range from 30% to 60% by increment of 5%.
+
 
 ```{r fig4, echo=FALSE, fig.align='center', out.width="100%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig4.jpg")
+knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/heatmap_100-1000_appnote_NB.jpg")
 ```
 
-<center>Figure 5: Performance results of NeighborFinder</center>
+<center>Figure 4: Performance scores on simulated data</center>
 <br>
 
-The function ```choose_params_values()``` has been designed to allow the user to obtain a more specific indication based on the dataset provided and the genus or species of interest. This function works in the same way as the procedure described previously:
+Based on the performance scores calculated on simulated data, parameter pair choices (```prev_level``` and ```filtering_top```) should be adjusted according to the size of the dataset on which the user wishes to use NeighborFinder. When dealing with large datasets, the user has plenty of parameter combinations that lead to an equivalent expected performance, with the dark green areas indicating a high F1 score (>=0.9) in Figure 4. One choice could be to select a low value of ```prev_filter``` to include as many bacterial species as possible and then choose the ```filtering_top``` value to ensure satisfactory optimum performance. For example: with n=1000, ```prev_level```=0.15 and ```filtering_top```=30. As the dataset size decreases, the user is advised to increase the ```prev_level``` value while maintaining a high value of ```filtering_top```. 
+
+<br>
+
+The function ```choose_params_values()``` has been designed to allow the user to obtain a more specific indication based on the dataset provided and the module of interest. This function works in the same way as the procedure described previously:
 
 *	Generation of a graph
 
 *	Simulation of a dataset respecting the dependencies between taxa encoded in the graph, for different prevalence levels
 
-*	Application of ```apply_NeighborFinder()``` with and without filtering (testing different percentages)
+*	Application of ```apply_NF_simple()``` on 10 seeds, with and without filtering top results (testing different percentages) 
 
-*	Comparison and computation of F1 score before and after filtering
+* Application of the robustness step (filtering interactions if they are found in at least half of the seeds-generated results)
 
-The user can then decide which values of these parameters to use for downstream analysis and pass them on to ```apply_NeighborFinder()``` using the arguments ‘prev_level’ and ‘filtering_top’. 
+*	Comparison and computation of F1 score:
 
-### How many samples should my dataset contain ?
+- *before* (```filtering_top```=100 and no robustness step) 
 
-The procedure presented previously was tested here with the default values of ‘prevalence_level’ and ‘filtering_top’. Only the sample size of the simulated datasets was evaluated.
-The next figure shows the gain of performance provided by the repetition of the method on 10 seeds versus one. Below a sample size of n=100, the gain is no longer noticeable. This is why the behavior of the method depends on the number of samples:
+- *after* the filtering & robustness steps
 
- * when n is greater than 50 samples, ```apply_NeighborFinder()``` is the result of ```apply_NF_simple()``` ran 10 times and neighbors found in more than half of the seeds are kept
- 
- * when n is smaller or equal to 50 samples, ```apply_NeighborFinder()``` is equivalent to ```apply_NF_simple()``` since it is run one only one seed
-
-
-```{r fig nsize, echo=FALSE, fig.align='center', out.width="100%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig nsize.jpg")
-```
-
-<center>Figure 6: Performance of the difference between the two behaviors of NeighborFinder</center>
-<br>
-
-Here are the final performance results of the NeighborFinder method for each sample size tested:
-
-```{r fig5new, echo=FALSE, fig.align='center', out.width="25%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig5new.jpg")
-```
-
-<center>Figure 7: Impact of the sample size on NeighborFinder performance</center>
-<br>
-
-The performance results from synthetic data show here that a sample size n greater than or equal to 100 is recommended to ensure a good performance (F1 > 50%).
+The user can then decide which values of these parameters to use for downstream analysis and pass them on to ```apply_NeighborFinder()``` using the arguments ```prev_level``` and ```filtering_top```. 
 
 <br>
 <br>
