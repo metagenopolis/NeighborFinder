@@ -30,7 +30,6 @@
 
 new_synth_data<-function(real_data, graph_type="cluster", must_connect=TRUE, graph=NULL, n=300,
                          seed=10010, r=50, dens=4, k=3, verbatim=TRUE, signed=FALSE){
- 
  p=ncol(real_data)
  species <- colnames(real_data)
  

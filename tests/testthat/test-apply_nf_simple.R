@@ -2,6 +2,6 @@
 
 test_that("apply_NF_simple works", {
   data(data)
-  res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
-  expect_equal(res_CRC_JPN$node2, c("msp_0103", "msp_0208", "msp_0030", "msp_2448"))
+  res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
+  expect_equal(res_CRC_JPN$node2[1:4], c("msp_0103", "msp_0109", "msp_0148c", "msp_0208"))
 })

@@ -33,7 +33,6 @@ NeighborFinder_flat.Rmd:
   - R/new_synth_data.R
   - R/norm_data.R
   - R/prev_for_selected_nodes.R
-  - R/res_by_filtering.R
   - R/simulate_by_prevalence.R
   - R/simulate_from_ecdf.R
   - R/test_filter.R
@@ -53,7 +52,6 @@ NeighborFinder_flat.Rmd:
   - tests/testthat/test-prev_for_selected_nodes.R
   - tests/testthat/test-truth_by_prevalence.R
   - tests/testthat/test-norm_data.R
-  - tests/testthat/test-res_by_filtering.R
   - tests/testthat/test-compute_precision.R
   - tests/testthat/test-compute_recall.R
   - tests/testthat/test-choose_params_values.R

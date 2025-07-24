@@ -24,49 +24,48 @@
 #' res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 #' res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 #'
-#' # intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=3)
+#' if (requireNamespace("network", quietly=TRUE) && requireNamespace("sna", quietly=TRUE) && requireNamespace("scales", quietly=TRUE)){
+#' intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=7, edge_label_size=4, node_size=15, annotation_option=TRUE, seed=3)
+#'  }
 
-intersections_network<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
-  #Gathering all results from datasets
-  for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=l)}
-  inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
-     dplyr::summarize(datasets=list(dataset), .by=c(node1,node2))
-  #Counting in how many cohorts each neighbor was found
-  res_intersections <- inter %>%  dplyr::rowwise() %>% 
-     dplyr::mutate(intersections = datasets %>% unlist() %>% length()) 
-  #Keeping only neighbors found in more than n cohort(s)
-  res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) %>%  dplyr::select(node1,node2,intersections)
-  if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
-  if (!annotation_option){
-    #Build network
-    net <- network::network(res_intersections, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
-    network::set.edge.attribute(net, "weights", res_intersections$intersections)
-    edges<-res_intersections$intersections
-    #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
-    #Plot network
-    if (!is.null(seed)){set.seed(seed)}
-    GGally::ggnet2(net, edge.size = "weights", 
-           color=palette, edge.color="lightsteelblue4", size=node_size,
-           edge.label=edges, edge.label.color = "white", edge.label.fill = "lightsteelblue4",
-           label=TRUE, legend.position = "none", max_size=label_size)
-  }
-  else{
-    #Give taxonomic correspondence
-    res_intersections <- res_intersections %>%  dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
-                                                      node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
-    #Build network
-    net <- network::network(res_intersections, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
-    network::set.edge.attribute(net, "weights", res_intersections$intersections)
-    edges<-res_intersections$intersections
-    #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
-                                                                  annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
-    #Plot network
-    if (!is.null(seed)){set.seed(seed)}
-    GGally::ggnet2(net, edge.size = "weights", 
-           color=palette, edge.color="lightsteelblue4", size=node_size,
-           edge.label=edges, edge.label.color = "white", edge.label.fill = "lightsteelblue4",
-           label=TRUE, legend.position = "none", max_size=label_size, layout.exp = 0.1)
-  }
+intersections_network<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, edge_label_size=2, object_color="cadetblue2", seed=NULL){
+ #Gathering all results from datasets
+ for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=l)}
+ #Counting in how many cohorts each neighbor was found
+ inter <- dplyr::bind_rows(res_list) %>% tibble::tibble() %>%   
+  dplyr::mutate(pair=paste(node1,node2,sep="_")) %>% 
+  dplyr::group_by(pair) %>% dplyr::summarize(intersections=list(dataset) %>% unlist() %>% length(), mean_coef=mean(coef)) %>%
+  dplyr::ungroup() %>% tidyr::separate(pair, into=c("node1", "node2"), sep="_msp") %>% dplyr::mutate(node2=paste0("msp",node2))
+ 
+ #Keeping only neighbors found in more than n cohort(s)
+ res_intersections <- inter %>%  dplyr::filter(intersections >= threshold)
+ if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
+ if (!annotation_option){
+  #Build network
+  net <- network::network(res_intersections, matrix.type="edgelist")
+  network::set.edge.attribute(net, "weights", res_intersections$mean_coef)
+  #Identify species of interest in a different color
+  palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
+ }
+ else{
+  #Give taxonomic correspondence
+  res_intersections <- res_intersections %>% dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                                                           node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
+  #Build network
+  net <- network::network(res_intersections, matrix.type="edgelist")
+  network::set.edge.attribute(net, "weights", res_intersections$mean_coef)
+  #Identify species of interest in a different color
+  palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(
+   module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+   annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
+ }
+ #Plot network
+ if (!is.null(seed)){set.seed(seed)}
+ GGally::ggnet2(net, edge.size=20*abs(res_intersections$mean_coef), 
+                edge.color=ifelse(res_intersections$mean_coef>=0,"green4","red3"), edge.alpha=0.5, 
+                edge.label=res_intersections$intersections, edge.label.color="white", 
+                edge.label.fill="black", edge.label.size=edge_label_size,
+                node.color=palette, size=node_size, label=TRUE,
+                legend.position="none", max_size=label_size, mode="kamadakawai", layout.exp=0.2)
+ 
 }

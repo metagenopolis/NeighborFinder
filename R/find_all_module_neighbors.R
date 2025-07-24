@@ -16,10 +16,10 @@
 #' data(metadata)
 #' #Simple example
 #' x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species")[[1]]
-#' neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024)
+#' neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025)
 #' # Example with covariate
 #' x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species")[[1]]
-#' neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+#' neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 
 find_all_module_neighbors <- function(df, test_module, seed=NULL, ...) {
   purrr::map(test_module, function(x) find_module_neighbors(df, x, seed, ...)) %>% dplyr::bind_rows()

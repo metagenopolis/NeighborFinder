@@ -17,7 +17,7 @@
 #' @export
 #' @examples
 #' data(data)
-#' res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+#' res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
 
 apply_NF_simple<-function(data_with_annotation, object_of_interest, col_module_id, annotation_level, prev_level=0.30, filtering_top=20, seed=NULL, ...){
   if (is.null(seed)) {stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")} 

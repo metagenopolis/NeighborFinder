@@ -16,10 +16,10 @@
 #' data(metadata)
 #' #Simple example
 #' x <- norm_data(data$CRC_JPN, 0.30)[[1]]
-#' neighbors_JPN<-find_module_neighbors(df=x, module="msp_0030", seed=20232024)
+#' neighbors_JPN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025)
 #' #Example with covariate
 #' x <- norm_data(data$CRC_CHN, 0.30)[[1]]
-#' neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+#' neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 
 find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df = NULL, sample_col = NULL) {
   if (is.null(seed)) {

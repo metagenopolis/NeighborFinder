@@ -44,5 +44,5 @@ Apply NeighborFinder simplest version on raw data
 }
 \examples{
 data(data)
-res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
 }

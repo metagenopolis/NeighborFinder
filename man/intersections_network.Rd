@@ -14,6 +14,7 @@ intersections_network(
   annotation_option = FALSE,
   node_size = 12,
   label_size = 4,
+  edge_label_size = 2,
   object_color = "cadetblue2",
   seed = NULL
 )
@@ -55,5 +56,7 @@ res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia 
 res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 
-# intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=3)
+if (requireNamespace("network", quietly=TRUE) && requireNamespace("sna", quietly=TRUE) && requireNamespace("scales", quietly=TRUE)){
+intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=7, edge_label_size=4, node_size=15, annotation_option=TRUE, seed=3)
+ }
 }

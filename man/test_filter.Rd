@@ -20,18 +20,23 @@ Dataframe. Returns the precision and recall rates before and after the modificat
 Render a table gathering precision and recall rates before and after filtering on coefficient values
 }
 \examples{
-data(data)
-data(taxo)
-data(graphs)
-#Generate dataframe with true neighbors
-df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella", annotation_level="species"), prev_list=c(0.20,0.30))
-#Generate dataframe with detected neighbors
-normed_JPN<-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
-df_detected<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=identify_module("Klebsiella",taxo,"msp_id", annotation_level="species"), seed=20232024)
+#Dataframe with true neighbors
+list_true<-list(tibble::tibble(node1=c("msp_1","msp_1","msp_2","msp_3"), node2=c("msp_55","msp_20","msp_3","msp_18"),
+                             prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
+              tibble::tibble(node1=c("msp_2","msp_3"), node2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60))) \%>\% rlang::set_names(c("0.20","0.30"))
+
+#Dataframes with detected neighbors
+list_detected<-list(tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), node1=c("msp_2","msp_2","msp_3","msp_3"),
+                            node2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005), 
+                            filtering_top=c(100,100,100,100)),
+                  tibble::tibble()) \%>\% rlang::set_names(c("0.20","0.30"))
+list_detected2<-list(tibble::tibble(prev_level=c("0.20","0.20"), node1=c("msp_2","msp_3"),
+                            node2=c("msp_3","msp_18"), coef=c(0.160,0.005), 
+                            filtering_top=c(100,100)),
+                  tibble::tibble()) \%>\% rlang::set_names(c("0.20","0.30"))
 #Use final_step() to gather both
-neighbors<-final_step(df_true, df_detected)
-
-neighbors_modif<-final_step(df_true, res_by_filtering(df_detected, filtering_list=c(10,50)))
-
-scores<-test_filter(neighbors, neighbors_modif, prevs=names(df_true))
+neighbors<-final_step(list_true, list_detected, robustness_step=FALSE) 
+neighbors2<-final_step(list_true, list_detected2, robustness_step=FALSE) \%>\% dplyr::mutate(filtering_top=10)
+#Calculate scores
+scores<-test_filter(neighbors, neighbors2)
 }

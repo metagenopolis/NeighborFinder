@@ -7,7 +7,6 @@ editor_options:
 
 ```{r development, include=FALSE}
 library(testthat)
-
 library(glmnet)
 # remotes::install_gitlab(repo = "metagenopolis/OneNet", host = "forgemia.inra.fr")
 library(Matrix)
@@ -17,7 +16,6 @@ library(knitr)
 library(igraph)
 library(GGally)
 library(network)
-library(sna)
 ```
 
 ```{r description, eval=TRUE}
@@ -330,7 +328,6 @@ simulate_from_ecdf <- function (real_data, Sigma, n, seed=10010, verbatim=FALSE)
 
 new_synth_data<-function(real_data, graph_type="cluster", must_connect=TRUE, graph=NULL, n=300,
                          seed=10010, r=50, dens=4, k=3, verbatim=TRUE, signed=FALSE){
- 
  p=ncol(real_data)
  species <- colnames(real_data)
  
@@ -796,10 +793,10 @@ data(data)
 data(metadata)
 #Simple example
 x <- norm_data(data$CRC_JPN, 0.30)[[1]]
-neighbors_JPN<-find_module_neighbors(df=x, module="msp_0030", seed=20232024)
+neighbors_JPN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025)
 #Example with covariate
 x <- norm_data(data$CRC_CHN, 0.30)[[1]]
-neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
 # Apply cv.glmnet() for a list of module IDs
@@ -827,10 +824,10 @@ data(data)
 data(metadata)
 #Simple example
 x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species")[[1]]
-neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024)
+neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025)
 # Example with covariate
 x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species")[[1]]
-neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
 # Apply cv.glmnet() for a list of module IDs and for each prevalence level
@@ -860,52 +857,11 @@ data(data)
 data(metadata)
 #Simple example
 normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
-neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20232024)
+neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20242025)
 #Example with covariate
 normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
-neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20232024, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
-
-# Give results from cvglm_to_coeffs_by_object() for each filtering top percentage
-
-```{r fun-res_by_filtering}
-#' Give results from cvglm_to_coeffs_by_object() for each filtering top percentage
-#' 
-#' @param res_glm Dataframe. The one resulting from cvglm_to_coeffs_by_object()
-#' @param filtering_list List of numeric. The filtering top percentages to be studied. Required format is: 10 for the top 10% 
-#' 
-#' @return List of dataframes. Each element of the list corresponds to a dataframe of detected edges by filtering top percentage
-#' @export
-
-res_by_filtering<-function(res_glm, filtering_list){
- 
- filtering_glm<-function(filtering_top){
-  res_glm %>% dplyr::group_by(prev_level) %>% 
-   dplyr::filter(abs(coef) > quantile(abs(coef),1-filtering_top/100)) %>% 
-   dplyr::ungroup()
- }
- 
- purrr::map(filtering_list, filtering_glm) %>% rlang::set_names(filtering_list)
-}
-```
-
-```{r ex-res_by_filtering}
-data(data)
-#Simple example
-normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
-neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20232024)
-filtered_neighbors_JPN<-res_by_filtering(neighbors_JPN, filtering_list=c(10,15,20))
-```
-
-```{r test-res_by_filtering}
-test_that("norm_data works", {
- df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), msp1=c("msp_2","msp_2","msp_3","msp_3"), msp2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
- expected_top20<-structure(list(prev_level = "0.30", msp1 = "msp_3", msp2 = "msp_18", 
-                                coef = 0.16), row.names = c(NA, -1L), class = "data.frame")
-  expect_equal(res_by_filtering(df_detected, filtering_list=c(20))[[1]] %>% as.data.frame() %>% dput(), expected_top20)
-})
-```
-
 
 # Gather lists of neighbors of true ones from the graph and detected ones from cv.glmnet()
 
@@ -914,38 +870,72 @@ test_that("norm_data works", {
 #' 
 #' @param df_truth Dataframe. The one resulting from truth_by_prevalence()
 #' @param df_glm Dataframe. The one resulting from cvglm_to_coeffs_by_object()
+#' @param robustness_step Boolean. When TRUE, filtering_top will be different from 100%, when FALSE the reults from the naïve method are looked at
 #' 
 #' @return Dataframe. Returns for each level of prevalence and module ID, the list of true and/or detected neighbors and the corresponding list of coefficients 
 #' @export
 
-final_step<-function(df_truth, df_glm){
+final_step<-function(df_truth, df_glm, robustness_step=NULL){
  truth <- df_truth %>% dplyr::bind_rows(.id = "prev_level") %>% 
+   dplyr::mutate(prev_level=as.numeric(prev_level)) %>% 
   dplyr::summarize(node2_true = list(node2), .by = c(prev_level, node1))
- if (class(df_glm)[[1]]!="list"){inference <- df_glm %>% 
-  dplyr::summarize(node2_detected = list(node2), 
-                   node2_coef     = list(coef), 
-                   .by = c(prev_level, node1))
+ 
+ if (robustness_step!=TRUE){
+  inference <- df_glm %>% dplyr::bind_rows(.id = "prev_level") %>% dplyr::filter(filtering_top==100) %>% 
+   dplyr::mutate(prev_level=as.numeric(prev_level)) %>% 
+   dplyr::summarize(node2_detected = list(node2), 
+                    node2_coef     = list(coef), 
+                    .by = c(prev_level, node1))
+  
+  result<-dplyr::full_join(truth, inference, by = c("prev_level", "node1")) %>% 
+   lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
+   tibble::as_tibble()
  }
- else {inference <- df_glm %>% dplyr::bind_rows(.id = "filtering_top") %>% 
-  dplyr::summarize(node2_detected = list(node2), 
-                   node2_coef     = list(coef), 
-                   .by = c(prev_level, filtering_top, node1))
+ 
+ else if (robustness_step==TRUE){
+  inference <- df_glm %>% dplyr::bind_rows(.id = "prev_level") %>% dplyr::filter(., filtering_top!=100) %>% 
+   dplyr::mutate(prev_level=as.numeric(prev_level))
+  res<-c()
+  for (prev in unique(inference$prev_level)){
+   for (top in unique(inference$filtering_top)){
+    df<-inference %>% dplyr::filter(prev_level==prev & filtering_top==top) %>% 
+     dplyr::mutate(pair=paste(node1,node2,sep="_")) %>% dplyr::group_by(pair) %>% unique() %>% 
+     dplyr::summarize(seeds_detect=dplyr::n(), med=median(coef)) %>% dplyr::filter(seeds_detect>=5) %>% dplyr::select(-seeds_detect) %>%
+     unique() %>% dplyr::ungroup() %>% tidyr::separate(pair, into = c("node1", "node2"), sep="_msp") %>%
+     dplyr::mutate(node2=paste0("msp",node2)) %>% dplyr::rename(coef=med) %>% 
+     dplyr::mutate(prev_level=prev, filtering_top=top)
+    if (!nrow(df)){
+     df<-inference %>% dplyr::filter(prev_level==prev, filtering_top==top) %>% 
+      dplyr::slice_head(n=1) %>% dplyr::mutate(node2=0, coef=0) %>% dplyr::select(-SEED)
+     }
+    res<-rbind(res,df)
+   }
+  } 
+  inference_robust<-res %>% dplyr::summarize(node2_detected = list(node2), 
+                                             node2_coef     = list(coef), 
+                                             .by = c(prev_level, filtering_top, node1))
+  
+  result<-dplyr::full_join(truth, inference_robust, by = c("prev_level", "node1")) %>% 
+   lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
+   tibble::as_tibble()
  }
- dplyr::full_join(truth, inference, by = c("prev_level", "node1")) %>% 
-  lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>% do.call(cbind, .) %>% 
-  tibble::as_tibble()
+ result
 }
 ```
 
 ```{r ex-final_step}
-#Generate dataframe with true neighbors
-df_true<-list(tibble::tibble(node1=c("msp_1","msp_1","msp_2","msp_3"), node2=c("msp_55","msp_20","msp_3","msp_18"), prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
-          tibble::tibble(node1=c("msp_2","msp_3"), node2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60)))
-names(df_true)<-c("0.20","0.30")
-#Generate dataframe with detected neighbors
-df_detected<-tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), node1=c("msp_2","msp_2","msp_3","msp_3"), node2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005))
+#Dataframe with true neighbors
+df_true<-list(tibble::tibble(node1=c("msp_1","msp_1","msp_2","msp_3"), node2=c("msp_55","msp_20","msp_3","msp_18"),
+                             prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
+              tibble::tibble(node1=c("msp_2","msp_3"), node2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60))) %>% rlang::set_names(c("0.20","0.30"))
+
+#Dataframe with detected neighbors
+df_detected<-list(tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), node1=c("msp_2","msp_2","msp_3","msp_3"),
+                            node2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005), 
+                            filtering_top=c(100,100,100,100)),
+                  tibble::tibble()) %>% rlang::set_names(c("0.20","0.30"))
 #Use final_step() to gather both
-neighbors<-final_step(df_true, df_detected)
+neighbors<-final_step(df_true, df_detected, robustness_step=FALSE)
 ```
 
 # Compute precision rate
@@ -1020,7 +1010,7 @@ test_that("compute_recall works", {c(
 #' @return Dataframe. Returns the precision and recall rates before and after the modification
 #' @export
 
-test_filter<-function(df_before, df_after, prevs = NULL){
+test_filter<-function(df_before, df_after, prevs=NULL){
   scores_before <- df_before %>%  dplyr::mutate(
     precision_before = purrr::pmap_dbl(list(node2_true, node2_detected), compute_precision),
     recall_before = purrr::pmap_dbl(list(node2_true, node2_detected), compute_recall))
@@ -1030,32 +1020,38 @@ test_filter<-function(df_before, df_after, prevs = NULL){
   
   if(!nrow(scores_before) | !nrow(scores_after)){ return(tibble::tibble()) }
   else{
-  score_table <-  dplyr::full_join(scores_before, scores_after, by=c("prev_level","node1")) %>% 
+  score_table <- dplyr::full_join(scores_before, scores_after, by=c("prev_level","node1")) %>% 
      dplyr::select(prev_level, filtering_top, precision_before, recall_before, precision_after, recall_after) %>% 
      dplyr::mutate_all(~ replace(., is.na(.), 0))
   
-  res <- score_table %>%  dplyr::summarize(across(precision_before:recall_after, mean), .by = c(prev_level,filtering_top)) %>% as.data.frame()
+  res <- score_table %>%  #dplyr::summarize(across(precision_before:recall_after, mean), .by = c(prev_level,filtering_top)) %>%
+   as.data.frame()
   if (is.null(prevs)) {return(res)}
-  else {return(res %>%  dplyr::filter(prev_level %in% prevs))}
+  else {return(res %>% dplyr::filter(prev_level %in% prevs))}
   }
 }
 ```
 
 ```{r ex-test_filter}
-data(data)
-data(taxo)
-data(graphs)
-#Generate dataframe with true neighbors
-df_true<-truth_by_prevalence(edge_table = prev_for_selected_nodes(data$CRC_JPN, graphs$CRC_JPN, "msp_id", "Klebsiella", annotation_level="species"), prev_list=c(0.20,0.30))
-#Generate dataframe with detected neighbors
-normed_JPN<-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
-df_detected<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=identify_module("Klebsiella",taxo,"msp_id", annotation_level="species"), seed=20232024)
+#Dataframe with true neighbors
+list_true<-list(tibble::tibble(node1=c("msp_1","msp_1","msp_2","msp_3"), node2=c("msp_55","msp_20","msp_3","msp_18"),
+                             prev1=c(0.28,0.28,0.96,0.75), prev2=c(0.76,0.25,0.75,0.60)),
+              tibble::tibble(node1=c("msp_2","msp_3"), node2=c("msp_3","msp_18"), prev1=c(0.96,0.75), prev2=c(0.75,0.60))) %>% rlang::set_names(c("0.20","0.30"))
+
+#Dataframes with detected neighbors
+list_detected<-list(tibble::tibble(prev_level=c("0.20","0.30","0.30","0.30"), node1=c("msp_2","msp_2","msp_3","msp_3"),
+                            node2=c("msp_3","msp_3","msp_18","msp_8"), coef=c(0.406,-0.025,0.160,0.005), 
+                            filtering_top=c(100,100,100,100)),
+                  tibble::tibble()) %>% rlang::set_names(c("0.20","0.30"))
+list_detected2<-list(tibble::tibble(prev_level=c("0.20","0.20"), node1=c("msp_2","msp_3"),
+                            node2=c("msp_3","msp_18"), coef=c(0.160,0.005), 
+                            filtering_top=c(100,100)),
+                  tibble::tibble()) %>% rlang::set_names(c("0.20","0.30"))
 #Use final_step() to gather both
-neighbors<-final_step(df_true, df_detected)
-
-neighbors_modif<-final_step(df_true, res_by_filtering(df_detected, filtering_list=c(10,50)))
-
-scores<-test_filter(neighbors, neighbors_modif, prevs=names(df_true))
+neighbors<-final_step(list_true, list_detected, robustness_step=FALSE) 
+neighbors2<-final_step(list_true, list_detected2, robustness_step=FALSE) %>% dplyr::mutate(filtering_top=10)
+#Calculate scores
+scores<-test_filter(neighbors, neighbors2)
 ```
 
 # Render a table to give an indication of the values to choose for the prevalence level and the top filtering percentage
@@ -1071,12 +1067,11 @@ scores<-test_filter(neighbors, neighbors_modif, prevs=names(df_true))
 #' @param graph_file Dataframe. The object generated by graph_step() function
 #' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
-#' @param seed Numeric. The seed number, ensuring reproducibility
 #'  
 #' @return Dataframe. Returns F1 rates before and after using NeighborFinder()
 #' @export
 
-choose_params_values <- function(data_with_annotation, object_of_interest, list_sims, prev_list=NULL, filtering_list=c(20), graph_file=NULL, col_module_id, annotation_level, seed=NULL){
+choose_params_values <- function(data_with_annotation, object_of_interest, sample_size, prev_list=c(0.2,0.3,0.4), filtering_list=c(10,20,30), graph_file=NULL, col_module_id, annotation_level){
  
  #Loading graph
  if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
@@ -1086,51 +1081,64 @@ choose_params_values <- function(data_with_annotation, object_of_interest, list_
  true_edges <- prev_for_selected_nodes(data_with_annotation, graph_file, col_module_id, annotation_level, object_of_interest)
  if(!nrow(true_edges)){return(tibble::tibble())}
  
- prevs<-as.numeric(names(list_sims))
- list_truth <- truth_by_prevalence(true_edges, prevs)
+ list_truth <- truth_by_prevalence(true_edges, prev_list)
  
- #Applying  glmnet
- df_glm<-cvglm_to_coeffs_by_object(list_sims, test_module=identify_module(object_of_interest=object_of_interest, annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level), seed=seed)
- if(!nrow(df_glm)){return(tibble::tibble())}
+ #Applying  cv.glmnet on 10 seeds
+ set.seed(seed=123)
+ seeds10<-sample(1:1000000,10)
+ res_glm<-c()
+ for (seed in seeds10){
+  sims<-simulate_by_prevalence(data_with_annotation, prev_list=prev_list, graph_file=graph_file, col_module_id=col_module_id,
+                               annotation_level="species", seed=seed, sample_size=sample_size) 
+  df_glm<-cvglm_to_coeffs_by_object(sims, 
+                                    test_module=identify_module(object_of_interest=object_of_interest,
+                                                                annotation_table=data_with_annotation, 
+                                                                col_module_id=col_module_id, annotation_level=annotation_level),
+                                    seed=seed) %>% dplyr::mutate(SEED=seed)
+  if(!nrow(df_glm)){return(tibble::tibble())}
+  else{
+   filtering_list<-c(filtering_list,100)
+   res<-purrr::map_dfr(filtering_list,  ~ df_glm %>% dplyr::filter(abs(coef)>quantile(abs(coef), 1-.x/100)) %>% dplyr::mutate(filtering_top=.x))
+  }
+  if(!nrow(res)){res<-tibble::tibble()}
+  res_glm<-rbind(res_glm, res)
+ }
+ list_glm<-split(res_glm, res_glm$prev_level)
  
  #Filtering results & rendering table
  cat("Calculating scores...\n")
- before<-final_step(list_truth, df_glm)
- after<-final_step(list_truth, res_by_filtering(df_glm,filtering_list))
+ before<-final_step(list_truth, list_glm, robustness_step=FALSE) #naïve method with scores calculated on 10 seeds, with filtering_top=100%
+ after<-final_step(list_truth, list_glm, robustness_step=TRUE) #full method with a value of filtering_top + the robustness part (selection of neighbors if they were found at least 5 out of 10 times)
  
- if (any(!prev_list %in% prevs)) {stop("The prevalence levels selected are not found in the simulations file. Please try another set of prevalences")}
- else {
-  harm_mean<-function(P,R){
-   hm<-2*(P*R)/(P+R)
-   hm
-  }
-  res<-test_filter(before, after, prev_list) %>% 
-   dplyr::mutate(F1_before=harm_mean(precision_before, recall_before)) %>% 
-   dplyr::mutate(F1_after=harm_mean(precision_after, recall_after)) %>% 
-   dplyr::select(-precision_before,-recall_before,-precision_after,-recall_after)
-  res$F1_before[is.na(res$F1_before)] <- 0
-  res$F1_after[is.na(res$F1_after)] <- 0
-  
-  if (!nrow(res)){return(tibble::tibble())}
-  else{res %>%  dplyr::mutate(prev_level=as.numeric(prev_level))}
+ harm_mean<-function(P,R){
+  hm<-2*(P*R)/(P+R)
+  hm
  }
+ res<-test_filter(before, after, prev_list) %>% 
+  dplyr::mutate(F1_before=harm_mean(precision_before, recall_before) %>% signif(.,2)) %>% 
+  dplyr::mutate(F1_after=harm_mean(precision_after, recall_after) %>% signif(.,2)) %>% 
+  dplyr::select(-precision_before,-recall_before,-precision_after,-recall_after)
+ res$F1_before[is.na(res$F1_before)] <- 0
+ res$F1_after[is.na(res$F1_after)] <- 0
+ 
+ if (!nrow(res)){return(tibble::tibble())}
+ else{res %>% dplyr::mutate(prev_level=as.numeric(prev_level))}
 }
 ```
 
 ```{r ex-choose_params_values}
 data(data)
 data(graphs)
-simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed=20232024)
-choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(10,20), graph_file = graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed = 20232024)
+choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
 ```
+
 
 ```{r test-choose_params_values}
 test_that("choose_params_values works", {
-  data(data)
-  data(graphs)
-  simulations <- simulate_by_prevalence(data$CRC_JPN, prev_list=c(0.20,0.30), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed=20232024)
-  scores<-choose_params_values(data$CRC_JPN, "Klebsiella", simulations, filtering_list=c(15,20), graph_file = graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species", seed = 20232024)
-  expect_equal(scores$F1_after %>% round(digits=2), c(1, 0.80, 0.67, 0.67))
+ data(data)
+data(graphs)
+scores<-choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
+  expect_equal(scores$F1_after,c(0.00,0.67,0.67,1.00))
 })
 ```
 
@@ -1169,14 +1177,14 @@ apply_NF_simple<-function(data_with_annotation, object_of_interest, col_module_i
 
 ```{r ex-apply_NF_simple}
 data(data)
-res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
+res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
 ```
 
 ```{r test-apply_NF_simple}
 test_that("apply_NF_simple works", {
   data(data)
-  res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20232024)
-  expect_equal(res_CRC_JPN$node2, c("msp_0103", "msp_0208", "msp_0030", "msp_2448"))
+  res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
+  expect_equal(res_CRC_JPN$node2[1:4], c("msp_0103", "msp_0109", "msp_0148c", "msp_0208"))
 })
 ```
 
@@ -1202,7 +1210,7 @@ apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_mod
  
  # Performance depends on the number of samples in the dataset, please choose the good comination of prev_level and filtering_top
  # The function runs for 10 seed and filters results if found in more than half the seeds to return robust results
- set.seed(seed=1)
+ set.seed(seed=123)
  seeds10<-sample(1:1000000,10)
  res_repet_seeds<-data.frame()
  
@@ -1256,35 +1264,34 @@ test_that("apply_NeighborFinder works", {
 visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
   if (!nrow(res_NeighborFinder)) {return(message("No neighbors were found."))}
   if (!annotation_option){
-    #Give more visual weight to edges
-    res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10)
-    #Build network
-    net <- network::network(res, matrix.type = "edgelist")
+   #Build network
+    res <- res_NeighborFinder
+    net <- network::network(res, matrix.type="edgelist")
     network::set.edge.attribute(net, "weights", res$coef)
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
-    GGally::ggnet2(net, edge.size = "weights", 
-           color=palette, edge.color="lightsteelblue4", size=node_size,
-           label=TRUE, legend.position = "none", max_size=label_size, layout.exp = 0.1)
+    GGally::ggnet2(net, edge.size=20*abs(res$coef), edge.color=ifelse(res$coef>=0,"green4","red3"), edge.alpha=0.5,
+           node.color=palette, size=node_size, label=TRUE, 
+           legend.position="none", max_size=label_size, mode="kamadakawai", layout.exp=0.2)
   }
   else{
     #Give taxonomic correspondence
-    res <- res_NeighborFinder %>%  dplyr::mutate(coef=abs(coef)*10) %>% 
+    res <- res_NeighborFinder %>%  
        dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
              node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
     #Build network
-    net <- network::network(res, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
+    net <- network::network(res, matrix.type = "edgelist")
     network::set.edge.attribute(net, "weights", res$coef)
     #Identify species of interest in a different color
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
                                                                   annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
-    GGally::ggnet2(net, edge.size = "weights", 
-           color=palette, edge.color="lightsteelblue4", size=node_size,
-           label=TRUE, legend.position = "none", max_size=label_size, layout.exp = 0.1)
+    GGally::ggnet2(net, edge.size=20*abs(res$coef), edge.color=ifelse(res$coef>=0,"green4","red3"), edge.alpha=0.5, 
+           node.color=palette, size=node_size, label=TRUE,
+           legend.position="none", max_size=label_size, mode="kamadakawai", layout.exp=0.2)
   }
 }
 ```
@@ -1294,11 +1301,13 @@ data(taxo)
 data(data)
 res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
 
-# visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5)
+if (requireNamespace("network", quietly=TRUE) && requireNamespace("sna", quietly=TRUE) && requireNamespace("scales", quietly=TRUE)){
+visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5)
 # #With species names instead of msp names
-# visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
+visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
 # #With esthetic changes
-# visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
+visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
+}
 ```
 
 # Display the intersection network from 2 or more datasets
@@ -1321,49 +1330,46 @@ res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia 
 #' @return Network. Visualization of NeighborFinder results from several datasets
 #' @export
 
-intersections_network<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
-  #Gathering all results from datasets
-  for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=l)}
-  inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
-     dplyr::summarize(datasets=list(dataset), .by=c(node1,node2))
-  #Counting in how many cohorts each neighbor was found
-  res_intersections <- inter %>%  dplyr::rowwise() %>% 
-     dplyr::mutate(intersections = datasets %>% unlist() %>% length()) 
-  #Keeping only neighbors found in more than n cohort(s)
-  res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) %>%  dplyr::select(node1,node2,intersections)
-  if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
-  if (!annotation_option){
-    #Build network
-    net <- network::network(res_intersections, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
-    network::set.edge.attribute(net, "weights", res_intersections$intersections)
-    edges<-res_intersections$intersections
-    #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
-    #Plot network
-    if (!is.null(seed)){set.seed(seed)}
-    GGally::ggnet2(net, edge.size = "weights", 
-           color=palette, edge.color="lightsteelblue4", size=node_size,
-           edge.label=edges, edge.label.color = "white", edge.label.fill = "lightsteelblue4",
-           label=TRUE, legend.position = "none", max_size=label_size)
-  }
-  else{
-    #Give taxonomic correspondence
-    res_intersections <- res_intersections %>%  dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
-                                                      node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
-    #Build network
-    net <- network::network(res_intersections, matrix.type = "edgelist")#, ignore.eval = FALSE, names.eval = "weights")
-    network::set.edge.attribute(net, "weights", res_intersections$intersections)
-    edges<-res_intersections$intersections
-    #Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
-                                                                  annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
-    #Plot network
-    if (!is.null(seed)){set.seed(seed)}
-    GGally::ggnet2(net, edge.size = "weights", 
-           color=palette, edge.color="lightsteelblue4", size=node_size,
-           edge.label=edges, edge.label.color = "white", edge.label.fill = "lightsteelblue4",
-           label=TRUE, legend.position = "none", max_size=label_size, layout.exp = 0.1)
-  }
+intersections_network<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, edge_label_size=2, object_color="cadetblue2", seed=NULL){
+ #Gathering all results from datasets
+ for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=l)}
+ #Counting in how many cohorts each neighbor was found
+ inter <- dplyr::bind_rows(res_list) %>% tibble::tibble() %>%   
+  dplyr::mutate(pair=paste(node1,node2,sep="_")) %>% 
+  dplyr::group_by(pair) %>% dplyr::summarize(intersections=list(dataset) %>% unlist() %>% length(), mean_coef=mean(coef)) %>%
+  dplyr::ungroup() %>% tidyr::separate(pair, into=c("node1", "node2"), sep="_msp") %>% dplyr::mutate(node2=paste0("msp",node2))
+ 
+ #Keeping only neighbors found in more than n cohort(s)
+ res_intersections <- inter %>%  dplyr::filter(intersections >= threshold)
+ if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
+ if (!annotation_option){
+  #Build network
+  net <- network::network(res_intersections, matrix.type="edgelist")
+  network::set.edge.attribute(net, "weights", res_intersections$mean_coef)
+  #Identify species of interest in a different color
+  palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
+ }
+ else{
+  #Give taxonomic correspondence
+  res_intersections <- res_intersections %>% dplyr::mutate(node1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+                                                           node2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) 
+  #Build network
+  net <- network::network(res_intersections, matrix.type="edgelist")
+  network::set.edge.attribute(net, "weights", res_intersections$mean_coef)
+  #Identify species of interest in a different color
+  palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(
+   module=identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
+   annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
+ }
+ #Plot network
+ if (!is.null(seed)){set.seed(seed)}
+ GGally::ggnet2(net, edge.size=20*abs(res_intersections$mean_coef), 
+                edge.color=ifelse(res_intersections$mean_coef>=0,"green4","red3"), edge.alpha=0.5, 
+                edge.label=res_intersections$intersections, edge.label.color="white", 
+                edge.label.fill="black", edge.label.size=edge_label_size,
+                node.color=palette, size=node_size, label=TRUE,
+                legend.position="none", max_size=label_size, mode="kamadakawai", layout.exp=0.2)
+ 
 }
 ```
 
@@ -1375,7 +1381,9 @@ res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia 
 res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 
-# intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=3)
+if (requireNamespace("network", quietly=TRUE) && requireNamespace("sna", quietly=TRUE) && requireNamespace("scales", quietly=TRUE)){
+intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=7, edge_label_size=4, node_size=15, annotation_option=TRUE, seed=3)
+ }
 ```
 
 # Display the intersection table summarizing the results from 2 or more datasets
@@ -1396,18 +1404,19 @@ res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia 
 intersections_table<-function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest){
   #Gathering all results from datasets
   for (l in 1:length(res_list)){res_list[[l]] <- res_list[[l]] %>%  dplyr::mutate(dataset=paste("n_",l))}
-  inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  dplyr::select(-coef) %>% 
-     dplyr::summarize(datasets=list(dataset), .by=c(node1,node2))
   #Counting in how many cohorts each neighbor was found
-  res_intersections <- inter %>%  dplyr::rowwise() %>% 
-     dplyr::mutate(intersections = datasets %>% unlist() %>% length()) 
+ inter <-  dplyr::bind_rows(res_list) %>% tibble::tibble() %>%  
+  dplyr::mutate(pair=paste(node1,node2,sep="_")) %>% 
+  dplyr::group_by(pair) %>% dplyr::summarize(datasets=list(dataset), intersections=list(dataset) %>% unlist() %>% length(), mean_coef=mean(coef)) %>%
+  dplyr::ungroup() %>% tidyr::separate(pair, into=c("node1", "node2"), sep="_msp") %>% dplyr::mutate(node2=paste0("msp",node2))
+  
   #Keeping only neighbors found in more than n cohort(s)
-  res_intersections <- res_intersections %>%  dplyr::filter(intersections >= threshold) 
+  res_intersections <- inter %>%  dplyr::filter(intersections >= threshold) 
   if (nrow(res_intersections)==0){return(message("No intersection was found between the results provided, try to lower the threshold.\n"))}
   #Give taxonomic correspondence
   res_intersections %>%  dplyr::mutate(module1=module_to_node(module=node1, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), 
                                module2=module_to_node(module=node2, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level)) %>% 
-     dplyr::select(node1,module1,node2,module2,datasets,intersections) %>% as.data.frame()
+     dplyr::select(node1,module1,node2,module2,datasets,intersections,mean_coef) %>% as.data.frame()
 }
 ```
 
