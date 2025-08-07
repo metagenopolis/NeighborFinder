@@ -4,6 +4,7 @@
 # NeighborFinder
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 NeighborFinder uses the local approach to identify companion species of
@@ -20,6 +21,6 @@ gitlab](metagenopolis/NeighborFinder) with:
 
 ``` r
 remotes::install_gitlab(repo = "metagenopolis/NeighborFinder", 
-                        host = "forgemia.inra.fr",
+                        host = "forge.inrae.fr",
                         auth_token = "nFp2JVVouQzas-MyBwS2")
 ```
