@@ -29,6 +29,7 @@ NeighborFinder_flat.Rmd:
   - R/identify_module.R
   - R/intersections_network.R
   - R/intersections_table.R
+  - R/mclr.R
   - R/module_to_node.R
   - R/new_synth_data.R
   - R/norm_data.R

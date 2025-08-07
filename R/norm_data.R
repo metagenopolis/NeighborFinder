@@ -27,7 +27,7 @@ norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), anno
    #Creating count table
    df_counts <- get_count_table(abund.table = data_with_annotation[,-1], sample.id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
    #Transformed matrix with mclr
-   df_norm <- SPRING::mclr(df_counts$data)
+   df_norm <- mclr(df_counts$data)
    colnames(df_norm)<-colnames(df_counts$data) 
    
    df_norm <- df_norm %>% as.matrix()

@@ -42,7 +42,7 @@ simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=N
     # Simulation of count table
     df_sim <- new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), verbatim=FALSE, seed=seed)
     #Transformed matrix with mclr
-    df_norm <- SPRING::mclr(df_sim$counts)
+    df_norm <- mclr(df_sim$counts)
     colnames(df_norm)<-colnames(df_counts$data)
     df_norm %>% as.matrix()
   }

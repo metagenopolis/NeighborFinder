@@ -22,7 +22,6 @@ Imports:
     network,
     purrr,
     rlang,
-    SPRING,
     stats,
     stringr,
     tibble,
