@@ -8,7 +8,8 @@ norm_data(
   data_with_annotation,
   col_module_id,
   prev_list = c(0.3),
-  annotation_level
+  annotation_level,
+  data_type = "shotgun"
 )
 }
 \arguments{
@@ -16,7 +17,9 @@ norm_data(
 
 \item{col_module_id}{String. The name of the column with the module names in annotation_table}
 
-\item{prev_list}{List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20\% of prevalence}
+\item{prev_list}{Vector of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20\% of prevalence}
+
+\item{data_type}{String. Enables the treatment of 16S data with "16S", default value is "shotgun"}
 }
 \value{
 List of dataframes. Each element of the list corresponds to a normalized 'data_with_annotation', by level of prevalence

@@ -6,6 +6,7 @@
 #' @param col_module_id String. The name of the column with the module names in the annotation table
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param seed Numeric. Seed number for data generation (new_synth_data)
+#' @param data_type String. Enables the treatment of 16S data with "16S", default value is "shotgun"
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
@@ -19,8 +20,20 @@
 #'
 #' tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) %>% suppressWarnings()
 
-graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed){
+graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed, data_type="shotgun"){
+ if (data_type=="shotgun"){
  counts <- get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample.id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
+ }
+ else if (data_type=="16S"){
+   ## Compute prevalence of all modules at the studied level
+   prev_df <- tibble::tibble(id_module=data_with_annotation %>% dplyr::pull(paste(col_module_id)),
+                             prevalence=data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% 
+                              data.matrix() %>% `>`(0) %>% rowMeans())
+   prev_df_filtered <- prev_df %>% dplyr::filter(prevalence>0.15)
+   data_with_annotation_filtered <- data_with_annotation %>% dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+   counts <- data_with_annotation_filtered %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% t() 
+   colnames(counts) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
+ }
  G <- new_synth_data(counts, n=50, verbatim=FALSE, seed=seed)$G
  dimnames(G) <- list(colnames(counts), colnames(counts))
  G <- G %>% as.data.frame() %>% 

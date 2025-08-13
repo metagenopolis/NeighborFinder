@@ -12,7 +12,8 @@ simulate_by_prevalence(
   annotation_level,
   sample_size = 500,
   seed,
-  verbatim = FALSE
+  verbatim = FALSE,
+  data_type = "shotgun"
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ simulate_by_prevalence(
 \item{seed}{Numeric. The seed number, ensuring reproducibility}
 
 \item{verbatim}{Boolean. Controls verbosity}
+
+\item{data_type}{String. Enables the treatment of 16S data with "16S", default value is "shotgun"}
 }
 \value{
 List of dataframes. Each element of the list corresponds to a level of prevalence and is a simulated abundance table

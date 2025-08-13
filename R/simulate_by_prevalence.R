@@ -10,6 +10,7 @@
 #' @param sample_size Numeric. The size to be considerated, the value of 500 is recommended
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param verbatim Boolean. Controls verbosity
+#' @param data_type String. Enables the treatment of 16S data with "16S", default value is "shotgun"
 #'
 #' @return List of dataframes. Each element of the list corresponds to a level of prevalence and is a simulated abundance table
 #' @export
@@ -25,7 +26,7 @@
 #'
 #' tiny_sims<-simulate_by_prevalence(tiny_data, prev_list=c(0.20,0.30), graph_file=tiny_graph, col_module_id="msp_name", annotation_level="species", sample_size=500, seed=20242025)
 
-simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed, verbatim=FALSE) {
+simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed, verbatim=FALSE, data_type="shotgun") {
   set.seed(seed)
   if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
   else {G <- graph_file}  
@@ -37,13 +38,23 @@ simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=N
   
   sim_one_prev <- function(prev) {
     if (verbatim) {cat(glue::glue("p{100*prev}"), sep = "\n")}
+   if (data_type=="shotgun"){
     # Generating count table
-    df_counts <- get_count_table(abund.table=abund_table, sample.id=sample_id, msp=modules, prev.min=prev, verbatim=FALSE)
+    df_counts <- get_count_table(abund.table=abund_table, sample.id=sample_id, msp=modules, prev.min=prev, verbatim=FALSE)$data
+   }
+   else if (data_type=="16S"){
+   prev_df <- tibble::tibble(id_module=modules,
+                             prevalence=abund_table %>% data.matrix() %>% `>`(0) %>% rowMeans())
+   prev_df_filtered <- prev_df %>% dplyr::filter(prevalence>0.15)
+   data_with_annotation_filtered <- data_with_annotation %>% dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+   df_counts <- data_with_annotation_filtered %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% t() 
+   colnames(df_counts) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
+   }
     # Simulation of count table
-    df_sim <- new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), verbatim=FALSE, seed=seed)
+    df_sim <- new_synth_data(df_counts, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), verbatim=FALSE, seed=seed)
     #Transformed matrix with mclr
     df_norm <- mclr(df_sim$counts)
-    colnames(df_norm)<-colnames(df_counts$data)
+    colnames(df_norm)<-colnames(df_counts)
     df_norm %>% as.matrix()
   }
   

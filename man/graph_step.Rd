@@ -4,7 +4,13 @@
 \alias{graph_step}
 \title{Generate a graph}
 \usage{
-graph_step(data_with_annotation, col_module_id, annotation_level, seed)
+graph_step(
+  data_with_annotation,
+  col_module_id,
+  annotation_level,
+  seed,
+  data_type = "shotgun"
+)
 }
 \arguments{
 \item{data_with_annotation}{Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample}
@@ -14,6 +20,8 @@ graph_step(data_with_annotation, col_module_id, annotation_level, seed)
 \item{annotation_level}{String. The name of the column with the level to be studied. Examples: species, genus, level_1}
 
 \item{seed}{Numeric. Seed number for data generation (new_synth_data)}
+
+\item{data_type}{String. Enables the treatment of 16S data with "16S", default value is "shotgun"}
 }
 \value{
 Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.

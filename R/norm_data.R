@@ -4,7 +4,8 @@
 #' 
 #' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param col_module_id String. The name of the column with the module names in annotation_table
-#' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
+#' @param prev_list Vector of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
+#' @param data_type String. Enables the treatment of 16S data with "16S", default value is "shotgun"
 #' 
 #' @return List of dataframes. Each element of the list corresponds to a normalized 'data_with_annotation', by level of prevalence
 #' @export
@@ -18,20 +19,39 @@
 #'
 #' tiny_normed <-norm_data(tiny_data, col_module_id="msp_name", annotation_level="species", prev_list=c(0.20, 0.30))
 
-norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level){
-  list_norm<-list()
-  res<-tibble::tibble()
-  #Normalizing for each level of prevalence if prev_list is a list
-  # cat("Normalizing data...\n")
-  for (prev in prev_list){
+norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level, data_type="shotgun"){
+ list_norm <- list()
+ res <- tibble::tibble()
+ #Normalizing for each level of prevalence if prev_list is a vector
+ # cat("Normalizing data...\n")
+ for (prev in prev_list){
+  
+  if (data_type=="shotgun"){
    #Creating count table
-   df_counts <- get_count_table(abund.table = data_with_annotation[,-1], sample.id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
+   df_counts <- get_count_table(abund.table=data_with_annotation[,-1], sample.id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
    #Transformed matrix with mclr
    df_norm <- mclr(df_counts$data)
-   colnames(df_norm)<-colnames(df_counts$data) 
-   
-   df_norm <- df_norm %>% as.matrix()
-   list_norm[[paste(prev)]] <- df_norm
+   colnames(df_norm) <- colnames(df_counts$data) 
   }
-  return(list_norm)
+  
+  # Alternative if the input data is recovered from 16S sequencing
+  else if (data_type=="16S"){
+   ## Compute prevalence of all modules at the studied level
+   prev_df <- tibble::tibble(id_module=data_with_annotation %>% dplyr::pull(paste(col_module_id)),
+                             prevalence=data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% 
+                              data.matrix() %>% `>`(0) %>% rowMeans())
+   prev_df_filtered <- prev_df %>% dplyr::filter(prevalence>prev)
+   data_with_annotation_filtered <- data_with_annotation %>% dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+   #Arranging data
+   df <- data_with_annotation_filtered %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% t() 
+   colnames(df) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
+   #Transformed matrix with mclr
+   df_norm <- mclr(df)
+   colnames(df_norm) <- colnames(df) 
+  }
+  
+  df_norm <- df_norm %>% as.matrix()
+  list_norm[[paste(prev)]] <- df_norm
+ }
+ return(list_norm)
 }

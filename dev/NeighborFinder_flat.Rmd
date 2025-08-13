@@ -440,12 +440,25 @@ sim_data<-new_synth_data(count_table$data, n=50, graph=as.matrix(tiny_graph %>% 
 #' @param col_module_id String. The name of the column with the module names in the annotation table
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param seed Numeric. Seed number for data generation (new_synth_data)
+#' @param data_type String. Enables the treatment of 16S data with "16S", default value is "shotgun"
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
 
-graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed){
+graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed, data_type="shotgun"){
+ if (data_type=="shotgun"){
  counts <- get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample.id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
+ }
+ else if (data_type=="16S"){
+   ## Compute prevalence of all modules at the studied level
+   prev_df <- tibble::tibble(id_module=data_with_annotation %>% dplyr::pull(paste(col_module_id)),
+                             prevalence=data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% 
+                              data.matrix() %>% `>`(0) %>% rowMeans())
+   prev_df_filtered <- prev_df %>% dplyr::filter(prevalence>0.15)
+   data_with_annotation_filtered <- data_with_annotation %>% dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+   counts <- data_with_annotation_filtered %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% t() 
+   colnames(counts) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
+ }
  G <- new_synth_data(counts, n=50, verbatim=FALSE, seed=seed)$G
  dimnames(G) <- list(colnames(counts), colnames(counts))
  G <- G %>% as.data.frame() %>% 
@@ -540,11 +553,12 @@ mclr <- function(dat, base=exp(1), tol=1e-16, eps=NULL, atleast=1){
 #' @param sample_size Numeric. The size to be considerated, the value of 500 is recommended
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' @param verbatim Boolean. Controls verbosity
+#' @param data_type String. Enables the treatment of 16S data with "16S", default value is "shotgun"
 #'
 #' @return List of dataframes. Each element of the list corresponds to a level of prevalence and is a simulated abundance table
 #' @export
 
-simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed, verbatim=FALSE) {
+simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=NULL, col_module_id, annotation_level, sample_size=500, seed, verbatim=FALSE, data_type="shotgun") {
   set.seed(seed)
   if (is.null(graph_file)) {stop("Please generate the graph beforehand with graph_step() function")}
   else {G <- graph_file}  
@@ -556,13 +570,23 @@ simulate_by_prevalence <- function(data_with_annotation, prev_list, graph_file=N
   
   sim_one_prev <- function(prev) {
     if (verbatim) {cat(glue::glue("p{100*prev}"), sep = "\n")}
+   if (data_type=="shotgun"){
     # Generating count table
-    df_counts <- get_count_table(abund.table=abund_table, sample.id=sample_id, msp=modules, prev.min=prev, verbatim=FALSE)
+    df_counts <- get_count_table(abund.table=abund_table, sample.id=sample_id, msp=modules, prev.min=prev, verbatim=FALSE)$data
+   }
+   else if (data_type=="16S"){
+   prev_df <- tibble::tibble(id_module=modules,
+                             prevalence=abund_table %>% data.matrix() %>% `>`(0) %>% rowMeans())
+   prev_df_filtered <- prev_df %>% dplyr::filter(prevalence>0.15)
+   data_with_annotation_filtered <- data_with_annotation %>% dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+   df_counts <- data_with_annotation_filtered %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% t() 
+   colnames(df_counts) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
+   }
     # Simulation of count table
-    df_sim <- new_synth_data(df_counts$data, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), verbatim=FALSE, seed=seed)
+    df_sim <- new_synth_data(df_counts, n=sample_size, graph=as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))), verbatim=FALSE, seed=seed)
     #Transformed matrix with mclr
     df_norm <- mclr(df_sim$counts)
-    colnames(df_norm)<-colnames(df_counts$data)
+    colnames(df_norm)<-colnames(df_counts)
     df_norm %>% as.matrix()
   }
   
@@ -731,27 +755,47 @@ test_that("truth_by_prevalence works", {
 #' 
 #' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param col_module_id String. The name of the column with the module names in annotation_table
-#' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
+#' @param prev_list Vector of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
+#' @param data_type String. Enables the treatment of 16S data with "16S", default value is "shotgun"
 #' 
 #' @return List of dataframes. Each element of the list corresponds to a normalized 'data_with_annotation', by level of prevalence
 #' @export
 
-norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level){
-  list_norm<-list()
-  res<-tibble::tibble()
-  #Normalizing for each level of prevalence if prev_list is a list
-  # cat("Normalizing data...\n")
-  for (prev in prev_list){
+norm_data<-function(data_with_annotation, col_module_id, prev_list=c(0.30), annotation_level, data_type="shotgun"){
+ list_norm <- list()
+ res <- tibble::tibble()
+ #Normalizing for each level of prevalence if prev_list is a vector
+ # cat("Normalizing data...\n")
+ for (prev in prev_list){
+  
+  if (data_type=="shotgun"){
    #Creating count table
-   df_counts <- get_count_table(abund.table = data_with_annotation[,-1], sample.id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
+   df_counts <- get_count_table(abund.table=data_with_annotation[,-1], sample.id=colnames(data_with_annotation), prev.min=prev, verbatim=FALSE)
    #Transformed matrix with mclr
    df_norm <- mclr(df_counts$data)
-   colnames(df_norm)<-colnames(df_counts$data) 
-   
-   df_norm <- df_norm %>% as.matrix()
-   list_norm[[paste(prev)]] <- df_norm
+   colnames(df_norm) <- colnames(df_counts$data) 
   }
-  return(list_norm)
+  
+  # Alternative if the input data is recovered from 16S sequencing
+  else if (data_type=="16S"){
+   ## Compute prevalence of all modules at the studied level
+   prev_df <- tibble::tibble(id_module=data_with_annotation %>% dplyr::pull(paste(col_module_id)),
+                             prevalence=data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% 
+                              data.matrix() %>% `>`(0) %>% rowMeans())
+   prev_df_filtered <- prev_df %>% dplyr::filter(prevalence>prev)
+   data_with_annotation_filtered <- data_with_annotation %>% dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+   #Arranging data
+   df <- data_with_annotation_filtered %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% t() 
+   colnames(df) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
+   #Transformed matrix with mclr
+   df_norm <- mclr(df)
+   colnames(df_norm) <- colnames(df) 
+  }
+  
+  df_norm <- df_norm %>% as.matrix()
+  list_norm[[paste(prev)]] <- df_norm
+ }
+ return(list_norm)
 }
 ```
 
