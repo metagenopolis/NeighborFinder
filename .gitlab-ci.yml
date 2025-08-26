@@ -51,32 +51,32 @@ building:
 # - Go to your project Settings > CI/CD
 # - Set the coverage parsing string to: Coverage: \d+\.\d+
 
-coverage:
-  stage: test
-  allow_failure: true
-  when: on_success
-  only:
-    - main
-    - master
-    - production
-  script:
-    # Install pak by security, although should be in cache
-    - Rscript -e 'if(!requireNamespace("pak", quietly = TRUE)) {install.packages("pak")}'
-    - Rscript -e 'pak::pak(pkg = ".", upgrade = TRUE)'
-    - Rscript -e 'pak::pkg_install(pkg = c("covr", "DT"), upgrade = TRUE)'
-    - Rscript -e 'covr::gitlab(quiet = FALSE)'
-  cache:
-    - key: cache-$CI_COMMIT_REF_SLUG
-      fallback_keys:
-        - cache-$CI_DEFAULT_BRANCH
-        - cache-default
-      paths:
-        - ${R_LIBS_USER}
-  coverage: '/Coverage: \d+\.\d+/'
-  artifacts:
-    paths:
-      - public
-    expire_in: 30 days
+# coverage:
+#   stage: test
+#   allow_failure: true
+#   when: on_success
+#   only:
+#     - main
+#     - master
+#     - production
+#   script:
+#     # Install pak by security, although should be in cache
+#     - Rscript -e 'if(!requireNamespace("pak", quietly = TRUE)) {install.packages("pak")}'
+#     - Rscript -e 'pak::pak(pkg = ".", upgrade = TRUE)'
+#     - Rscript -e 'pak::pkg_install(pkg = c("covr", "DT"), upgrade = TRUE)'
+#     - Rscript -e 'covr::gitlab(quiet = FALSE)'
+#   cache:
+#     - key: cache-$CI_COMMIT_REF_SLUG
+#       fallback_keys:
+#         - cache-$CI_DEFAULT_BRANCH
+#         - cache-default
+#       paths:
+#         - ${R_LIBS_USER}
+#   coverage: '/Coverage: \d+\.\d+/'
+#   artifacts:
+#     paths:
+#       - public
+#     expire_in: 30 days
 
 # To produce a code coverage report as a GitLab page see
 # https://about.gitlab.com/2016/11/03/publish-code-coverage-report-with-gitlab-pages/
