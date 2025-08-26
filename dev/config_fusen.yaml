@@ -1,18 +1,5 @@
-flat_teaching.Rmd:
-  path: dev/flat_teaching.Rmd
-  state: active
-  R: R/add_one.R
-  tests: tests/testthat/test-add_one.R
-  vignettes: vignettes/get-started.Rmd
-  inflate:
-    flat_file: dev/flat_teaching.Rmd
-    vignette_name: Get started
-    open_vignette: true
-    check: true
-    document: true
-    overwrite: ask
-NeighborFinder_flat.Rmd:
-  path: dev/NeighborFinder_flat.Rmd
+flat_NeighborFinder.Rmd:
+  path: dev/flat_NeighborFinder.Rmd
   state: active
   R:
   - R/apply_neighborfinder.R
@@ -61,7 +48,7 @@ NeighborFinder_flat.Rmd:
   - tests/testthat/test-intersections_table.R
   vignettes: []
   inflate:
-    flat_file: dev/NeighborFinder_flat.Rmd
+    flat_file: dev/flat_NeighborFinder.Rmd
     vignette_name: .na
     open_vignette: true
     check: false
@@ -69,3 +56,11 @@ NeighborFinder_flat.Rmd:
     overwrite: ask
     clean: ask
     codecov: false
+keep:
+  path: keep
+  state: active
+  R: R/res_by_filtering.R
+  tests: tests/testthat/test-res_by_filtering.R
+  vignettes:
+  - vignettes/NeighborFinder_technical_report.Rmd
+  - vignettes/NeighborFinder_vignette.Rmd

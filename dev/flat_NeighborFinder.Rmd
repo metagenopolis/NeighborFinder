@@ -1555,7 +1555,12 @@ Build your package from this very Rmd using `fusen::inflate()`
 
 ```{r development-inflate, eval=TRUE}
 # Execute in the console directly
-fusen::inflate(flat_file = "dev/NeighborFinder_flat.Rmd", vignette_name = NA)
+# fusen::inflate(
+#   flat_file = "dev/flat_NeighborFinder.Rmd", 
+#   vignette_name = NA, 
+#   check = FALSE
+# )
+fusen::inflate_all_no_check(stylers = function() {styler::style_pkg(); lintr::lint_package()})
 ```
 
 ```{r development-vignette}
