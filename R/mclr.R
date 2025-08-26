@@ -6,7 +6,7 @@
 #' @param base exp(1) for natural log
 #' @param tol tolerance for checking zeros
 # For eps and atleast, users do not have to specify any values. Default should be enough.
-#' @param eps epsilon in eq (2) of the paper "Yoon, Gaynanova, M\"{u}ller (2019), Frontiers in Genetics". positive shifts to all non-zero compositions. Refer to the paper for more details. eps = absolute value of minimum of log ratio counts plus c.
+#' @param eps epsilon in eq (2) of the paper "Yoon, Gaynanova, Müller (2019), Frontiers in Genetics". positive shifts to all non-zero compositions. Refer to the paper for more details. eps = absolute value of minimum of log ratio counts plus c.
 #' @param atleast default value is 1. Constant c which ensures all nonzero values to be strictly positive. default is 1.
 #'
 #' @return \code{mclr} returns a data matrix of the same dimension with input data matrix.

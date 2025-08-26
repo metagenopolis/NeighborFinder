@@ -10,10 +10,8 @@
 #' @param verbatim Boolean. Controls verbosity
 #'
 #' @return A list containing
-#' \itemize{
 #'  \item{data: }{the final count table (tibble)}
 #'  \item{prevalences: }{a tibble gathering the prevalence of each bacterial species}
-#'}
 #' @export
 #' @examples
 #' tiny_data<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),

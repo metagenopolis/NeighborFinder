@@ -28,10 +28,8 @@ get_count_table(
 }
 \value{
 A list containing
-\itemize{
 \item{data: }{the final count table (tibble)}
 \item{prevalences: }{a tibble gathering the prevalence of each bacterial species}
-}
 }
 \description{
 Conversion to count table function with prevalence filter (Extracted from OneNet package)

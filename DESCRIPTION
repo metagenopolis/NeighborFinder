@@ -10,9 +10,11 @@ Description: NeihborFinder uses the local approach to identify companion
     species based on the integration of results. A visualization via a
     network is proposed.
 License: MIT + file LICENSE
+Depends: 
+    R (>= 3.5.0)
 Imports: 
     dplyr,
-    GGally,
+    ggnet (>= 0.1.0),
     glmnet,
     glue,
     igraph,
@@ -32,6 +34,8 @@ Suggests:
     testthat
 VignetteBuilder: 
     knitr
+Remotes: 
+    briatte/ggnet
 Config/fusen/version: 0.7.1
 Encoding: UTF-8
 LazyData: true

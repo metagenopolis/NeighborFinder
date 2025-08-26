@@ -36,7 +36,7 @@ visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id,
     palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest=object_of_interest, annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
-    GGally::ggnet2(net, edge.size=20*abs(res$coef), edge.color=ifelse(res$coef>=0,"green4","red3"), edge.alpha=0.5,
+    ggnet::ggnet2(net, edge.size=20*abs(res$coef), edge.color=ifelse(res$coef>=0,"green4","red3"), edge.alpha=0.5,
            node.color=palette, size=node_size, label=TRUE, 
            legend.position="none", max_size=label_size, mode="kamadakawai", layout.exp=0.2)
   }
@@ -53,7 +53,7 @@ visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id,
                                                                   annotation_table=annotation_table, col_module_id=col_module_id, annotation_level=annotation_level), object_color, "grey85")
     #Plot network
     if (!is.null(seed)){set.seed(seed)}
-    GGally::ggnet2(net, edge.size=20*abs(res$coef), edge.color=ifelse(res$coef>=0,"green4","red3"), edge.alpha=0.5, 
+    ggnet::ggnet2(net, edge.size=20*abs(res$coef), edge.color=ifelse(res$coef>=0,"green4","red3"), edge.alpha=0.5, 
            node.color=palette, size=node_size, label=TRUE,
            legend.position="none", max_size=label_size, mode="kamadakawai", layout.exp=0.2)
   }
