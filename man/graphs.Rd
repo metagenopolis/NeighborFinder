@@ -5,16 +5,16 @@
 \alias{graphs}
 \title{graphs}
 \format{
-An object of class \code{list} of length 2.
+A list of dataframes corresponding to graphs based on synthetic data.
+\describe{
+\item{ CRC_JPN }{  graph corresponding to data with only Japanese patients diagnosed with colorectal cancer }
+\item{ CRC_JPN_CHN_EUR }{  graph corresponding to data gathering Japanese, Chinese and European patients diagnosed with colorectal cancer }
+}
 }
 \usage{
 graphs
 }
 \description{
-#' @format A list of dataframes corresponding to graphs based on synthetic data.
-\describe{
-\item{ CRC_JPN }{  graph corresponding to data with only Japanese patients diagnosed with colorectal cancer }
-\item{ CRC_JPN_CHN_EUR }{  graph corresponding to data gathering Japanese, Chinese and European patients diagnosed with colorectal cancer }
-}
+graphs
 }
 \keyword{datasets}
