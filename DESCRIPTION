@@ -22,6 +22,8 @@ Imports:
     network,
     purrr,
     rlang,
+    scales,
+    sna,
     stats,
     stringr,
     tibble,
