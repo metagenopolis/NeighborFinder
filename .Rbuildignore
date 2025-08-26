@@ -2,3 +2,8 @@
 ^LICENSE\.md$
 ^neighborfinder\.Rproj$
 ^\.Rproj\.user$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.gitlab-ci\.yml$
+^ci/lib$
