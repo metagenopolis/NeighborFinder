@@ -20,6 +20,8 @@ choose_params_values(
 
 \item{object_of_interest}{String. The name of the bacteria or species of interest or a key word in the functional module definition}
 
+\item{sample_size}{Numeric. Number of samples in each dataset.}
+
 \item{prev_list}{List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20\% of prevalence}
 
 \item{filtering_list}{List of numeric. The filtering top percentages to be studied. Required format is: 10 for the top 10\%}
@@ -29,8 +31,6 @@ choose_params_values(
 \item{col_module_id}{String. The name of the column with the module names in annotation_table}
 
 \item{annotation_level}{String. The name of the column with the level to be studied. Examples: species, genus, level_1}
-
-\item{list_sims}{List of dataframes. The result of simulate_by_prevalence()}
 }
 \value{
 Dataframe. Returns F1 rates before and after using NeighborFinder()

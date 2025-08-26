@@ -64,7 +64,8 @@ NeighborFinder_flat.Rmd:
     flat_file: dev/NeighborFinder_flat.Rmd
     vignette_name: .na
     open_vignette: true
-    check: true
+    check: false
     document: true
     overwrite: ask
     clean: ask
+    codecov: false

@@ -13,11 +13,7 @@ find_all_module_neighbors(df, test_module, seed = NULL, ...)
 
 \item{seed}{Numeric. The seed number, ensuring reproducibility}
 
-\item{covar}{String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession}
-
-\item{meta_df}{Dataframe. The dataframe giving metadata information}
-
-\item{sample_col}{String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'}
+\item{...}{Additional arguments passed on to \code{\link[=find_module_neighbors]{find_module_neighbors()}}}
 }
 \value{
 Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient

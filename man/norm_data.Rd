@@ -19,6 +19,8 @@ norm_data(
 
 \item{prev_list}{Vector of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20\% of prevalence}
 
+\item{annotation_level}{String. Annotation level to aggregate the taxa}
+
 \item{data_type}{String. Enables the treatment of 16S data with "16S", default value is "shotgun"}
 }
 \value{
