@@ -18,11 +18,7 @@ cvglm_to_coeffs_by_object(
 
 \item{seed}{Numeric. The seed number, ensuring reproducibility}
 
-\item{covar}{String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession}
-
-\item{meta_df}{Dataframe. The dataframe giving metadata information}
-
-\item{sample_col}{String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'}
+\item{...}{Additional arguments passed on to \code{\link[=find_all_module_neighbors]{find_all_module_neighbors()}}}
 }
 \value{
 Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient
@@ -33,10 +29,10 @@ Apply cv.glmnet() for a list of module IDs and for each prevalence level
 \examples{
 data(data)
 data(metadata)
-#Simple example
-normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
-neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20242025)
-#Example with covariate
-normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
-neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+# Simple example
+normed_JPN <- norm_data(data$CRC_JPN, col_module_id = "msp_id", annotation_level = "species", prev_list = c(0.20, 0.25, 0.30))
+neighbors_JPN <- cvglm_to_coeffs_by_object(list_dfs = normed_JPN, test_module = c("msp_0030", "msp_0345"), seed = 20242025)
+# Example with covariate
+normed_CHN <- norm_data(data$CRC_CHN, col_module_id = "msp_id", annotation_level = "species", prev_list = c(0.20, 0.25, 0.30))
+neighbors_CHN <- cvglm_to_coeffs_by_object(list_dfs = normed_CHN, test_module = c("msp_0030", "msp_0345"), seed = 20242025, covar = ~study_accession, meta_df = metadata$CRC_CHN, sample_col = "secondary_sample_accession")
 }

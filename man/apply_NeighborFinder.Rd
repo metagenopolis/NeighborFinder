@@ -27,11 +27,7 @@ apply_NeighborFinder(
 
 \item{filtering_top}{Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10\%}
 
-\item{covar}{String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession}
-
-\item{meta_df}{Dataframe. The dataframe giving metadata information}
-
-\item{sample_col}{String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'}
+\item{...}{Additional arguments passed on to \code{\link[=apply_NF_simple]{apply_NF_simple()}}}
 }
 \value{
 Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
@@ -41,5 +37,5 @@ Apply NeighborFinder on raw data
 }
 \examples{
 data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
+res_CRC_JPN <- apply_NeighborFinder(data$CRC_JPN, object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species")
 }

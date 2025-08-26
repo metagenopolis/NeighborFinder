@@ -26,7 +26,9 @@ fusen::fill_description(overwrite = TRUE,
     Title = "Find neighbor species of a bacteria of interest in the human gut microbiota",
     Description = "NeihborFinder uses the local approach to identify companion species of a bacteria of interest. From several abundance tables of metagenomic data, NeighborFinder suggests a shortlist of companion species based on the integration of results. A visualization via a network is proposed.",
     `Authors@R` = c(
-      person("Mathilde", "Sola", email = "mathilde.sola@inrae.fr", role = c("aut", "cre"), comment = c())
+      person("Mathilde", "Sola", email = "mathilde.sola@inrae.fr", role = c("aut", "cre"), comment = c(ORCID = "0009-0009-0436-5078")), 
+      person("Mahendra", "Mariadassou", email = "mahendra.mariadassou@inrae.fr", role = c("aut"), comment = c(ORCID = "0000-0003-2986-354X")), 
+      person("Magali", "Berland", email = "magali.berland@inrae.fr", role = c("aut"), comment = c(ORCID = "0000-0002-6762-5350"))
     )
   )
 )
@@ -88,7 +90,7 @@ usethis::use_mit_license("Mathilde Sola")
 ```{r fun-graphs}
 #' graphs
 #'
-#'#' @format A list of dataframes corresponding to graphs based on synthetic data.
+#' @format A list of dataframes corresponding to graphs based on synthetic data.
 #' \describe{
 #'   \item{ CRC_JPN }{  graph corresponding to data with only Japanese patients diagnosed with colorectal cancer }
 #'   \item{ CRC_JPN_CHN_EUR }{  graph corresponding to data gathering Japanese, Chinese and European patients diagnosed with colorectal cancer }
@@ -125,10 +127,8 @@ NULL
 #' @param verbatim Boolean. Controls verbosity
 #'
 #' @return A list containing
-#' \itemize{
 #'  \item{data: }{the final count table (tibble)}
 #'  \item{prevalences: }{a tibble gathering the prevalence of each bacterial species}
-#'}
 #' @export
 
 get_count_table<-function(abund.path=NULL, abund.table=NULL, sample.id=NULL, prev.min, verbatim=TRUE, msp=NULL){
@@ -495,7 +495,7 @@ test_that("graph_step works", {
 #' @param base exp(1) for natural log
 #' @param tol tolerance for checking zeros
 # For eps and atleast, users do not have to specify any values. Default should be enough.
-#' @param eps epsilon in eq (2) of the paper "Yoon, Gaynanova, M\"{u}ller (2019), Frontiers in Genetics". positive shifts to all non-zero compositions. Refer to the paper for more details. eps = absolute value of minimum of log ratio counts plus c.
+#' @param eps epsilon in eq (2) of the paper "Yoon, Gaynanova, Müller (2019), Frontiers in Genetics". positive shifts to all non-zero compositions. Refer to the paper for more details. eps = absolute value of minimum of log ratio counts plus c.
 #' @param atleast default value is 1. Constant c which ensures all nonzero values to be strictly positive. default is 1.
 #'
 #' @return \code{mclr} returns a data matrix of the same dimension with input data matrix.
@@ -757,6 +757,7 @@ test_that("truth_by_prevalence works", {
 #' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param prev_list Vector of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param data_type String. Enables the treatment of 16S data with "16S", default value is "shotgun"
+#' @param annotation_level String. Annotation level to aggregate the taxa
 #' 
 #' @return List of dataframes. Each element of the list corresponds to a normalized 'data_with_annotation', by level of prevalence
 #' @export
@@ -905,9 +906,10 @@ neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025, cov
 #' @param df Dataframe. A normalized dataframe
 #' @param test_module List of string. The module IDs 
 #' @param seed Numeric. The seed number, ensuring reproducibility
-#' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
-#' @param meta_df Dataframe. The dataframe giving metadata information
-#' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+# @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
+# @param meta_df Dataframe. The dataframe giving metadata information
+# @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+#' @param ... Additional arguments passed on to [find_module_neighbors()]
 #' 
 #' @return Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient 
 #' @export
@@ -936,9 +938,10 @@ neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_034
 #' @param list_dfs List of dataframe. A normalized dataframe
 #' @param test_module List of string. The module IDs
 #' @param seed Numeric. The seed number, ensuring reproducibility
-#' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
-#' @param meta_df Dataframe. The dataframe giving metadata information
-#' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+# @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
+# @param meta_df Dataframe. The dataframe giving metadata information
+# @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+#' @param ... Additional arguments passed on to [find_all_module_neighbors()]
 #' 
 #' @return Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient 
 #' @export
@@ -1159,8 +1162,9 @@ scores<-test_filter(neighbors, neighbors2)
 #' 
 #' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param object_of_interest String. The name of the bacteria or species of interest or a key word in the functional module definition
-#' @param list_sims List of dataframes. The result of simulate_by_prevalence()
+# @param list_sims List of dataframes. The result of simulate_by_prevalence()
 #' @param prev_list List of numeric. The prevalences to be studied. Required format is decimal: 0.20 for 20% of prevalence
+#' @param sample_size Numeric. Number of samples in each dataset.
 #' @param filtering_list List of numeric. The filtering top percentages to be studied. Required format is: 10 for the top 10% 
 #' @param graph_file Dataframe. The object generated by graph_step() function
 #' @param col_module_id String. The name of the column with the module names in annotation_table
@@ -1252,9 +1256,11 @@ scores<-choose_params_values(data_with_annotation=data$CRC_JPN, object_of_intere
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
 #' @param seed Numeric. The seed number, ensuring reproducibility
-#' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
-#' @param meta_df Dataframe. The dataframe giving metadata information
-#' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+#' @param ... Additional arguments passed on to [cvglm_to_coeffs_by_object()]
+
+# @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
+# @param meta_df Dataframe. The dataframe giving metadata information
+# @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
 #' 
 #' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
@@ -1297,9 +1303,10 @@ test_that("apply_NF_simple works", {
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10% 
-#' @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
-#' @param meta_df Dataframe. The dataframe giving metadata information
-#' @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+# @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
+# @param meta_df Dataframe. The dataframe giving metadata information
+# @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
+#' @param ... Additional arguments passed on to [apply_NF_simple()]
 #' 
 #' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
@@ -1358,7 +1365,7 @@ test_that("apply_NeighborFinder works", {
 #' 
 #' @return Network. Visualization of NeighborFinder results
 #' @export
-
+#' @importFrom sna gplot
 visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
   if (!nrow(res_NeighborFinder)) {return(message("No neighbors were found."))}
   if (!annotation_option){
@@ -1398,14 +1405,11 @@ visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id,
 data(taxo)
 data(data)
 res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
-
-if (requireNamespace("network", quietly=TRUE) && requireNamespace("sna", quietly=TRUE) && requireNamespace("scales", quietly=TRUE)){
 visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5)
 # #With species names instead of msp names
 visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
 # #With esthetic changes
 visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
-}
 ```
 
 # Display the intersection network from 2 or more datasets
@@ -1422,6 +1426,7 @@ visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_
 #' @param annotation_option Boolean. Default value is False. If True: labels on nodes become module names instead of module IDs 
 #' @param node_size Numeric. The parameter to adjust size of nodes
 #' @param label_size Numeric. The parameter to adjust size of labels
+#' @param edge_label_size Numeric. The parameter to adjust the size of edge labels
 #' @param object_color String. The name of the color to differentiate the nodes corresponding to 'object_of_interest' from the other module IDs
 #' @param seed Numeric. The seed number, ensuring reproducibility
 #' 
@@ -1479,9 +1484,7 @@ res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia 
 res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
 
-if (requireNamespace("network", quietly=TRUE) && requireNamespace("sna", quietly=TRUE) && requireNamespace("scales", quietly=TRUE)){
 intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=7, edge_label_size=4, node_size=15, annotation_option=TRUE, seed=3)
- }
 ```
 
 # Display the intersection table summarizing the results from 2 or more datasets
@@ -1554,7 +1557,13 @@ Build your package from this very Rmd using `fusen::inflate()`
 
 ```{r development-inflate, eval=TRUE}
 # Execute in the console directly
-fusen::inflate(flat_file = "dev/NeighborFinder_flat.Rmd", vignette_name = NA)
+# fusen::inflate(
+#    flat_file = "dev/flat_NeighborFinder.Rmd", 
+#    vignette_name = NA, 
+#    check = FALSE
+# )
+# fusen::register_all_to_config()
+fusen::inflate_all_no_check(stylers = function() {styler::style_pkg(); lintr::lint_package()})
 ```
 
 ```{r development-vignette}

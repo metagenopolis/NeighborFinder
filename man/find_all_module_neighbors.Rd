@@ -13,11 +13,7 @@ find_all_module_neighbors(df, test_module, seed = NULL, ...)
 
 \item{seed}{Numeric. The seed number, ensuring reproducibility}
 
-\item{covar}{String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession}
-
-\item{meta_df}{Dataframe. The dataframe giving metadata information}
-
-\item{sample_col}{String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'}
+\item{...}{Additional arguments passed on to \code{\link[=find_module_neighbors]{find_module_neighbors()}}}
 }
 \value{
 Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient
@@ -28,10 +24,10 @@ Apply cv.glmnet() for a list of module IDs
 \examples{
 data(data)
 data(metadata)
-#Simple example
-x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species")[[1]]
-neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025)
+# Simple example
+x <- norm_data(data$CRC_JPN, 0.30, annotation_level = "species")[[1]]
+neighbors_JPN <- find_all_module_neighbors(df = x, test_module = c("msp_0030", "msp_0345"), seed = 20242025)
 # Example with covariate
-x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species")[[1]]
-neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+x <- norm_data(data$CRC_CHN, 0.30, annotation_level = "species")[[1]]
+neighbors_CHN <- find_all_module_neighbors(df = x, test_module = c("msp_0030", "msp_0345"), seed = 20242025, covar = ~study_accession, meta_df = metadata$CRC_CHN, sample_col = "secondary_sample_accession")
 }

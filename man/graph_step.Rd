@@ -30,12 +30,14 @@ Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence o
 Generate a graph
 }
 \examples{
-tiny_data<-data.frame(species=c("One bacteria","One bacterium L","One bacterium G","Two bact"),
-                      msp_name=c("msp_1","msp_2","msp_3","msp_4"),
-                      SAMPLE1=c(0,1.328425e-06,0,1.527688e-07),
-                      SAMPLE2=c(1.251707e-07,1.251707e-07,3.985320e-07,0),
-                      SAMPLE3=c(0,0,4.926046e-09,5.626392e-06),
-                      SAMPLE4=c(0,0,2.98320e-05,0))
+tiny_data <- data.frame(
+  species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact"),
+  msp_name = c("msp_1", "msp_2", "msp_3", "msp_4"),
+  SAMPLE1 = c(0, 1.328425e-06, 0, 1.527688e-07),
+  SAMPLE2 = c(1.251707e-07, 1.251707e-07, 3.985320e-07, 0),
+  SAMPLE3 = c(0, 0, 4.926046e-09, 5.626392e-06),
+  SAMPLE4 = c(0, 0, 2.98320e-05, 0)
+)
 
-tiny_graph<-graph_step(tiny_data, col_module_id="msp_name", annotation_level="species", seed=20242025) \%>\% suppressWarnings()
+tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) \%>\% suppressWarnings()
 }

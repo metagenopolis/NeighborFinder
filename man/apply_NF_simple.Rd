@@ -30,11 +30,7 @@ apply_NF_simple(
 
 \item{seed}{Numeric. The seed number, ensuring reproducibility}
 
-\item{covar}{String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession}
-
-\item{meta_df}{Dataframe. The dataframe giving metadata information}
-
-\item{sample_col}{String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'}
+\item{...}{Additional arguments passed on to \code{\link[=cvglm_to_coeffs_by_object]{cvglm_to_coeffs_by_object()}}}
 }
 \value{
 Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
@@ -44,5 +40,5 @@ Apply NeighborFinder simplest version on raw data
 }
 \examples{
 data(data)
-res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
+res_CRC_JPN <- apply_NF_simple(data$CRC_JPN, object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species", seed = 20242025)
 }

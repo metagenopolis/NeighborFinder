@@ -1,8 +1,10 @@
 ---
 title: "NeighborFinder_technical_report.Rmd"
-output: html_document
-editor_options: 
-  chunk_output_type: console
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Technical Report}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -50,7 +52,7 @@ library(neighborfinder)
 The required data format in input is as follows: module IDs are the rows and samples are the columns. The first column must be the <span style="color:#5594E5;"><strong>modules name</strong></span> (e.g. species), the second is the <span style="color:#FFD91D;"><strong>module ID</strong></span> (e.g. msp), and each subsequent column is a <span style="color:#7AD370;"><strong>sample</strong></span>. “X” is a numeric value corresponding to an abundance provided either as count, abundance, coverage or fpkm. Here is an example when the <span style="color:#5594E5;"><strong>modules name</strong></span> is the species name and the <span style="color:#FFD91D;"><strong>module ID</strong></span> is the MSP_name.
 
 ```{r fig1, echo=FALSE, fig.align='center', out.width="80%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig1.jpg")
+knitr::include_graphics("./Technical_report_figures/fig1.jpg")
 ```
 
 <center>Figure 1: Example of dataset and required format</center>
@@ -61,7 +63,7 @@ knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig
 Here is a description of how the function works.
 
 ```{r fig2, echo=FALSE, fig.align='center', out.width="100%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/workflow_top_only.png")
+knitr::include_graphics("./Technical_report_figures/workflow_top_only.png")
 ```
 
 <center>Figure 2: Description of the architecture of apply_NeighborFinder() </center>
@@ -158,7 +160,7 @@ See part “Apply NeighborFinder with covariate option” in the [vignette](~/ne
 This step enables NeighborFinder to have better performances than with the naive glmnet method. For each seed-generated result, a filter is applied to increase the reliability of detected interactions. This is done with the ```top_filtering parameter```: it consists in keeping only the strongest coefficients. If ```top_filtering``` is set to 10%, the coefficients conserved must be greater in absolute value than the 90th quantile of all coefficients detected for the neighbors of a species of interest. 
 
 ```{r fig3, echo=FALSE, fig.align='center', out.width="100%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/fig3.jpg")
+knitr::include_graphics("./Technical_report_figures/fig3.jpg")
 ```
 
 <center>Figure 3: Filtering process</center>
@@ -185,7 +187,7 @@ The same procedure was done on simulated datasets of size n=50, but with a prev_
 
 
 ```{r fig4, echo=FALSE, fig.align='center', out.width="100%"}
-knitr::include_graphics("~/neighborfinder/vignettes/Technical_report_figures/heatmap_100-1000_appnote_NB.jpg")
+knitr::include_graphics("./Technical_report_figures/heatmap_100-1000_appnote_NB.jpg")
 ```
 
 <center>Figure 4: Performance scores on simulated data</center>

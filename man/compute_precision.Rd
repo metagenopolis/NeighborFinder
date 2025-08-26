@@ -19,5 +19,5 @@ Compute precision rate
 }
 \examples{
 compute_precision(c("a"), c("a", "b", "c"))
-compute_precision(c("a","b"), c("a", "c"))
+compute_precision(c("a", "b"), c("a", "c"))
 }
