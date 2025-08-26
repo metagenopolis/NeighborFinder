@@ -19,5 +19,5 @@ Compute recall rate
 }
 \examples{
 compute_recall(c("a"), c("a", "b", "c"))
-compute_recall(c("a","b"), c("a", "c"))
+compute_recall(c("a", "b"), c("a", "c"))
 }

@@ -28,7 +28,9 @@ A visualization via a network is proposed.
 You can install NeighborFinder from the [forgemia gitlab](metagenopolis/NeighborFinder) with:
 
 ```{r install, eval=FALSE}
-remotes::install_gitlab(repo = "metagenopolis/NeighborFinder", 
-                        host = "forge.inrae.fr",
-                        auth_token = "nFp2JVVouQzas-MyBwS2")
+remotes::install_gitlab(
+  repo = "metagenopolis/NeighborFinder",
+  host = "forge.inrae.fr",
+  auth_token = "nFp2JVVouQzas-MyBwS2"
+)
 ```

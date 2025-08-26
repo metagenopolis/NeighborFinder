@@ -27,13 +27,15 @@ Dictionary. The name of the module, can be a single one or a list
 Correspondence between the module ID (msp or functional module) and its name (bacteria or function)
 }
 \examples{
-df_taxo<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
-                    genus=c("A","B","C","D"),
-                    species=c("A a","B a","C c","D b"))
+df_taxo <- data.frame(
+  msp_name = c("msp_1", "msp_2", "msp_3", "msp_4"),
+  genus = c("A", "B", "C", "D"),
+  species = c("A a", "B a", "C c", "D b")
+)
 # Correspondence for one specific msp
-module_to_node("msp_1", annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species")
+module_to_node("msp_1", annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "species")
 # or for several msps
-module_to_node(c("msp_1","msp_3","msp_4"), annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species")
+module_to_node(c("msp_1", "msp_3", "msp_4"), annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "species")
 # and if one msp is repeated
-module_to_node(c("msp_1","msp_1","msp_2"), annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="genus")
+module_to_node(c("msp_1", "msp_1", "msp_2"), annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "genus")
 }

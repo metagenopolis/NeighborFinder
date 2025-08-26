@@ -27,9 +27,11 @@ List of string. The module names of the corresponding object of interest
 List the modules corresponding to a given object of interest
 }
 \examples{
-df_taxo<-data.frame(msp_name=c("msp_1","msp_2","msp_3","msp_4"),
-                    genus=c("One","One","One","Two"),
-                    species=c("One bacteria","One bacterium L","One bacterium G","Two bact"))
-identify_module(object_of_interest="bacterium", annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species")
-identify_module(object_of_interest="One", annotation_table=df_taxo, col_module_id = "msp_name", annotation_level="species")
+df_taxo <- data.frame(
+  msp_name = c("msp_1", "msp_2", "msp_3", "msp_4"),
+  genus = c("One", "One", "One", "Two"),
+  species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact")
+)
+identify_module(object_of_interest = "bacterium", annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "species")
+identify_module(object_of_interest = "One", annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "species")
 }
