@@ -26,7 +26,9 @@ fusen::fill_description(overwrite = TRUE,
     Title = "Find neighbor species of a bacteria of interest in the human gut microbiota",
     Description = "NeihborFinder uses the local approach to identify companion species of a bacteria of interest. From several abundance tables of metagenomic data, NeighborFinder suggests a shortlist of companion species based on the integration of results. A visualization via a network is proposed.",
     `Authors@R` = c(
-      person("Mathilde", "Sola", email = "mathilde.sola@inrae.fr", role = c("aut", "cre"), comment = c())
+      person("Mathilde", "Sola", email = "mathilde.sola@inrae.fr", role = c("aut", "cre"), comment = c(ORCID = "0009-0009-0436-5078")), 
+      person("Mahendra", "Mariadassou", email = "mahendra.mariadassou@inrae.fr", role = c("aut"), comment = c(ORCID = "0000-0003-2986-354X")), 
+      person("Magali", "Berland", email = "magali.berland@inrae.fr", role = c("aut"), comment = c(ORCID = "0000-0002-6762-5350"))
     )
   )
 )
@@ -88,7 +90,7 @@ usethis::use_mit_license("Mathilde Sola")
 ```{r fun-graphs}
 #' graphs
 #'
-#'#' @format A list of dataframes corresponding to graphs based on synthetic data.
+#' @format A list of dataframes corresponding to graphs based on synthetic data.
 #' \describe{
 #'   \item{ CRC_JPN }{  graph corresponding to data with only Japanese patients diagnosed with colorectal cancer }
 #'   \item{ CRC_JPN_CHN_EUR }{  graph corresponding to data gathering Japanese, Chinese and European patients diagnosed with colorectal cancer }
@@ -1556,10 +1558,11 @@ Build your package from this very Rmd using `fusen::inflate()`
 ```{r development-inflate, eval=TRUE}
 # Execute in the console directly
 # fusen::inflate(
-#   flat_file = "dev/flat_NeighborFinder.Rmd", 
-#   vignette_name = NA, 
-#   check = FALSE
+#    flat_file = "dev/flat_NeighborFinder.Rmd", 
+#    vignette_name = NA, 
+#    check = FALSE
 # )
+# fusen::register_all_to_config()
 fusen::inflate_all_no_check(stylers = function() {styler::style_pkg(); lintr::lint_package()})
 ```
 

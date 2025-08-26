@@ -2,8 +2,14 @@ Package: neighborfinder
 Title: Find Neighbor Species of a Bacteria of Interest in the Human Gut
     Microbiota
 Version: 0.0.0.9000
-Authors@R: 
-    person("Mathilde", "Sola", , "mathilde.sola@inrae.fr", role = c("aut", "cre"))
+Authors@R: c(
+    person("Mathilde", "Sola", , "mathilde.sola@inrae.fr", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0009-0436-5078")),
+    person("Mahendra", "Mariadassou", , "mahendra.mariadassou@inrae.fr", role = "aut",
+           comment = c(ORCID = "0000-0003-2986-354X")),
+    person("Magali", "Berland", , "magali.berland@inrae.fr", role = "aut",
+           comment = c(ORCID = "0000-0002-6762-5350"))
+  )
 Description: NeihborFinder uses the local approach to identify companion
     species of a bacteria of interest. From several abundance tables of
     metagenomic data, NeighborFinder suggests a shortlist of companion
