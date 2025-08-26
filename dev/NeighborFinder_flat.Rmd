@@ -1363,7 +1363,7 @@ test_that("apply_NeighborFinder works", {
 #' 
 #' @return Network. Visualization of NeighborFinder results
 #' @export
-
+#' @importFrom sna gplot
 visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option=FALSE, node_size=12, label_size=4, object_color="cadetblue2", seed=NULL){
   if (!nrow(res_NeighborFinder)) {return(message("No neighbors were found."))}
   if (!annotation_option){

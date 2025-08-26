@@ -60,7 +60,7 @@ intersections_network<-function(res_list, threshold, annotation_table, col_modul
  }
  #Plot network
  if (!is.null(seed)){set.seed(seed)}
- ggnet::ggnet2(net, edge.size=20*abs(res_intersections$mean_coef), 
+ GGally::ggnet2(net, edge.size=20*abs(res_intersections$mean_coef), 
                 edge.color=ifelse(res_intersections$mean_coef>=0,"green4","red3"), edge.alpha=0.5, 
                 edge.label=res_intersections$intersections, edge.label.color="white", 
                 edge.label.fill="black", edge.label.size=edge_label_size,

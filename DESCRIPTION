@@ -14,7 +14,7 @@ Depends:
     R (>= 3.5.0)
 Imports: 
     dplyr,
-    ggnet (>= 0.1.0),
+    GGally,
     glmnet,
     glue,
     igraph,
@@ -24,6 +24,7 @@ Imports:
     network,
     purrr,
     rlang,
+    sna,
     stats,
     stringr,
     tibble,
@@ -34,8 +35,6 @@ Suggests:
     testthat
 VignetteBuilder: 
     knitr
-Remotes: 
-    briatte/ggnet
 Config/fusen/version: 0.7.1
 Encoding: UTF-8
 LazyData: true
