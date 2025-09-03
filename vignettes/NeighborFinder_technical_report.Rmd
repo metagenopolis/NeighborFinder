@@ -20,27 +20,18 @@ library(knitr)
 library(neighborfinder)
 ```
 
-### What is NeighborFinder?
+### Why use NeighborFinder?
 
-* NeighborFinder uses the local approach to identify companion species of an object of interest (e.g. species, genus, functional module). 
+* NeighborFinder helps you find the direct neighbors of a certain object of interest (bacterial species, functional module, etc). 
 
-* From several abundance tables of metagenomic data, NeighborFinder suggests a shortlist of companion species based on the integration of results. 
-
-* A visualization via a network is proposed.
-
-
-### Why would I use it?
-
-* NeighborFinder helps you find the direct neighbors of a certain object of interest. 
-
-* With multiple datasets, NeighborFinder supports you in the design of probiotics and LBP (Live Biotherapeutic Products). 
+* Applying NeighborFinder to multiple datasets makes predictions more robust. Identified neighbors can thus be used to design microbial communities, probiotics or live biotherapeutic products (LBP). 
 
 * NeighborFinder can also help to identify specific ecological niches linked to particular diseases.
 
 
 ### How to use it?
 
-* Install package [README](~/neighborfinder/README.Rmd)
+* Install package cf. [README](~/neighborfinder/README.Rmd)
 
 * Apply it on abundance tables of metagenomic data gathering at least 100 samples for better performance.
 
@@ -49,7 +40,7 @@ library(neighborfinder)
 
 ### Input dataframe format
 
-The required data format in input is as follows: module IDs are the rows and samples are the columns. The first column must be the <span style="color:#5594E5;"><strong>modules name</strong></span> (e.g. species), the second is the <span style="color:#FFD91D;"><strong>module ID</strong></span> (e.g. msp), and each subsequent column is a <span style="color:#7AD370;"><strong>sample</strong></span>. “X” is a numeric value corresponding to an abundance provided either as count, abundance, coverage or fpkm. Here is an example when the <span style="color:#5594E5;"><strong>modules name</strong></span> is the species name and the <span style="color:#FFD91D;"><strong>module ID</strong></span> is the MSP_name.
+The required data format in input is as follows: module IDs are the rows and samples are the columns. The first column must be the <span style="color:#5594E5;"><strong>modules name</strong></span> (e.g. species), the second is the <span style="color:#FFD91D;"><strong>module ID</strong></span> (e.g. msp), and each subsequent column is a <span style="color:#7AD370;"><strong>sample</strong></span>. “X” is a numeric value corresponding to an abundance provided either as count or a metagenomic abundance. Here is an example when the <span style="color:#5594E5;"><strong>modules name</strong></span> is the species name and the <span style="color:#FFD91D;"><strong>module ID</strong></span> is the MSP_name.
 
 ```{r fig1, echo=FALSE, fig.align='center', out.width="80%"}
 knitr::include_graphics("./Technical_report_figures/fig1.jpg")
@@ -68,9 +59,11 @@ knitr::include_graphics("./Technical_report_figures/workflow_top_only.png")
 
 <center>Figure 2: Description of the architecture of apply_NeighborFinder() </center>
 
+<br>
+
 #### 1)	Pre-processing: Counts & Normalization
 
-##### a)
+##### a) Prevalence filter & shotgun pre-treatment
 
 The first step of ```apply_NeighborFinder()``` is to filter the input abundance data, provided in the above format, using the parameter ```prev_level```. This step helps simplify the dataset by filtering out rare species.
 
@@ -81,7 +74,7 @@ where $A$ is the abundance table and $B$ the resulting count table. Note that th
 
 <br>
 
-##### b)
+##### b) Normalization
 
 The next step consists in applying a mclr normalization to the previously transformed abundance data.
 Here is the equation corresponding to the mclr transformation:
@@ -131,7 +124,7 @@ Covariates can be included in the model by considering an $X$ made of two distin
 $D$ the metadata matrix where some columns are considered as covariates.
 Here is the necessary transformation: 
 
-$[\matrix{D&C_{-j0}}] [\matrix{\alpha\\\theta}]$
+$[\matrix{D&C_{-j0}}]$ $[\matrix{\alpha\\\theta}]$
 
 The penalization $\lambda$ only applies on coefficients $\theta_i$ and not on $\alpha$.
 
@@ -143,11 +136,11 @@ In practice, $D$ and $C_{-j0}$  are concatenated into a single matrix which is u
 
 To use covariates, 3 additional arguments are required: 
 
-* covar: takes a formula or the name of the column of the covariate in the metadata table. 
+* ```covar```: takes a formula or the name of the column of the covariate in the metadata table. 
 
-* meta_df: the dataframe giving metadata information.
+* ```meta_df```: the dataframe giving metadata information.
 
-* sample_col: the name of the column in metadata indicating the sample names.
+* ```sample_col```: the name of the column in metadata indicating the sample names.
 
 See part “Apply NeighborFinder with covariate option” in the [vignette](~/neighborfinder/vignettes/NeighborFinder_vignette.Rmd) for a detailed example.
 
@@ -176,14 +169,16 @@ Performance scores were way better with this repetition approach than running th
 
 ### How to calibrate the parameters values ?
 
-For each of the eight large cohorts (ranging in size from n=347 to 1084 individuals), a graph with cluster-like structure was generated. A precision matrix $\Omega$ with non-null coefficients respecting the graph topology was produced and then inverted to produce a covariance matrix ${\Sigma}$. Simulated datasets of sizes n=100, n=250, n=500, and n=1000 samples were generated using gaussian copula from the covariance matrix ${\Sigma}$ and the original count matrix to produce count tables that *(i)* have the same marginal counts distributions as the original cohort *(ii)* while enforcing the correlation between taxa encoded in ${\Sigma}$. The graph edges are here considered as true edges (ground truth).
+The function ```apply_neighborfinder()``` has two important parameters (```prev_level``` and ```top_filtering```) that shape the output. It is also acknowledged that the dataset size usually has an impact on the generated network. Our performance assessment strategy therefore consisted in covering a range of values for both parameters, with the aim of providing users with guidelines to pick the most suitable combination for their dataset size. We tested the performance of NeighborFinder on eight shotgun metagenomic cohorts (sample sizes ranging from 347 to 1084) detailed here doi_recherhche_data_gouv.
 
-On 10 different seeds, for each value of prev_level tested (from 15% to 35%, by increment of 5%), and for each bacterial species, the ```cv.glmnet()``` function was applied to each simulated dataset (via the function ```cvglm_to_coeffs_by_object()``` from the ```NeighborFinder``` package). This part corresponds to the first steps of the method (see Figure 2, step 1 and step 2 at top). 
-The results were then filtered as in the procedure of ```apply_NeighborFinder()``` (see Figure 2, step 2 at bottom) to keep only a filtering_top percentage of the coefficients, ranging from 5% to 30% in 5% increments, and 100% corresponding to not filtering results. 
+For each of the eight large cohorts, a graph with "cluster-like" structure was generated with the ```graph_step()``` function. A precision matrix $\Omega$ with non-null coefficients respecting the graph topology was produced and then inverted to produce a covariance matrix ${\Sigma}$. Semi-synthetic simulated datasets of sizes n=100, n=250, n=500, and n=1000 samples were generated using gaussian copula from the covariance matrix ${\Sigma}$ and the original count matrix to produce count tables that *(i)* have the same marginal counts distributions as the original cohort *(ii)* while enforcing the correlation between taxa encoded in ${\Sigma}$. The graph edges are here considered as true edges (ground truth).
+
+On 10 different seeds, for each value of ```prev_level``` tested (from 15% to 35%, by increment of 5%), and for each bacterial species, the ```cv.glmnet()``` function was applied to each simulated dataset (via the function ```cvglm_to_coeffs_by_object()``` from the ```NeighborFinder``` package). This part corresponds to the first steps of the method (see Figure 2, step 1 and step 2 at top). 
+The results were then filtered as in the procedure of ```apply_NeighborFinder()``` (see Figure 2, step 2 at bottom) to keep only a ```filtering_top``` percentage of the coefficients, ranging from 5% to 30% in 5% increments, and 100% corresponding to not filtering results. 
 The final results were obtained by going through the last step of the method (see Figure 2 step 3) with the selection of interactions if they were detected in at least 5 of the 10 results (each corresponding to a seed) for each pre-mentioned case.
 
 Performance scores (F1) were calculated by comparing the true edges of the graph with the detected neighbors, averaging on bacterial species and cohort datasets. 
-The same procedure was done on simulated datasets of size n=50, but with a prev_level range from 30% to 60% by increment of 5%.
+The same procedure was done on simulated datasets of size n=50, but with a ```prev_level``` range from 30% to 60% by increment of 5%.
 
 
 ```{r fig4, echo=FALSE, fig.align='center', out.width="100%"}
@@ -209,9 +204,9 @@ The function ```choose_params_values()``` has been designed to allow the user to
 
 *	Comparison and computation of F1 score:
 
-- *before* (```filtering_top```=100 and no robustness step) 
+  - *before* (```filtering_top```=100 and no robustness step) 
 
-- *after* the filtering & robustness steps
+  - *after* the filtering & robustness steps
 
 The user can then decide which values of these parameters to use for downstream analysis and pass them on to ```apply_NeighborFinder()``` using the arguments ```prev_level``` and ```filtering_top```. 
 

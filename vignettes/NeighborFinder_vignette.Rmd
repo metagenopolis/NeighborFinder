@@ -21,22 +21,66 @@ library(neighborfinder)
 ```
 
 ## Presentation of dataset: CRC Example
+
+The data provided in the package was extracted from this repository: [Taxonomic profiles, functional profiles and manually curated metadata of human fecal metagenomes from public projects coming from colorectal cancer studies](https://doi.org/10.57745/7IVO3E)
+
 Three subgroups are defined following 3 geographic areas: Japan, China and Europe (gathering Italy, Austria, Germany and France). 
 The focus is on patients with colorectal cancer.
 
-In this example, we are looking for Escherichia coli because it is one bacteria that is associated with colorectal cancer (CRC). Here is the article mentionning it: https://pubmed.ncbi.nlm.nih.gov/34514986/
+## Preview of the data
 
-Some strains can produce colibactin, which is a toxin inducing DNA damage that may lead to colorectal cancer.
+Below, each object needed in this tutorial is loaded and a preview is displayed.
+
+### 1) The abundance table
+
+Here is a preview of what an abundance table from the data object looks like, with species as rows and samples as columns. 
+The first column is the taxonomic annotation at the species level, the second one is the module ID, and then each column is a sample.
 
 ```{r load-data}
 data(data)
-data(metadata)
-data(taxo)
-data(graphs)
+data$CRC_JPN[1:5, 1:5] %>% kable()
 ```
 
-## Explore if the default parameters of NeighborFinder are suitable for your bacteria of interest & dataset
-This function enables one to test the NeighborFinder method for different levels of prevalence thanks to simulated data based on the provided dataset. There will be different performance scores depending on the bacteria of interest and the dataset provided.
+### 2) The metadata
+
+The metadata gathers characteristics (in columns) for each sample (in rows).
+
+```{r load-metadata}
+data(metadata)
+metadata$CRC_JPN[1:5, 1:5] %>% kable()
+```
+
+### 3) The taxonomy
+
+The taxonomic file indicates for each msp (*i.e.* metagenomic species) its species and genus annotation as well as the catalog in which the msp is mostly found.
+
+```{r load-taxo}
+data(taxo)
+taxo[1:5, ] %>% kable()
+```
+
+### 4) The graph
+
+This dataframe is an adjacency matrix encoding the graph with "cluster-like" structure produced with ```graph_step()```. A value of 1 corresponds to an edge.
+This object is needed to simulate semi-synthetic data.
+
+```{r load-graphs}
+data(graphs)
+graphs$CRC_JPN[1:5, 1:5] %>% kable()
+graphs$CRC_JPN[5:10, 87:90] %>% kable()
+```
+
+## Aim of this use case
+
+In this example, we are focusing on *Escherichia coli* because it is one bacterium that is associated with colorectal cancer (CRC). 
+Here is the [article](https://pubmed.ncbi.nlm.nih.gov/34514986/) mentionning it. Some *E. coli* strains can produce colibactin, which is a toxin inducing DNA damage that may lead to colorectal cancer.
+
+The goal here is to explore the ecosystem around *E. coli* by identifying its direct neighbors in patients with colorectal cancer.
+
+
+## Test if the default parameters of NeighborFinder are suitable for your species of interest & dataset
+
+This function enables one to test the NeighborFinder method for different parameter values thanks to simulated data based on the provided dataset. There will be different performance scores depending on the species of interest and the dataset provided.
 
 To do this step, generating a graph is needed. 
 
@@ -44,11 +88,13 @@ It is recommended to save it to make next steps quicker.
 This step was commented since it takes few minutes to execute and also because it is included in the 'graphs' object.
 
 ```{r graph_step}
+# G <- graph_step(data_with_annotation = data$CRC_JPN_CHN_EUR,
+#                 col_module_id = "msp_id")
+
 G <- graphs$CRC_JPN_CHN_EUR
 ```
 
-The displayed table indicates the precision and recall scores before and after applying the NeighborFinder method, for each 'prev_level' and 'filtering_top' parameters tested.
-NeighborFinder uses by default the level of prevalence of 30% and the filtering top 20%. If the results from the table rendered by choose_params_values() indicate better performance scores at other values of these parameters, please feel free to change the 'prev_level' and 'filtering_top' parameters in the function apply_NeighborFinder().
+NeighborFinder uses by default the level of prevalence of 30% and filtering the top 20%. If the results from the table rendered by ```choose_params_values()``` indicate better performance scores at other values of these parameters, the user can adjust the ```prev_level``` and ```filtering_top``` parameters in the function ```apply_NeighborFinder()```.
 
 ```{r choose-params-values}
 choose_params_values(
@@ -66,29 +112,37 @@ choose_params_values(
   kable()
 ```
 
-## Apply NeighborFinder & look for Escherichia coli neighbors on CRC patients
-This renders a dataframe gathering all neighbors of your species of interest.
-The required data format in input is as follows: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample.
+The displayed table indicates the F1 scores (harmonic mean of precision and recall) before and after applying the NeighborFinder method, for each ```prev_level``` and ```filtering_top``` parameters tested.
+In this example, one of the combinations enabling a satisfying performance is ```prev_level```=0.30 and ```filtering_top```=30.
+
+Note that this step is optional, and a summary of the expected performance scores (calculated on 8 semi-synthetic simulated datasets) is shown in Fig.4 of the [Tech report](./vignettes/NeighborFinder_technical_report.Rmd).
+
+
+## Apply NeighborFinder & look for *Escherichia coli* neighbors in CRC patients
+
+Running ```apply_NeighborFinder()``` renders a dataframe gathering all neighbors of your species of interest.
+The required data format in input is as follows: species are the rows and samples are the columns. The first column must be the species name, the second is the msps name, and each subsequent column is a sample (see above for the abundance table preview).
 
 ```{r apply-JPN}
 # JAPAN
 res_CRC_JPN <- apply_NeighborFinder(
-  data$CRC_JPN,
+  data_with_annotation = data$CRC_JPN,
   object_of_interest = "Escherichia coli",
   col_module_id = "msp_id",
-  annotation_level = "species"
+  annotation_level = "species",
+  prev_level = 0.30,
+  filtering_top = 30
 )
-# res_CRC_JPN %>% download_this(output_name = "res_CRC_JPN", output_extension = ".csv",
-#     button_label = "Download results as csv file", button_type = "default",
-#     has_icon = TRUE, icon = "fa fa-save")
+res_CRC_JPN %>% kable()
 ```
 
 ## Visualize the corresponding network
-Here is a proposition of visualization of NeighborFinder results.
 
-It is possible to adjust the size of nodes and labels. One can also define the color of nodes corresponding to their species of interest. The 'taxo_option' generates the same network but with species names instead of msps ones.
+Here is a visualization of NeighborFinder results.
 
-```{r network-JPN, fig.height=4, fig.width=7}
+It is possible to adjust the size of nodes and labels. One can also define the color of nodes corresponding to their species of interest. The ```taxo_option``` generates the same network but with species names instead of msps ones.
+
+```{r network-JPN, fig.height=4, fig.width=7, message=FALSE}
 visualize_network(
   res_CRC_JPN,
   taxo,
@@ -99,7 +153,8 @@ visualize_network(
 )
 
 visualize_network(
-  res_CRC_JPN, taxo,
+  res_CRC_JPN,
+  taxo,
   object_of_interest = "Escherichia coli",
   col_module_id = "msp_id",
   annotation_level = "species",
@@ -110,14 +165,17 @@ visualize_network(
 ```
 
 ## Apply NeighborFinder with covariate option
+
+Including covariates makes it possible to correct for the effect of external factors (*e.g.* the sequencing technology used to generate the data, the extraction method) that can introduce bias or variability into the observations. This allows the model to better distinguish between what is part of the true structure in the network and what is simply due to technical or contextual differences.
+
 Here is an example of applying the same method, but giving a covariate: in this case, the name of the study.
 To include a covariate, the function would run only if the following all 3 arguments are given:
 
-- covar: takes a formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession. 
+- ```covar```: takes a formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ```~study_accession```. 
 
-- meta_df: the dataframe giving metadata information.
+- ```meta_df```: the dataframe giving metadata information.
 
-- sample_col: the name of the column in metadata indicating the sample names, it should be consistent with the colnames of "data_with_taxo".
+- ```sample_col```: the name of the column in metadata indicating the sample names, it should be consistent with the colnames of "data_with_taxo".
 
 ```{r apply-covariate}
 # On CRC patients
@@ -127,6 +185,8 @@ res_CRC_CHN <- apply_NeighborFinder(
   object_of_interest = "Escherichia coli",
   col_module_id = "msp_id",
   annotation_level = "species",
+  prev_level = 0.30,
+  filtering_top = 30,
   covar = ~study_accession,
   meta_df = metadata$CRC_CHN,
   sample_col = "secondary_sample_accession"
@@ -138,18 +198,40 @@ res_CRC_EUR <- apply_NeighborFinder(
   object_of_interest = "Escherichia coli",
   col_module_id = "msp_id",
   annotation_level = "species",
+  prev_level = 0.30,
+  filtering_top = 30,
   covar = ~study_accession,
   meta_df = metadata$CRC_EUR,
   sample_col = "secondary_sample_accession"
 )
 ```
 
-## Look at the intersection of neighbors found in the 3 subgroups
-Here is an example of how to merge the results of several datasets into a single network. 
-This operation can be performed with 2 or more datasets. One can choose the visualization threshold, corresponding to the minimum number of datasets in which neighbors have been found.
-Another function used here is equivalent to the network thanks to a summary table, indicating in which datasets intersections were found above the set threshold.
+```{r network-covariate, fig.height=4, fig.width=7, message=FALSE}
+visualize_network(
+  res_CRC_CHN,
+  taxo,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  label_size = 5
+)
 
-```{r intersections-network, fig.height=6, fig.width=7}
+visualize_network(
+  res_CRC_EUR,
+  taxo,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  label_size = 5
+)
+```
+
+## Look at the intersection of neighbors found in the 3 subgroups
+
+Here is an example of how to merge the results of several datasets into a single network. 
+This operation can be performed with 2 or more datasets. One can choose the visualization ```threshold```, corresponding to the minimum number of datasets in which neighbors have been found.
+
+```{r intersections-network, fig.height=6, fig.width=8}
 intersections_network(
   res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
   taxo,
@@ -165,11 +247,7 @@ intersections_network(
 )
 ```
 
-One of the main links is with Klebsiella pneumoniae. It is also a bacteria associated with CRC, and produces the same toxin: https://www.sciencedirect.com/science/article/pii/S0041010121001112
-
-"pks = polyketide synthase. Its genes can synthetize bacterial toxin=colibactin.
-The article summarized the prevalence of pks positive E. coli and K. pneumoniae in CRC patient samples. 
-It seems that pks positive bacteria can induce mutation of CRC driver genes and, therefore, pks may become a marker of CRC carcinogenesis and therapy."
+Another function used here is equivalent to the network thanks to a summary table, indicating in which datasets intersections were found above the set ```threshold```.
 
 ```{r intersections-table}
 intersections_table(
@@ -181,3 +259,11 @@ intersections_table(
   "Escherichia coli"
 ) %>% kable()
 ```
+
+One of the resulting neighbors is *Klebsiella pneumoniae*. It is also described in this [article](https://www.sciencedirect.com/science/article/pii/S0041010121001112) as a bacterium associated with CRC, producing the same toxin. 
+
+The article summarized the prevalence of pks positive *E. coli* and *K. pneumoniae* in CRC patient samples. 
+pks stands for polyketide synthase, *K. pneumoniae* genes can synthetize a bacterial toxin which is colibactin.
+
+> "It seems that pks positive bacteria can induce mutation of CRC driver genes and, therefore, pks may become a marker of CRC carcinogenesis and therapy." (N. Strakova, K. Korena, R Karpiskova, 2021)
+
