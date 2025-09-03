@@ -73,7 +73,7 @@ graphs$CRC_JPN[5:10, 87:90] %>% kable()
 ## Aim of this use case
 
 In this example, we are focusing on *Escherichia coli* because it is one bacterium that is associated with colorectal cancer (CRC). 
-Here is the [article](https://pubmed.ncbi.nlm.nih.gov/34514986/) mentionning it. Some *E. coli* strains can produce colibactin, which is a toxin inducing DNA damage that may lead to colorectal cancer.
+Here is the [article](https://doi.org/10.2174/1389201022666210910094827) mentionning it. Some *E. coli* strains can produce colibactin, which is a toxin inducing DNA damage that may lead to colorectal cancer.
 
 The goal here is to explore the ecosystem around *E. coli* by identifying its direct neighbors in patients with colorectal cancer.
 
@@ -260,7 +260,7 @@ intersections_table(
 ) %>% kable()
 ```
 
-One of the resulting neighbors is *Klebsiella pneumoniae*. It is also described in this [article](https://www.sciencedirect.com/science/article/pii/S0041010121001112) as a bacterium associated with CRC, producing the same toxin. 
+One of the resulting neighbors is *Klebsiella pneumoniae*. It is also described in this [article](https://doi.org/10.1016/j.toxicon.2021.04.007) as a bacterium associated with CRC, producing the same toxin. 
 
 The article summarized the prevalence of pks positive *E. coli* and *K. pneumoniae* in CRC patient samples. 
 pks stands for polyketide synthase, *K. pneumoniae* genes can synthetize a bacterial toxin which is colibactin.
