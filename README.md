@@ -26,7 +26,7 @@ data (and other count-based inputs) by skipping it.
 
 <p align="center">
 
-<img src="./vignettes/LOGO_NeighborFinder_black.jpg" width="700" height="200" alt="logo">
+<img src="vignettes/LOGO_NeighborFinder_black.jpg" width="700" height="200" alt="logo">
 </p>
 
 ## Installation
@@ -52,9 +52,9 @@ tested on R 4.4.1.
 The main input of `apply_neighborfinder()` is an abundance table with
 species as rows and samples as columns. For more details, see section
 “Input dataframe format” in the [Tech
-report](./vignettes/NeighborFinder_technical_report.Rmd). For an
+report](vignettes/NeighborFinder_technical_report.Rmd). For an
 illustrated example, please refer to the
-[vignette](./vignettes/NeighborFinder_vignette.Rmd).
+[vignette](vignettes/NeighborFinder_vignette.Rmd).
 
 ## Output
 
@@ -65,7 +65,7 @@ With this output, a network can be created with `visualize_network()`.
 
 ## Tutorial
 
-The [vignette](./vignettes/NeighborFinder_vignette.Rmd) provides an
+The [vignette](vignettes/NeighborFinder_vignette.Rmd) provides an
 overview of the various use cases of NeighborFinder through examples
 based on real data extracted from this
 [repository](https://doi.org/10.57745/7IVO3E).
