@@ -1,7 +1,7 @@
 Package: neighborfinder
 Title: Find Neighbor Species of a Bacteria of Interest in the Human Gut
     Microbiota
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c(
     person("Mathilde", "Sola", , "mathilde.sola@inrae.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0009-0436-5078")),
@@ -15,7 +15,7 @@ Description: NeihborFinder uses the local approach to identify companion
     metagenomic data, NeighborFinder suggests a shortlist of companion
     species based on the integration of results. A visualization via a
     network is proposed.
-License: MIT + file LICENSE
+License: LGLP v3 + file LICENSE
 Depends: 
     R (>= 3.5.0)
 Imports: 
@@ -41,7 +41,7 @@ Suggests:
     testthat
 VignetteBuilder: 
     knitr
-Config/fusen/version: 0.7.1
+Config/fusen/version: 0.7.2
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
