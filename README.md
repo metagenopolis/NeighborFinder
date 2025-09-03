@@ -26,7 +26,7 @@ data (and other count-based inputs) by skipping it.
 
 <p align="center">
 
-<img src="vignettes/LOGO_NeighborFinder_black.jpg" width="700" height="200" alt="logo">
+<img src="dev/Logo_NeighborFinder_white.jpg" width="700" height="200" alt="logo">
 </p>
 
 ## Installation
