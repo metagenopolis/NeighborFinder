@@ -15,7 +15,7 @@ Description: NeihborFinder uses the local approach to identify companion
     metagenomic data, NeighborFinder suggests a shortlist of companion
     species based on the integration of results. A visualization via a
     network is proposed.
-License: LGPL v3 + file LICENSE
+License: LGPL (>= 3)
 Depends: 
     R (>= 3.5.0)
 Imports: 
