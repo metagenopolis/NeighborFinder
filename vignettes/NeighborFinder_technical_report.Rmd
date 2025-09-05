@@ -1,5 +1,5 @@
 ---
-title: "NeighborFinder_technical_report.Rmd"
+title: "Technical Report"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Technical Report}

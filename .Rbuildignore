@@ -7,3 +7,5 @@
 ^pkgdown$
 ^\.gitlab-ci\.yml$
 ^ci/lib$
+^doc$
+^Meta$

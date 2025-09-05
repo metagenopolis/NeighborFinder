@@ -1,8 +1,8 @@
 ---
-title: "NeighborFinder_vignette"
+title: "NeighborFinder"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{NeighborFinder_vignette}
+  %\VignetteIndexEntry{NeighborFinder}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
