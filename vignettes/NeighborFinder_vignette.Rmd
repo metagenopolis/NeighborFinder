@@ -115,7 +115,7 @@ choose_params_values(
 The displayed table indicates the F1 scores (harmonic mean of precision and recall) before and after applying the NeighborFinder method, for each ```prev_level``` and ```filtering_top``` parameters tested.
 In this example, one of the combinations enabling a satisfying performance is ```prev_level```=0.30 and ```filtering_top```=30.
 
-Note that this step is optional, and a summary of the expected performance scores (calculated on 8 semi-synthetic simulated datasets) is shown in Fig.4 of the [Tech report](./vignettes/NeighborFinder_technical_report.Rmd).
+Note that this step is optional, and a summary of the expected performance scores (calculated on 8 semi-synthetic simulated datasets) is shown in Fig.4 of the [Tech report](NeighborFinder_technical_report.html).
 
 
 ## Apply NeighborFinder & look for *Escherichia coli* neighbors in CRC patients

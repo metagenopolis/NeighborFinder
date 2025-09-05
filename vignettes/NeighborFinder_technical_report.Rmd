@@ -31,11 +31,11 @@ library(neighborfinder)
 
 ### How to use it?
 
-* Install package cf. [README](~/neighborfinder/README.Rmd)
+* Install package cf. [README](../README.html)
 
 * Apply it on abundance tables of metagenomic data gathering at least 100 samples for better performance.
 
-* See the [vignette](~/neighborfinder/vignettes/NeighborFinder_vignette.Rmd) included in the package. It reviews the main functions that are useful for making the most of the NeighborFinder's features.
+* See the [vignette](NeighborFinder_vignette.html) included in the package. It reviews the main functions that are useful for making the most of the NeighborFinder's features.
 
 
 ### Input dataframe format
@@ -142,7 +142,7 @@ To use covariates, 3 additional arguments are required:
 
 * ```sample_col```: the name of the column in metadata indicating the sample names.
 
-See part “Apply NeighborFinder with covariate option” in the [vignette](~/neighborfinder/vignettes/NeighborFinder_vignette.Rmd) for a detailed example.
+See part “Apply NeighborFinder with covariate option” in the [vignette](NeighborFinder_vignette.html) for a detailed example.
 
 <br>
 

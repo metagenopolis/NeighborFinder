@@ -34,7 +34,7 @@ normalization step for such datasets, but can accommodate metabarcoding data (an
 
 ## Installation
 
-You can install NeighborFinder from the [forgemia gitlab](metagenopolis/NeighborFinder) with:
+You can install NeighborFinder from the [forgemia gitlab](https://forge.inrae.fr/metagenopolis/neighborfinder) with:
 
 ```{r install, eval=FALSE}
 instal.packages("remotes")
@@ -51,7 +51,7 @@ Note that this R package depends on versions >= 3.5.0 and was recently tested on
 ## Input
 
 The main input of ```apply_neighborfinder()``` is an abundance table with species as rows and samples as columns. 
-For more details, see section "Input dataframe format" in the [Tech report](vignettes/NeighborFinder_technical_report.Rmd). For an illustrated example, please refer to the [vignette](vignettes/NeighborFinder_vignette.Rmd).
+For more details, see section "Input dataframe format" in the [Tech report](articles/NeighborFinder_technical_report.html). For an illustrated example, please refer to the [vignette](articles/NeighborFinder_vignette.html).
 
 ## Output
 
@@ -59,6 +59,6 @@ The output is an edge table in tibble format, i.e. a table with 3 columns: node1
 
 ## Tutorial
 
-The [vignette](vignettes/NeighborFinder_vignette.Rmd) provides an overview of the various use cases of NeighborFinder 
+The [vignette](articles/NeighborFinder_vignette.html) provides an overview of the various use cases of NeighborFinder 
 through examples based on real data extracted from this [repository](https://doi.org/10.57745/7IVO3E).
 
