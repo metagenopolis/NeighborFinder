@@ -34,6 +34,8 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
     if (is.null(meta_df)) stop("Please provide a metadata table.")
     ## Stop if no sample column provided
     if (is.null(sample_col)) stop("Please indicate the column of sample names in metadata.")
+    ## Stop if no covariate provided
+    if (is.null(covar) && !is.null(sample_col) | !is.null(meta_df)) stop("covar is NULL, please indicate a covariate present in meta_df.")
     ## Process metadata to match abundance table
     if (!is.null(sample_col) && sample_col %in% colnames(meta_df)) {
       rownames(meta_df) <- meta_df[[sample_col]]
