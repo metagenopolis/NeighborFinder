@@ -31,7 +31,7 @@ library(neighborfinder)
 
 ### How to use it?
 
-* Install package cf. [README](../index.html)
+* Install package cf. [README](https://forge.inrae.fr/metagenopolis/neighborfinder)
 
 * Apply it on abundance tables of metagenomic data gathering at least 100 samples for better performance.
 
