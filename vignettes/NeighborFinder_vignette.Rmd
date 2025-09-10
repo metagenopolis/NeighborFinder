@@ -1,8 +1,8 @@
 ---
-title: "NeighborFinder"
+title: "Use case"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{NeighborFinder}
+  %\VignetteIndexEntry{Use case}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

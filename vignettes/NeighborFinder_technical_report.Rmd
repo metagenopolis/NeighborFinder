@@ -31,7 +31,7 @@ library(neighborfinder)
 
 ### How to use it?
 
-* Install package cf. [README](../README.html)
+* Install package cf. [README](../index.html)
 
 * Apply it on abundance tables of metagenomic data gathering at least 100 samples for better performance.
 
@@ -54,7 +54,7 @@ knitr::include_graphics("./Technical_report_figures/fig1.jpg")
 Here is a description of how the function works.
 
 ```{r fig2, echo=FALSE, fig.align='center', out.width="100%"}
-knitr::include_graphics("./Technical_report_figures/workflow_top_only.png")
+knitr::include_graphics("./Technical_report_figures/workflow_top_only.jpg")
 ```
 
 <center>Figure 2: Description of the architecture of apply_NeighborFinder() </center>
