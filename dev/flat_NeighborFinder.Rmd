@@ -309,7 +309,7 @@ simulate_from_ecdf <- function (real_data, Sigma, n, seed=10010, verbatim=FALSE)
 # Create synthetic data from an empirical dataset
 
 ```{r fun-new_synth_data}
-#' Simulate data from some empirical count dataset
+#' Simulate data from some empirical count dataset with a "cluster-like" structure
 #'
 #' @param real_data Matrix. Empirical count table 
 #' @param graph_type String. Structure type for the conditional dependency structure. Here only "cluster" was kept, see EMtree package for more options
@@ -434,7 +434,7 @@ sim_data<-new_synth_data(count_table$data, n=50, graph=as.matrix(tiny_graph %>% 
 # Generate a graph
 
 ```{r fun-graph_step}
-#' Generate a graph
+#' Generate a graph with a "cluster-like" structure, only needed for simulation purposes
 #' 
 #' @param data_with_annotation Dataframe. The abundance table merged with the module names. Required format: modules are the rows and samples are the columns. The first column must be the modules name (e.g. species), the second is the module ID (e.g. msp), and each subsequent column is a sample
 #' @param col_module_id String. The name of the column with the module names in the annotation table
@@ -445,7 +445,7 @@ sim_data<-new_synth_data(count_table$data, n=50, graph=as.matrix(tiny_graph %>% 
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
 
-graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed, data_type="shotgun"){
+graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed=10010, data_type="shotgun"){
  if (data_type=="shotgun"){
  counts <- get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample.id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
  }
