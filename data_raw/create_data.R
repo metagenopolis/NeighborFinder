@@ -48,8 +48,8 @@ usethis::use_data(data, overwrite = TRUE)
 
 
 ## Creation of graphs
-G_CRC<-graph_step(data$CRC_JPN_CHN_EUR, col_msp_id="msp_id")
-G_JPN<-graph_step(data$CRC_JPN, col_msp_id="msp_id")
+G_CRC<-graph_step(data$CRC_JPN_CHN_EUR, col_module_id="msp_id", annotation_level="species")
+G_JPN<-graph_step(data$CRC_JPN, col_module_id="msp_id", annotation_level="species")
 
 graphs<-list(CRC_JPN=G_JPN, CRC_JPN_CHN_EUR=G_CRC)
 

@@ -89,7 +89,9 @@ This step was commented since it takes few minutes to execute and also because i
 
 ```{r graph_step}
 # G <- graph_step(data_with_annotation = data$CRC_JPN_CHN_EUR,
-#                 col_module_id = "msp_id")
+#                 col_module_id = "msp_id",
+#                 annotation_level = "species"
+#                 )
 
 G <- graphs$CRC_JPN_CHN_EUR
 ```
