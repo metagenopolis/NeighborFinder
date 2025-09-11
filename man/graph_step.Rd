@@ -2,13 +2,13 @@
 % Please edit documentation in R/graph_step.R
 \name{graph_step}
 \alias{graph_step}
-\title{Generate a graph}
+\title{Generate a graph with a "cluster-like" structure, only needed for simulation purposes}
 \usage{
 graph_step(
   data_with_annotation,
   col_module_id,
   annotation_level,
-  seed,
+  seed = 10010,
   data_type = "shotgun"
 )
 }
@@ -27,7 +27,7 @@ graph_step(
 Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 }
 \description{
-Generate a graph
+Generate a graph with a "cluster-like" structure, only needed for simulation purposes
 }
 \examples{
 tiny_data <- data.frame(

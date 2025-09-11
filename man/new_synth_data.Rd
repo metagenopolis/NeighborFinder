@@ -2,7 +2,7 @@
 % Please edit documentation in R/new_synth_data.R
 \name{new_synth_data}
 \alias{new_synth_data}
-\title{Simulate data from some empirical count dataset}
+\title{Simulate data from some empirical count dataset with a "cluster-like" structure}
 \usage{
 new_synth_data(
   real_data,
@@ -45,7 +45,7 @@ new_synth_data(
 List. Containing the simulated discrete counts, the corresponding true partial correlation matrix from the latent Gaussian layer of the model and the original graph structure that was used
 }
 \description{
-Simulate data from some empirical count dataset
+Simulate data from some empirical count dataset with a "cluster-like" structure
 }
 \examples{
 tiny_data <- data.frame(
