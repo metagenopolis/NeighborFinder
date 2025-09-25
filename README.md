@@ -31,17 +31,34 @@ data (and other count-based inputs) by skipping it.
 
 ## Installation
 
-You can install NeighborFinder from the [forgemia
-gitlab](https://forge.inrae.fr/metagenopolis/neighborfinder) with:
+You can install the latest NeighborFinder version from the public
+[github repo](https://github.com/metagenopolis/NeighborFinder)
+
+<!-- [repo](https://forge.inrae.fr/metagenopolis/neighborfinder) with: -->
+
+<!-- ```{r install, eval=FALSE} -->
+
+<!-- install.packages("remotes") -->
+
+<!-- library(remotes) -->
+
+<!-- remotes::install_gitlab( -->
+
+<!--   repo = "metagenopolis/NeighborFinder", -->
+
+<!--   host = "forge.inrae.fr", -->
+
+<!--   auth_token = "nFp2JVVouQzas-MyBwS2" -->
+
+<!-- ) -->
+
+<!-- ``` -->
 
 ``` r
-instal.packages("remotes")
-library(remotes)
-remotes::install_gitlab(
-  repo = "metagenopolis/NeighborFinder",
-  host = "forge.inrae.fr",
-  auth_token = "nFp2JVVouQzas-MyBwS2"
-)
+if (!requireNamespace('remotes')) {
+ install.packages("remotes") 
+}
+remotes::install_github('metagenopolis/NeighborFinder')
 ```
 
 Note that this R package depends on versions \>= 3.5.0 and was recently
@@ -58,7 +75,7 @@ illustrated example, please refer to the
 
 ## Output
 
-The output is an edge table in tibble format, i.e. a table with 3
+The output is an edge table in tibble format, i.e. a table with 3
 columns: node1, node2, and coef. This table gathers the potential
 neighbors of a species of interest found with `apply_neighborfinder()`.
 With this output, a network can be created with `visualize_network()`.

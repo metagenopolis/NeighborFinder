@@ -34,17 +34,27 @@ normalization step for such datasets, but can accommodate metabarcoding data (an
 
 ## Installation
 
-You can install NeighborFinder from the [forgemia gitlab](https://forge.inrae.fr/metagenopolis/neighborfinder) with:
+You can install the latest NeighborFinder version from the public [github repo](https://github.com/metagenopolis/NeighborFinder)
 
-```{r install, eval=FALSE}
-instal.packages("remotes")
-library(remotes)
-remotes::install_gitlab(
-  repo = "metagenopolis/NeighborFinder",
-  host = "forge.inrae.fr",
-  auth_token = "nFp2JVVouQzas-MyBwS2"
-)
+<!-- [repo](https://forge.inrae.fr/metagenopolis/neighborfinder) with: -->
+
+<!-- ```{r install, eval=FALSE} -->
+<!-- install.packages("remotes") -->
+<!-- library(remotes) -->
+<!-- remotes::install_gitlab( -->
+<!--   repo = "metagenopolis/NeighborFinder", -->
+<!--   host = "forge.inrae.fr", -->
+<!--   auth_token = "nFp2JVVouQzas-MyBwS2" -->
+<!-- ) -->
+<!-- ``` -->
+
+```{r eval=FALSE}
+if (!requireNamespace('remotes')) {
+ install.packages("remotes") 
+}
+remotes::install_github('metagenopolis/NeighborFinder')
 ```
+
 
 Note that this R package depends on versions >= 3.5.0 and was recently tested on R 4.4.1.
 
