@@ -1,0 +1,50 @@
+# Give true neighbors by level of prevalence
+
+Give true neighbors by level of prevalence
+
+## Usage
+
+``` r
+truth_by_prevalence(edge_table, prev_list)
+```
+
+## Arguments
+
+- edge_table:
+
+  Dataframe. The result of prev_for_selected_nodes()
+
+- prev_list:
+
+  List of numeric. The prevalences to be studied. Required format is
+  decimal: 0.20 for 20% of prevalence
+
+## Value
+
+List of dataframes. Each element of the list corresponds to a dataframe
+of true edges by level of prevalence
+
+## Examples
+
+``` r
+tiny_data <- data.frame(
+  species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact"),
+  msp_name = c("msp_1", "msp_2", "msp_3", "msp_4"),
+  SAMPLE1 = c(0, 1.328425e-06, 0, 1.527688e-07),
+  SAMPLE2 = c(1.251707e-07, 1.251707e-07, 3.985320e-07, 0),
+  SAMPLE3 = c(0, 0, 4.926046e-09, 5.626392e-06),
+  SAMPLE4 = c(0, 0, 2.98320e-05, 0)
+)
+
+tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) %>% suppressWarnings()
+#> Error in igraph::graph_from_adjacency_matrix(G): Cannot create a graph object because the adjacency matrix contains NAs.
+
+tiny_truth <- prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id = "msp_name", annotation_level = "species", object_of_interest = "bacterium")
+#> Error: object 'tiny_graph' not found
+
+tiny_true_edges <- truth_by_prevalence(tiny_truth, c(0.20, 0.30))
+#> Defining and saving true neighbors...
+#> Error in purrr::map(prev_list, for_one_prev): ℹ In index: 1.
+#> Caused by error:
+#> ! object 'tiny_truth' not found
+```

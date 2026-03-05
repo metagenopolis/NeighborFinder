@@ -1,0 +1,56 @@
+# Gather lists of neighbors of true ones from the graph and detected ones from cv.glmnet()
+
+Gather lists of neighbors of true ones from the graph and detected ones
+from cv.glmnet()
+
+## Usage
+
+``` r
+final_step(df_truth, df_glm, robustness_step = NULL)
+```
+
+## Arguments
+
+- df_truth:
+
+  Dataframe. The one resulting from truth_by_prevalence()
+
+- df_glm:
+
+  Dataframe. The one resulting from cvglm_to_coeffs_by_object()
+
+- robustness_step:
+
+  Boolean. When TRUE, filtering_top will be different from 100%, when
+  FALSE the reults from the naïve method are looked at
+
+## Value
+
+Dataframe. Returns for each level of prevalence and module ID, the list
+of true and/or detected neighbors and the corresponding list of
+coefficients
+
+## Examples
+
+``` r
+# Dataframe with true neighbors
+df_true <- list(
+  tibble::tibble(
+    node1 = c("msp_1", "msp_1", "msp_2", "msp_3"), node2 = c("msp_55", "msp_20", "msp_3", "msp_18"),
+    prev1 = c(0.28, 0.28, 0.96, 0.75), prev2 = c(0.76, 0.25, 0.75, 0.60)
+  ),
+  tibble::tibble(node1 = c("msp_2", "msp_3"), node2 = c("msp_3", "msp_18"), prev1 = c(0.96, 0.75), prev2 = c(0.75, 0.60))
+) %>% rlang::set_names(c("0.20", "0.30"))
+
+# Dataframe with detected neighbors
+df_detected <- list(
+  tibble::tibble(
+    prev_level = c("0.20", "0.30", "0.30", "0.30"), node1 = c("msp_2", "msp_2", "msp_3", "msp_3"),
+    node2 = c("msp_3", "msp_3", "msp_18", "msp_8"), coef = c(0.406, -0.025, 0.160, 0.005),
+    filtering_top = c(100, 100, 100, 100)
+  ),
+  tibble::tibble()
+) %>% rlang::set_names(c("0.20", "0.30"))
+# Use final_step() to gather both
+neighbors <- final_step(df_true, df_detected, robustness_step = FALSE)
+```

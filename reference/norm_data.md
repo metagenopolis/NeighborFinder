@@ -1,0 +1,63 @@
+# Normalize data and filters it by prevalence level
+
+Normalize data and filters it by prevalence level
+
+## Usage
+
+``` r
+norm_data(
+  data_with_annotation,
+  col_module_id,
+  prev_list = c(0.3),
+  annotation_level,
+  data_type = "shotgun"
+)
+```
+
+## Arguments
+
+- data_with_annotation:
+
+  Dataframe. The abundance table merged with the module names. Required
+  format: modules are the rows and samples are the columns. The first
+  column must be the modules name (e.g. species), the second is the
+  module ID (e.g. msp), and each subsequent column is a sample
+
+- col_module_id:
+
+  String. The name of the column with the module names in
+  annotation_table
+
+- prev_list:
+
+  Vector of numeric. The prevalences to be studied. Required format is
+  decimal: 0.20 for 20% of prevalence
+
+- annotation_level:
+
+  String. Annotation level to aggregate the taxa
+
+- data_type:
+
+  String. Enables the treatment of 16S data with "16S", default value is
+  "shotgun"
+
+## Value
+
+List of dataframes. Each element of the list corresponds to a normalized
+'data_with_annotation', by level of prevalence
+
+## Examples
+
+``` r
+tiny_data <- data.frame(
+  species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact"),
+  msp_name = c("msp_1", "msp_2", "msp_3", "msp_4"),
+  SAMPLE1 = c(0, 1.328425e-06, 0, 1.527688e-07),
+  SAMPLE2 = c(1.251707e-07, 1.251707e-07, 3.985320e-07, 0),
+  SAMPLE3 = c(0, 0, 4.926046e-09, 5.626392e-06),
+  SAMPLE4 = c(0, 0, 2.98320e-05, 0)
+)
+
+tiny_normed <- norm_data(tiny_data, col_module_id = "msp_name", annotation_level = "species", prev_list = c(0.20, 0.30))
+```
