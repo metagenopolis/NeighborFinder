@@ -38,10 +38,10 @@ You can install the latest NeighborFinder version from the public [github repo](
 
 
 ```{r eval=FALSE}
-if (!requireNamespace('remotes')) {
- install.packages("remotes") 
+if (!requireNamespace("remotes")) {
+  install.packages("remotes")
 }
-remotes::install_github('metagenopolis/NeighborFinder')
+remotes::install_github("metagenopolis/NeighborFinder")
 ```
 
 
