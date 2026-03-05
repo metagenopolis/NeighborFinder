@@ -2,7 +2,7 @@
 title: "Use case"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Use case}
+  %\VignetteIndexEntry{Detailed example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -34,26 +34,6 @@ data (and other count-based inputs) by skipping it.
 You can install the latest NeighborFinder version from the public
 [github repo](https://github.com/metagenopolis/NeighborFinder)
 
-<!-- [repo](https://forge.inrae.fr/metagenopolis/neighborfinder) with: -->
-
-<!-- ```{r install, eval=FALSE} -->
-
-<!-- install.packages("remotes") -->
-
-<!-- library(remotes) -->
-
-<!-- remotes::install_gitlab( -->
-
-<!--   repo = "metagenopolis/NeighborFinder", -->
-
-<!--   host = "forge.inrae.fr", -->
-
-<!--   auth_token = "nFp2JVVouQzas-MyBwS2" -->
-
-<!-- ) -->
-
-<!-- ``` -->
-
 ``` r
 if (!requireNamespace('remotes')) {
  install.packages("remotes") 
@@ -75,12 +55,57 @@ illustrated example, please refer to the
 
 ## Output
 
-The output is an edge table in tibble format, i.e. a table with 3
+The output is an edge table in tibble format, i.e. a table with 3
 columns: node1, node2, and coef. This table gathers the potential
 neighbors of a species of interest found with `apply_neighborfinder()`.
 With this output, a network can be created with `visualize_network()`.
 
-## Tutorial
+## Basic usage
+
+**1. Download data**
+
+Here is a quick example with the data included in this package.
+
+``` r
+library(neighborfinder)
+data(data)
+data(taxo)
+```
+
+**2. Apply NeighborFinder on a species of interest**
+
+Let’s look at the neighborhood of *Escherichia coli* in the Japanese
+participants from this [cohort](https://doi.org/10.57745/7IVO3E).
+
+``` r
+res_CRC_JPN <- apply_NeighborFinder(
+  data_with_annotation = data$CRC_JPN,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  prev_level = 0.30,
+  filtering_top = 30
+)
+```
+
+**3. Visualize network**
+
+``` r
+visualize_network(
+  res_CRC_JPN,
+  taxo,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  label_size = 4,
+  annotation_option = TRUE,
+  seed = 2
+)
+```
+
+<img src="man/figures/README-network-ex-1.png" width="100%" />
+
+## Full tutorial
 
 The [vignette](articles/NeighborFinder_vignette.html) provides an
 overview of the various use cases of NeighborFinder through examples
