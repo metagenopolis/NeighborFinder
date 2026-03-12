@@ -18,15 +18,14 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-NeighborFinder is an R package enabling the identification of the local neighborhood of a species of interest, based on microbiome data.
+NeighborFinder is an R package enabling the reconstruction of the local neighborhood of a species of interest in the microbial interaction network, based on microbiome abundance data. Unlike most methods, NeighborFinder **does not** attempt to reconstruct full networks before extracting local neighborhoods but focuses from the start on local interactions to gain statistical power. 
 
 Using cross-validated multiple linear regression with ℓ1 penalty and microbiome-specific filters, our approach infers interpretable species-centered interactions, with F1 score ≥ 0.95 on simulated datasets ranging from 250 to 1000 samples.
 
-From several abundance tables of metagenomic data, NeighborFinder suggests a shortlist of companion species based on the integration of results. A visualization via a network is proposed.
+Furthermore, when multiple abundance datasets are available for the species of interest, NeighborFinder integrates the results obtained on each dataset to produce a robust shortlist of high-likelihood companion species. 
+<!-- A visualization of those species and the consensus results via a network is proposed. -->
 
-NeighborFinder is tailored to microbiome data. It was specifically developed for shotgun metagenomic data and includes a default 
-normalization step for such datasets, but can accommodate metabarcoding data (and other count-based inputs) by skipping it. 
-
+NeighborFinder is tailored to microbiome data. It was specifically developed for shotgun metagenomic data and includes a default normalization step for such datasets, but can accommodate metabarcoding data (and other count-based inputs) by skipping it. 
 
 <p align="center">
  <img src="man/figures/Logo_NeighborFinder_white.jpg" width="700" height="200" alt="logo">
@@ -34,7 +33,7 @@ normalization step for such datasets, but can accommodate metabarcoding data (an
 
 ## Installation
 
-You can install the latest NeighborFinder version from the public [github repo](https://github.com/metagenopolis/NeighborFinder)
+The latest NeighborFinder version is available from the public [github repo](https://github.com/metagenopolis/NeighborFinder).
 
 
 ```{r eval=FALSE}
@@ -44,23 +43,20 @@ if (!requireNamespace("remotes")) {
 remotes::install_github("metagenopolis/NeighborFinder")
 ```
 
+<!-- ## Input -->
 
-Note that this R package depends on versions >= 3.5.0 and was recently tested on R 4.4.1.
+<!-- The main input of ```apply_neighborfinder()``` is an abundance table with species as rows and samples as columns.  -->
+<!-- For more details, see section "Input dataframe format" in the [Tech report](articles/NeighborFinder_technical_report.html). For an illustrated example, please refer to the [vignette](articles/NeighborFinder_vignette.html). -->
 
-## Input
+<!-- ## Output -->
 
-The main input of ```apply_neighborfinder()``` is an abundance table with species as rows and samples as columns. 
-For more details, see section "Input dataframe format" in the [Tech report](articles/NeighborFinder_technical_report.html). For an illustrated example, please refer to the [vignette](articles/NeighborFinder_vignette.html).
+<!-- The output is an edge table in tibble format, i.e. a table with 3 columns: node1, node2, and coef. This table gathers the potential neighbors of a species of interest found with ```apply_neighborfinder()```. With this output, a network can be created with ```visualize_network()```. -->
 
-## Output
-
-The output is an edge table in tibble format, i.e. a table with 3 columns: node1, node2, and coef. This table gathers the potential neighbors of a species of interest found with ```apply_neighborfinder()```. With this output, a network can be created with ```visualize_network()```.
-
-## Basic usage
+## Getting started
 
 **1. Download data**
 
-Here is a quick example with the data included in this package.
+We use the data provided in the package: abundance tables from three datasets. NeighborFinder requires an abundance table (`data`) (with species as rows and samples as columns) and can use a taxonomic affiliation table (`taxo`) to provide additional details on the taxa when visualizing the results.
 
 ```{r data-ex}
 library(neighborfinder)
@@ -70,7 +66,7 @@ data(taxo)
 
 **2. Apply NeighborFinder on a species of interest**
 
-Let's look at the neighborhood of *Escherichia coli* in the Japanese participants from this [cohort](https://doi.org/10.57745/7IVO3E).
+Let's find the neighborhood of *Escherichia coli* using the abundance data from the Japanese patients in this [cohort](https://doi.org/10.57745/7IVO3E) (`data$CRC_JPN`). 
 
 ```{r apply-ex}
 res_CRC_JPN <- apply_NeighborFinder(
@@ -83,19 +79,108 @@ res_CRC_JPN <- apply_NeighborFinder(
 )
 ```
 
-**3. Visualize network**
+**3. Visualize the corresponding network**
 
-```{r network-ex, fig.height=4.2, fig.width=6, message=FALSE}
-visualize_network(
+The species identified as neighbor can then be visualized using `visualize_network()` with or without taxonomic annotation.
+
+```{r network-ex, fig.height=5, fig.width=10, message=FALSE}
+plot_JPN <- visualize_network(
   res_CRC_JPN,
   taxo,
   object_of_interest = "Escherichia coli",
   col_module_id = "msp_id",
   annotation_level = "species",
-  label_size = 4,
+  label_size = 5
+)
+
+plot_JPN_annot <- visualize_network(
+  res_CRC_JPN,
+  taxo,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  label_size = 5,
   annotation_option = TRUE,
   seed = 2
 )
+
+library(patchwork)
+plot_JPN + plot_JPN_annot + plot_layout(widths=c(1,1.3))
+```
+
+**4. Use different datasets**
+
+We can repeat the process to the two other datasets: the Chinese patients (`data$CRC_CHN`) and the European patients (`data$CRC_EUR`). 
+
+```{r apply-multiple}
+# CHINA
+res_CRC_CHN <- apply_NeighborFinder(
+  data$CRC_CHN,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  prev_level = 0.30,
+  filtering_top = 30,
+  covar = ~study_accession,
+  meta_df = metadata$CRC_CHN,
+  sample_col = "secondary_sample_accession"
+)
+
+plot_CHN <- visualize_network(
+  res_CRC_CHN,
+  taxo,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  label_size = 5
+)
+
+# EUROPE
+res_CRC_EUR <- apply_NeighborFinder(
+  data$CRC_EUR,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  prev_level = 0.30,
+  filtering_top = 30,
+  covar = ~study_accession,
+  meta_df = metadata$CRC_EUR,
+  sample_col = "secondary_sample_accession"
+)
+
+plot_EUR <- visualize_network(
+  res_CRC_EUR,
+  taxo,
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  label_size = 5
+)
+```
+
+
+```{r plot-multiple, fig.height=4.5, fig.width=15}
+plot_JPN | plot_CHN | plot_EUR
+```
+
+**5. Aggregate the results**
+
+The results from all three datasets are combined. In this aggregated network, we selected the edges detected in at least 2 out of the 3 datasets. 
+
+```{r intersections-net, fig.height=5.5, fig.width=15}
+final_net <- intersections_network(
+ res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
+ taxo,
+ threshold = 2,
+ "Escherichia coli",
+ col_module_id = "msp_id",
+ annotation_level = "species",
+ label_size = 7,
+ edge_label_size = 4,
+ node_size = 15
+)
+
+plot_spacer() + final_net + plot_spacer() + plot_layout(widths=c(0.5,1,0.5))
 ```
 
 ## Full tutorial
