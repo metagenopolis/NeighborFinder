@@ -332,32 +332,6 @@ new_synth_data<-function(real_data, graph_type="cluster", must_connect=TRUE, gra
  species <- colnames(real_data)
  
  #Functions extracted from EMtree package to remove dependency
- ToSym<-function(A.vec){
-  n <- (1 + sqrt(1 + 8*length(A.vec)))/2
-  A.mat <- matrix(0, n, n)
-  A.mat[upper.tri(A.mat)] <- A.vec
-  A.mat <- A.mat + t(A.mat)
-  A.mat
- }
- ToVec<-function(A.mat){ 
-  return(suppressMessages(A.mat[upper.tri(A.mat)])) 
- }
- SimCluster<-function (p, k, dens, r){
-  beta <- dens/(r/k + (k-1)/k)
-  alpha <- r*beta
-  while (alpha>1) {
-   r <- 0.9*r
-   beta <- dens/(r/k + (k-1)/k)
-   alpha <- r*beta
-  }
-  Z <- t(stats::rmultinom(p, 1, rep(1/k, k)))
-  groupe <- Z %*% 1:k
-  Z <- Z %*% t(Z)
-  diag(Z) <- 0
-  ZZ <- ToVec(Z)
-  G <- ToSym(rbinom(p*(p-1)/2, 1, alpha*ZZ + beta*(1-ZZ)))
-  G
- }
  generator_graph<- function(p=20, graph="cluster", dens=0.3, r=2, k=3){
   theta <- matrix(0, p, p)
   if (graph=="cluster") { theta <- SimCluster(p, k=k, dens, r) }
@@ -443,11 +417,12 @@ sim_data<-new_synth_data(count_table$data, n=50, graph=as.matrix(tiny_graph %>% 
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param seed Numeric. Seed number for data generation (new_synth_data)
 #' @param data_type String. Enables the treatment of 16S data with "16S", default value is "shotgun"
+#' @param ... Additional arguments passed on to the `generator_graph()` routine of [new_synth_data()]
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
 
-graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed=10010, data_type="shotgun"){
+graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed=10010, data_type="shotgun", ...){
  if (data_type=="shotgun"){
  counts <- get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample.id=colnames(data_with_annotation), prev.min=0.15, verbatim=FALSE)$data
  }
@@ -461,7 +436,7 @@ graph_step<-function(data_with_annotation, col_module_id, annotation_level, seed
    counts <- data_with_annotation_filtered %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>% t() 
    colnames(counts) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
  }
- G <- new_synth_data(counts, n=50, verbatim=FALSE, seed=seed)$G
+ G <- new_synth_data(counts, n=50, verbatim=FALSE, seed=seed, ...)$G
  dimnames(G) <- list(colnames(counts), colnames(counts))
  G <- G %>% as.data.frame() %>% 
   dplyr::mutate(!!rlang::sym(annotation_level):=module_to_node(rownames(G), annotation_table=data_with_annotation, col_module_id=col_module_id, annotation_level=annotation_level))
