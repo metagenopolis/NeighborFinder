@@ -37,32 +37,6 @@ new_synth_data <- function(real_data, graph_type = "cluster", must_connect = TRU
   species <- colnames(real_data)
 
   # Functions extracted from EMtree package to remove dependency
-  ToSym <- function(A.vec) {
-    n <- (1 + sqrt(1 + 8 * length(A.vec))) / 2
-    A.mat <- matrix(0, n, n)
-    A.mat[upper.tri(A.mat)] <- A.vec
-    A.mat <- A.mat + t(A.mat)
-    A.mat
-  }
-  ToVec <- function(A.mat) {
-    return(suppressMessages(A.mat[upper.tri(A.mat)]))
-  }
-  SimCluster <- function(p, k, dens, r) {
-    beta <- dens / (r / k + (k - 1) / k)
-    alpha <- r * beta
-    while (alpha > 1) {
-      r <- 0.9 * r
-      beta <- dens / (r / k + (k - 1) / k)
-      alpha <- r * beta
-    }
-    Z <- t(stats::rmultinom(p, 1, rep(1 / k, k)))
-    groupe <- Z %*% 1:k
-    Z <- Z %*% t(Z)
-    diag(Z) <- 0
-    ZZ <- ToVec(Z)
-    G <- ToSym(rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
-    G
-  }
   generator_graph <- function(p = 20, graph = "cluster", dens = 0.3, r = 2, k = 3) {
     theta <- matrix(0, p, p)
     if (graph == "cluster") {

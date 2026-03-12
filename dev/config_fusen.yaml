@@ -21,6 +21,7 @@ flat_NeighborFinder.Rmd:
   - R/new_synth_data.R
   - R/norm_data.R
   - R/prev_for_selected_nodes.R
+  - R/simcluster.R
   - R/simulate_by_prevalence.R
   - R/simulate_from_ecdf.R
   - R/test_filter.R
@@ -35,6 +36,7 @@ flat_NeighborFinder.Rmd:
   - tests/testthat/test-get_count_table.R
   - tests/testthat/test-module_to_node.R
   - tests/testthat/test-identify_module.R
+  - tests/testthat/test-simcluster.R
   - tests/testthat/test-graph_step.R
   - tests/testthat/test-simulate_by_prevalence.R
   - tests/testthat/test-prev_for_selected_nodes.R

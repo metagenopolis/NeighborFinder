@@ -9,7 +9,8 @@ graph_step(
   col_module_id,
   annotation_level,
   seed = 10010,
-  data_type = "shotgun"
+  data_type = "shotgun",
+  ...
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ graph_step(
 \item{seed}{Numeric. Seed number for data generation (new_synth_data)}
 
 \item{data_type}{String. Enables the treatment of 16S data with "16S", default value is "shotgun"}
+
+\item{...}{Additional arguments passed on to the \code{generator_graph()} routine of \code{\link[=new_synth_data]{new_synth_data()}}}
 }
 \value{
 Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
