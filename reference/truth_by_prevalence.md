@@ -37,14 +37,9 @@ tiny_data <- data.frame(
 )
 
 tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) %>% suppressWarnings()
-#> Error in igraph::graph_from_adjacency_matrix(G): Cannot create a graph object because the adjacency matrix contains NAs.
 
 tiny_truth <- prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id = "msp_name", annotation_level = "species", object_of_interest = "bacterium")
-#> Error: object 'tiny_graph' not found
 
 tiny_true_edges <- truth_by_prevalence(tiny_truth, c(0.20, 0.30))
 #> Defining and saving true neighbors...
-#> Error in purrr::map(prev_list, for_one_prev): ℹ In index: 1.
-#> Caused by error:
-#> ! object 'tiny_truth' not found
 ```

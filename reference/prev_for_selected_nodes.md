@@ -59,8 +59,6 @@ tiny_data <- data.frame(
   SAMPLE4 = c(0, 0, 2.98320e-05, 0)
 )
 tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) %>% suppressWarnings()
-#> Error in igraph::graph_from_adjacency_matrix(G): Cannot create a graph object because the adjacency matrix contains NAs.
 
 tiny_truth <- prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id = "msp_name", annotation_level = "species", object_of_interest = "bacterium")
-#> Error: object 'tiny_graph' not found
 ```

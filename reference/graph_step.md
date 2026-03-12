@@ -11,7 +11,8 @@ graph_step(
   col_module_id,
   annotation_level,
   seed = 10010,
-  data_type = "shotgun"
+  data_type = "shotgun",
+  ...
 )
 ```
 
@@ -42,6 +43,11 @@ graph_step(
 
   String. Enables the treatment of 16S data with "16S", default value is
   "shotgun"
+
+- ...:
+
+  Additional arguments passed on to the `generator_graph()` routine of
+  [`new_synth_data()`](new_synth_data.md)
 
 ## Value
 

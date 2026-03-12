@@ -91,10 +91,8 @@
 <span class="r-in"><span>  SAMPLE4 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">2.98320e-05</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">tiny_graph</span> <span class="op">&lt;-</span> <span class="fu"><a href="graph_step.html">graph_step</a></span><span class="op">(</span><span class="va">tiny_data</span>, col_module_id <span class="op">=</span> <span class="st">"msp_name"</span>, annotation_level <span class="op">=</span> <span class="st">"species"</span>, seed <span class="op">=</span> <span class="fl">20242025</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in igraph::graph_from_adjacency_matrix(G):</span> Cannot create a graph object because the adjacency matrix contains NAs.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">tiny_truth</span> <span class="op">&lt;-</span> <span class="fu">prev_for_selected_nodes</span><span class="op">(</span><span class="va">tiny_data</span>, <span class="va">tiny_graph</span>, col_module_id <span class="op">=</span> <span class="st">"msp_name"</span>, annotation_level <span class="op">=</span> <span class="st">"species"</span>, object_of_interest <span class="op">=</span> <span class="st">"bacterium"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'tiny_graph' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
