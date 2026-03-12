@@ -1,4 +1,4 @@
-# Use case
+# Detailed example
 
 ``` r
 library(rmarkdown)
