@@ -30,6 +30,7 @@ The latest NeighborFinder version is available from the public [github
 repo](https://github.com/metagenopolis/NeighborFinder).
 
 ``` r
+
 if (!requireNamespace("remotes")) {
   install.packages("remotes")
 }
@@ -47,6 +48,7 @@ affiliation table (`taxo`) to provide additional details on the taxa
 when visualizing the results.
 
 ``` r
+
 library(neighborfinder)
 data(data)
 data(taxo)
@@ -59,6 +61,7 @@ data from the Japanese patients in this
 [cohort](https://doi.org/10.57745/7IVO3E) (`data$CRC_JPN`).
 
 ``` r
+
 res_CRC_JPN <- apply_NeighborFinder(
   data_with_annotation = data$CRC_JPN,
   object_of_interest = "Escherichia coli",
@@ -76,6 +79,7 @@ The species identified as neighbor can then be visualized using
 taxonomic annotation.
 
 ``` r
+
 plot_JPN <- visualize_network(
   res_CRC_JPN,
   taxo,
@@ -108,6 +112,7 @@ We can repeat the process to the two other datasets: the Chinese
 patients (`data$CRC_CHN`) and the European patients (`data$CRC_EUR`).
 
 ``` r
+
 # CHINA
 res_CRC_CHN <- apply_NeighborFinder(
   data$CRC_CHN,
@@ -154,6 +159,7 @@ plot_EUR <- visualize_network(
 ```
 
 ``` r
+
 plot_JPN | plot_CHN | plot_EUR
 ```
 
@@ -166,6 +172,7 @@ network, we selected the edges detected in at least 2 out of the 3
 datasets.
 
 ``` r
+
 final_net <- intersections_network(
  res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
  taxo,

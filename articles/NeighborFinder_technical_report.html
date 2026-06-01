@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Technical Report • neighborfinder</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Technical Report">
 </head>
@@ -142,7 +142,7 @@ smallest positive abundance and rounding the results, so that the
 minimum count is 1.</p>
 <p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>B</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mo stretchy="false" form="prefix">⌊</mo><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>/</mi><msub><mi>A</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo stretchy="false" form="postfix">⌋</mo></mrow><annotation encoding="application/x-tex">B_{ij} = \lfloor A_{ij}/A_{min}\rfloor</annotation></semantics></math>
 where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mtext mathvariant="normal">min</mtext></msub><mo>=</mo><msub><mo>min</mo><mrow><mo stretchy="false" form="prefix">{</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo>:</mo><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>≠</mo><mn>0</mn><mo stretchy="false" form="postfix">}</mo></mrow></msub><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">A_{\text{min}} = \min_{\{i,j : A_{ij} \neq 0\}} A_{ij}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mtext mathvariant="normal">min</mtext></msub><mo>=</mo><msub><mrow><mi mathvariant="normal">min</mi><mo>⁡</mo></mrow><mrow><mo stretchy="false" form="prefix">{</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo>:</mo><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>≠</mo><mn>0</mn><mo stretchy="false" form="postfix">}</mo></mrow></msub><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">A_{\text{min}} = \min_{\{i,j : A_{ij} \neq 0\}} A_{ij}</annotation></semantics></math>
 where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
 is the abundance table and
@@ -163,7 +163,7 @@ and the columns are module IDs
 <p>The next step consists in applying a mclr normalization to the
 previously transformed abundance data. Here is the equation
 corresponding to the mclr transformation:</p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mi>j</mi></msub><mo>=</mo><msub><mrow><mi>m</mi><mi>c</mi><mi>l</mi><mi>r</mi></mrow><mi>ϵ</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>B</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">C_j = {mclr}_\epsilon   (B_j)</annotation></semantics></math>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mi>j</mi></msub><mo>=</mo><msub><mrow><mi>m</mi><mi>c</mi><mi>l</mi><mi>r</mi></mrow><mi>ϵ</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>B</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">C_j = {mclr}_\epsilon   (B_j)</annotation></semantics></math>
 where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
 is the count table and
@@ -181,11 +181,11 @@ elements of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
 are zero, and that all other elements are positive.</p>
 <p>Then
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi>m</mi><mi>c</mi><mi>l</mi><mi>r</mi></mrow><mi>ϵ</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">{mclr}_\epsilon(x)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi>m</mi><mi>c</mi><mi>l</mi><mi>r</mi></mrow><mi>ϵ</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">{mclr}_\epsilon(x)</annotation></semantics></math>
 is defined by:</p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><msub><mrow><mi>m</mi><mi>c</mi><mi>l</mi><mi>r</mi></mrow><mi>ϵ</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mn>0</mn><mo>,</mo><mo>log</mo><mo stretchy="false" form="prefix">{</mo><mrow><msub><mi>x</mi><mrow><mi>q</mi><mo>+</mo><mn>1</mn></mrow></msub><mi>/</mi><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mo stretchy="false" form="postfix">}</mo><mo>+</mo><mi>ϵ</mi><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mo>log</mo><mo stretchy="false" form="prefix">{</mo><mrow><msub><mi>x</mi><mi>j</mi></msub><mi>/</mi><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mo stretchy="false" form="postfix">}</mo><mo>+</mo><mi>ϵ</mi><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mo>log</mo><mo stretchy="false" form="prefix">{</mo><mrow><msub><mi>x</mi><mi>p</mi></msub><mi>/</mi><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mo stretchy="false" form="postfix">}</mo><mo>+</mo><mi>ϵ</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">y= {mclr}_\epsilon(x)  = [0,...,0,\log\{{x_{q+1}/g(x)}\}+\epsilon  ,...,\log\{{x_j/g(x)}\}+\epsilon  ,...,\log\{{x_p/g(x)}\}+\epsilon ]</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><msub><mrow><mi>m</mi><mi>c</mi><mi>l</mi><mi>r</mi></mrow><mi>ϵ</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mn>0</mn><mo>,</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mrow><msub><mi>x</mi><mrow><mi>q</mi><mo>+</mo><mn>1</mn></mrow></msub><mi>/</mi><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><mo stretchy="false" form="postfix">}</mo><mo>+</mo><mi>ϵ</mi><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mrow><msub><mi>x</mi><mi>j</mi></msub><mi>/</mi><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><mo stretchy="false" form="postfix">}</mo><mo>+</mo><mi>ϵ</mi><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mrow><msub><mi>x</mi><mi>p</mi></msub><mi>/</mi><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><mo stretchy="false" form="postfix">}</mo><mo>+</mo><mi>ϵ</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">y= {mclr}_\epsilon(x)  = [0,...,0,\log\{{x_{q+1}/g(x)}\}+\epsilon  ,...,\log\{{x_j/g(x)}\}+\epsilon  ,...,\log\{{x_p/g(x)}\}+\epsilon ]</annotation></semantics></math></p>
 <p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mo>∏</mo><mrow><mi>j</mi><mo>=</mo><mi>q</mi><mo>+</mo><mn>1</mn></mrow><mi>p</mi></msubsup><msub><mi>x</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mn>1</mn><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mo>−</mo><mi>q</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mrow><annotation encoding="application/x-tex">g(x) = {(\prod^{p}_{j=q+1}x_j)}^{1/(p-q)}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mrow><mo stretchy="false" form="prefix">(</mo><msubsup><mo>∏</mo><mrow><mi>j</mi><mo>=</mo><mi>q</mi><mo>+</mo><mn>1</mn></mrow><mi>p</mi></msubsup><msub><mi>x</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mn>1</mn><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>p</mi><mo>−</mo><mi>q</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup></mrow><annotation encoding="application/x-tex">g(x) = {(\prod^{p}_{j=q+1}x_j)}^{1/(p-q)}</annotation></semantics></math>
 is the geometric mean of the non-zero elements of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>.</p>
 <p>When
@@ -195,9 +195,9 @@ is applied to the abundance table
 we apply it rowwise (that is to each sample
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>B</mi><mi>i</mi></msub><annotation encoding="application/x-tex">B_i</annotation></semantics></math>)
 and use
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi><mo>=</mo><mo>∣</mo><msub><mi>z</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>∣</mo><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\epsilon =∣ z_{min} ∣ + 1</annotation></semantics></math></p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϵ</mi><mo>=</mo><mo>∣</mo><msub><mi>z</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>∣</mo><mi>+</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">\epsilon =∣ z_{min} ∣ + 1</annotation></semantics></math></p>
 <p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>=</mo><msub><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow><mrow><msub><mrow><mi>i</mi><mi>j</mi><mo>:</mo><mi>B</mi></mrow><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>≠</mo><mn>0</mn></mrow></msub><mrow><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false" form="prefix">{</mo><mrow><msub><mi>B</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>/</mi><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>B</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mrow><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">z_{min} = {min }_{{ij:B}_{ij}\neq 0}{ log\{{B_{ij}/g(B_i)}}\}</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mo>=</mo><msub><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow><mrow><msub><mrow><mi>i</mi><mi>j</mi><mo>:</mo><mi>B</mi></mrow><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>≠</mo><mn>0</mn></mrow></msub><mrow><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false" form="prefix">{</mo><mrow><msub><mi>B</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>/</mi><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>B</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow></mrow><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">z_{min} = {min }_{{ij:B}_{ij}\neq 0}{ log\{{B_{ij}/g(B_i)}}\}</annotation></semantics></math>.</p>
 <p><br></p>
 </div>
 </div>
@@ -213,7 +213,7 @@ abundance
 of module
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mn>0</mn></mrow><annotation encoding="application/x-tex">j0</annotation></semantics></math>
 against the abundances of all others modules
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>C</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mi>j</mi><mo>≠</mo><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">{(C_j)}_{j\neq j0}</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>C</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>j</mi><mo>≠</mo><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">{(C_j)}_{j\neq j0}</annotation></semantics></math>.
 The function <code><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html" class="external-link">glmnet::cv.glmnet()</a></code> is applied on the
 normalized data 10 times, each time with a different seed. The following
 model is used:</p>
@@ -249,9 +249,9 @@ The modules for which
 corresponds to a potential neighbors of module
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mn>0</mn></mrow><annotation encoding="application/x-tex">j0</annotation></semantics></math>.</p>
 <p>This translates to the following minimization problem:</p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mi>r</mi><mi>g</mi><mi>m</mi><mi>i</mi><mi>n</mi><mrow><msub><mi></mi><mi>θ</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msup><mrow><mo>‖</mo><msub><mi>C</mi><mrow><mi>j</mi><mn>0</mn></mrow></msub><mo>−</mo><mi>X</mi><mi>θ</mi><mo>‖</mo></mrow><mn>2</mn></msup><mo>+</mo><msub><mrow><mi>λ</mi><mo>‖</mo><mi>θ</mi><mo>‖</mo></mrow><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">argmin{_{\theta}{({‖C_{j0}-X\theta‖}^2+{\lambda‖\theta‖}_1)}}</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mi>r</mi><mi>g</mi><mi>m</mi><mi>i</mi><mi>n</mi><mrow><msub><mi></mi><mi>θ</mi></msub><mrow><mo stretchy="false" form="prefix">(</mo><msup><mrow><mo>‖</mo><msub><mi>C</mi><mrow><mi>j</mi><mn>0</mn></mrow></msub><mo>−</mo><mi>X</mi><mi>θ</mi><mo>‖</mo></mrow><mn>2</mn></msup><mo>+</mo><msub><mrow><mi>λ</mi><mo>‖</mo><mi>θ</mi><mo>‖</mo></mrow><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">argmin{_{\theta}{({‖C_{j0}-X\theta‖}^2+{\lambda‖\theta‖}_1)}}</annotation></semantics></math></p>
 <p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi>X</mi><mo>=</mo><mi>C</mi></mrow><mrow><mo>−</mo><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">{X=C}_{-j0}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi>X</mi><mo>=</mo><mi>C</mi></mrow><mrow><mi>−</mi><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">{X=C}_{-j0}</annotation></semantics></math>
 is the design matrix composed of the abundances of all modules but
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mn>0</mn></mrow><annotation encoding="application/x-tex">j0</annotation></semantics></math>,
 and
@@ -269,7 +269,7 @@ parameter
 <p>Covariates can be included in the model by considering an
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 made of two distinct components:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mrow><mo>−</mo><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">C_{-j0}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mrow><mi>−</mi><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">C_{-j0}</annotation></semantics></math>
 , previously defined, and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>,
 the design matrix of the covariates.</p>
@@ -284,11 +284,11 @@ only applies on coefficients
 and not on
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>.</p>
 <p>Minimization of the objective function:</p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi>m</mi><mi>i</mi><mi>n</mi><mi>i</mi><mi>m</mi><mi>i</mi><mi>z</mi><mi>e</mi></mrow><mrow><mi>θ</mi><mo>,</mo><mi>α</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mrow><mo>‖</mo><msub><mi>C</mi><mrow><mi>j</mi><mn>0</mn></mrow></msub><mo>−</mo><msub><mi>C</mi><mrow><mo>−</mo><mi>j</mi><mn>0</mn></mrow></msub><mi>θ</mi><mo>−</mo><mi>D</mi><mi>α</mi><mo>‖</mo></mrow><mn>2</mn></msub><mo>+</mo><mi>λ</mi><msub><mrow><mo>‖</mo><mi>θ</mi><mo>‖</mo></mrow><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">{minimize}_{\theta ,\alpha}  ({‖C_{j0}-C_{-j0}\theta -D\alpha ‖}_2+\lambda {‖\theta ‖}_1)</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi>m</mi><mi>i</mi><mi>n</mi><mi>i</mi><mi>m</mi><mi>i</mi><mi>z</mi><mi>e</mi></mrow><mrow><mi>θ</mi><mo>,</mo><mi>α</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><msub><mrow><mo>‖</mo><msub><mi>C</mi><mrow><mi>j</mi><mn>0</mn></mrow></msub><mo>−</mo><msub><mi>C</mi><mrow><mi>−</mi><mi>j</mi><mn>0</mn></mrow></msub><mi>θ</mi><mo>−</mo><mi>D</mi><mi>α</mi><mo>‖</mo></mrow><mn>2</mn></msub><mo>+</mo><mi>λ</mi><msub><mrow><mo>‖</mo><mi>θ</mi><mo>‖</mo></mrow><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">{minimize}_{\theta ,\alpha}  ({‖C_{j0}-C_{-j0}\theta -D\alpha ‖}_2+\lambda {‖\theta ‖}_1)</annotation></semantics></math></p>
 <p>In practice,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mrow><mo>−</mo><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">C_{-j0}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mrow><mi>−</mi><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">C_{-j0}</annotation></semantics></math>
 are concatenated into a single matrix which is used as the input of
 <code>cv.glmnet()</code> and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
@@ -362,18 +362,18 @@ doi_recherhche_data_gouv.</p>
 <p>For each of the eight large cohorts, a graph with “cluster-like”
 structure was generated with the <code><a href="../reference/graph_step.html">graph_step()</a></code> function. A
 precision matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Ω</mi><annotation encoding="application/x-tex">\Omega</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Ω</mi><annotation encoding="application/x-tex">\Omega</annotation></semantics></math>
 with non-null coefficients respecting the graph topology was produced
 and then inverted to produce a covariance matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Σ</mi><annotation encoding="application/x-tex">{\Sigma}</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Σ</mi><annotation encoding="application/x-tex">{\Sigma}</annotation></semantics></math>.
 Semi-synthetic simulated datasets of sizes n=100, n=250, n=500, and
 n=1000 samples were generated using gaussian copula from the covariance
 matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Σ</mi><annotation encoding="application/x-tex">{\Sigma}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Σ</mi><annotation encoding="application/x-tex">{\Sigma}</annotation></semantics></math>
 and the original count matrix to produce count tables that <em>(i)</em>
 have the same marginal counts distributions as the original cohort
 <em>(ii)</em> while enforcing the correlation between taxa encoded in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Σ</mi><annotation encoding="application/x-tex">{\Sigma}</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Σ</mi><annotation encoding="application/x-tex">{\Sigma}</annotation></semantics></math>.
 The graph edges are here considered as true edges (ground truth).</p>
 <p>On 10 different seeds, for each value of <code>prev_level</code>
 tested (from 15% to 35%, by increment of 5%), and for each bacterial

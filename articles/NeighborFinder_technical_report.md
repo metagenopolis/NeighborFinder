@@ -1,6 +1,7 @@
 # Technical Report
 
 ``` r
+
 library(rmarkdown)
 library(knitr)
 library(neighborfinder)
@@ -77,11 +78,11 @@ extracted from the `OneNet` package. This is done by dividing all values
 by the smallest positive abundance and rounding the results, so that the
 minimum count is 1.
 
-$B_{ij} = \lfloor A_{ij}/A_{min}\rfloor$ where
-$A_{\text{min}} = \min_{\{ i,j:A_{ij} \neq 0\}}A_{ij}$ where $A$ is the
-abundance table and $B$ the resulting count table. Note that the rows of
-$A$ (and $B$) are samples $i \in \{ 1,...,n\}$ and the columns are
-module IDs $j \in \{ 1,...,p\}$.
+$`B_{ij} = \lfloor A_{ij}/A_{min}\rfloor`$ where
+$`A_{\text{min}} = \min_{\{i,j : A_{ij} \neq 0\}} A_{ij}`$ where $`A`$
+is the abundance table and $`B`$ the resulting count table. Note that
+the rows of $`A`$ (and $`B`$) are samples $`i \in \{1,...,n\}`$ and the
+columns are module IDs $`j \in \{1,...,p\}`$.
 
   
 
@@ -91,28 +92,27 @@ The next step consists in applying a mclr normalization to the
 previously transformed abundance data. Here is the equation
 corresponding to the mclr transformation:
 
-$C_{j} = {mclr}_{\epsilon}\left( B_{j} \right)$ where $B$ is the count
-table and $C$ the resulting normalized count table. Unlike the clr
+$`C_j = {mclr}_\epsilon   (B_j)`$ where $`B`$ is the count table and
+$`C`$ the resulting normalized count table. Unlike the clr
 normalization, mclr preserves the zeros in the dataset.
 
-The function ${mclr}_{\epsilon}$ is defined as follows. Consider a
-vector $x \in R_{+}^{p}$ of compositions, and and without loss of
-generality, assume that the ﬁrst $q$ elements of $x$ are zero, and that
-all other elements are positive.
+The function $`{mclr}_\epsilon`$ is defined as follows. Consider a
+vector $`x\in R_+^p`$ of compositions, and and without loss of
+generality, assume that the ﬁrst $`q`$ elements of $`x`$ are zero, and
+that all other elements are positive.
 
-Then ${mclr}_{\epsilon}(x)$ is defined by:
+Then $`{mclr}_\epsilon(x)`$ is defined by:
 
-$y = {mclr}_{\epsilon}(x) = \left\lbrack 0,...,0,\log\{{x_{q + 1}/g(x)}\} + \epsilon,...,\log\{{x_{j}/g(x)}\} + \epsilon,...,\log\{{x_{p}/g(x)}\} + \epsilon \right\rbrack$
+$`y= {mclr}_\epsilon(x)  = [0,...,0,\log\{{x_{q+1}/g(x)}\}+\epsilon  ,...,\log\{{x_j/g(x)}\}+\epsilon  ,...,\log\{{x_p/g(x)}\}+\epsilon ]`$
 
-where $g(x) = \left( \prod_{j = q + 1}^{p}x_{j} \right)^{1/{(p - q)}}$
-is the geometric mean of the non-zero elements of $x$.
+where $`g(x) = {(\prod^{p}_{j=q+1}x_j)}^{1/(p-q)}`$ is the geometric
+mean of the non-zero elements of $`x`$.
 
-When ${mclr}_{\epsilon}$ is applied to the abundance table $B$, we apply
-it rowwise (that is to each sample $B_{i}$) and use
-$\epsilon = \mid z_{min} \mid + 1$
+When $`{mclr}_\epsilon`$ is applied to the abundance table $`B`$, we
+apply it rowwise (that is to each sample $`B_i`$) and use
+$`\epsilon =∣ z_{min} ∣ + 1`$
 
-where
-$z_{min} = {min}_{{ij:B}_{ij} \neq 0}{log\{{B_{ij}/g\left( B_{i} \right)}}\}$.
+where $`z_{min} = {min }_{{ij:B}_{ij}\neq 0}{ log\{{B_{ij}/g(B_i)}}\}`$.
 
   
 
@@ -121,58 +121,59 @@ $z_{min} = {min}_{{ij:B}_{ij} \neq 0}{log\{{B_{ij}/g\left( B_{i} \right)}}\}$.
 ##### a) Simple case: no covariates
 
 We consider a linear regression problem where we regress the abundance
-$C_{j0}$ of module $j0$ against the abundances of all others modules
-$\left( C_{j} \right)_{j \neq j0}$. The function
+$`C_{j0}`$ of module $`j0`$ against the abundances of all others modules
+$`{(C_j)}_{j\neq j0}`$. The function
 [`glmnet::cv.glmnet()`](https://glmnet.stanford.edu/reference/cv.glmnet.html)
 is applied on the normalized data 10 times, each time with a different
 seed. The following model is used:
 
-$C_{j0} = \theta_{1}C_{1} + ... + \theta_{j0 - 1}C_{j0 - 1} + \theta_{j0 + 1}C_{j0 + 1} + ... + \theta_{p}C_{p} + \epsilon$
+$`C_{j0} = \theta_1  C_1 +...+ \theta_{j0-1}  C_{j0-1} + \theta_{j0+1}  C_{j0+1} +...+ \theta_p  C_p +\epsilon`$
 
-where $C$ is the normalized count table obtained at the end of step 1)
-and $j0$ designates the column of the module of interest in $C$.
-$\theta_{j}$ is the regression coefficient of $j0$ against $j$, and
-$\epsilon$ is the residual error, assumed to be gaussian with
-$\sigma^{2}I_{n}$ covariance.
+where $`C`$ is the normalized count table obtained at the end of step 1)
+and $`j0`$ designates the column of the module of interest in $`C`$.
+$`\theta_j`$ is the regression coefficient of $`j0`$ against $`j`$, and
+$`\epsilon`$ is the residual error, assumed to be gaussian with
+$`\sigma^2  I_n`$ covariance.
 
-Since $p$ is usually bigger than $n$ and we want a sparse vector
-$\theta$, we use $l_{1}$–regularization to select a small number of non
-null coefficients in $\theta$. The modules for which $\theta_{j} \neq 0$
-corresponds to a potential neighbors of module $j0$.
+Since $`p`$ is usually bigger than $`n`$ and we want a sparse vector
+$`\theta`$, we use $`l_1`$–regularization to select a small number of
+non null coefficients in $`\theta`$. The modules for which
+$`\theta_j \neq 0`$ corresponds to a potential neighbors of module
+$`j0`$.
 
 This translates to the following minimization problem:
 
-$argmin{_{\theta}\left( \left\| C_{j0} - X\theta \right\|^{2} + {\left. \lambda \right\|\left. \theta \right\|}_{1} \right)}$
+$`argmin{_{\theta}{({‖C_{j0}-X\theta‖}^2+{\lambda‖\theta‖}_1)}}`$
 
-where ${X = C}_{- j0}$ is the design matrix composed of the abundances
-of all modules but $j0$, and $\lambda$ is the penalization term
+where $`{X=C}_{-j0}`$ is the design matrix composed of the abundances of
+all modules but $`j0`$, and $`\lambda`$ is the penalization term
 enforcing the strength of the regularization and thus the number of non
 null coefficients. We solve this problem using `glmnet::glasso()` and
-use cross-validation to tune the parameter $\lambda$.
+use cross-validation to tune the parameter $`\lambda`$.
 
   
 
 ##### b) Handling covariates
 
-Covariates can be included in the model by considering an $X$ made of
-two distinct components: $C_{- j0}$ , previously defined, and $D$, the
-design matrix of the covariates.
+Covariates can be included in the model by considering an $`X`$ made of
+two distinct components: $`C_{-j0}`$ , previously defined, and $`D`$,
+the design matrix of the covariates.
 
-$D$ the metadata matrix where some columns are considered as covariates.
-Here is the necessary transformation:
+$`D`$ the metadata matrix where some columns are considered as
+covariates. Here is the necessary transformation:
 
 \$\[\matrix{D&C\_{-j0}}\]\$ \$\[\matrix{\alpha\\\theta}\]\$
 
-The penalization $\lambda$ only applies on coefficients $\theta_{i}$ and
-not on $\alpha$.
+The penalization $`\lambda`$ only applies on coefficients $`\theta_i`$
+and not on $`\alpha`$.
 
 Minimization of the objective function:
 
-${minimize}_{\theta,\alpha}\left( \left\| C_{j0} - C_{- j0}\theta - D\alpha \right\|_{2} + \lambda\left\| \theta \right\|_{1} \right)$
+$`{minimize}_{\theta ,\alpha}  ({‖C_{j0}-C_{-j0}\theta -D\alpha ‖}_2+\lambda {‖\theta ‖}_1)`$
 
-In practice, $D$ and $C_{- j0}$ are concatenated into a single matrix
-which is used as the input of `cv.glmnet()` and $D$ is constructed from
-a covariate dataframe using either *(i)* the formula interface, or
+In practice, $`D`$ and $`C_{-j0}`$ are concatenated into a single matrix
+which is used as the input of `cv.glmnet()` and $`D`$ is constructed
+from a covariate dataframe using either *(i)* the formula interface, or
 *(ii)* specifying the name of a single column used as covariate.
 
 To use covariates, 3 additional arguments are required:
@@ -240,15 +241,15 @@ ranging from 347 to 1084) detailed here doi_recherhche_data_gouv.
 For each of the eight large cohorts, a graph with “cluster-like”
 structure was generated with the
 [`graph_step()`](../reference/graph_step.md) function. A precision
-matrix $\Omega$ with non-null coefficients respecting the graph topology
-was produced and then inverted to produce a covariance matrix $\Sigma$.
-Semi-synthetic simulated datasets of sizes n=100, n=250, n=500, and
-n=1000 samples were generated using gaussian copula from the covariance
-matrix $\Sigma$ and the original count matrix to produce count tables
-that *(i)* have the same marginal counts distributions as the original
-cohort *(ii)* while enforcing the correlation between taxa encoded in
-$\Sigma$. The graph edges are here considered as true edges (ground
-truth).
+matrix $`\Omega`$ with non-null coefficients respecting the graph
+topology was produced and then inverted to produce a covariance matrix
+$`{\Sigma}`$. Semi-synthetic simulated datasets of sizes n=100, n=250,
+n=500, and n=1000 samples were generated using gaussian copula from the
+covariance matrix $`{\Sigma}`$ and the original count matrix to produce
+count tables that *(i)* have the same marginal counts distributions as
+the original cohort *(ii)* while enforcing the correlation between taxa
+encoded in $`{\Sigma}`$. The graph edges are here considered as true
+edges (ground truth).
 
 On 10 different seeds, for each value of `prev_level` tested (from 15%
 to 35%, by increment of 5%), and for each bacterial species, the

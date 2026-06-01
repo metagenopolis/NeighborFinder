@@ -1,6 +1,7 @@
 # Detailed example
 
 ``` r
+
 library(rmarkdown)
 library(knitr)
 library(neighborfinder)
@@ -35,6 +36,7 @@ the taxonomic annotation at the species level, the second one is the
 module ID, and then each column is a sample.
 
 ``` r
+
 data(data)
 data$CRC_JPN[1:5, 1:5] %>% kable()
 ```
@@ -53,17 +55,18 @@ The metadata gathers characteristics (in columns) for each sample (in
 rows).
 
 ``` r
+
 data(metadata)
 metadata$CRC_JPN[1:5, 1:5] %>% kable()
 ```
 
-| sample    | HQ_clean_read_count | gut_mapped_read_count | gut_mapped_pc    | oral_mapped_read_count |
-|:----------|--------------------:|----------------------:|:-----------------|-----------------------:|
-| DRS091371 |            39159954 |              32390300 | 82.7128142183211 |               32390300 |
-| DRS091370 |            35443586 |              28999607 | 81.8190546520885 |               28999607 |
-| DRS091369 |            43922552 |              36841645 | 83.8786530436574 |               36841645 |
-| DRS091368 |            29627016 |              25334944 | 85.5129790998864 |               25334944 |
-| DRS091366 |            49606076 |              41361270 | 83.3794432762632 |               41361270 |
+| sample | HQ_clean_read_count | gut_mapped_read_count | gut_mapped_pc | oral_mapped_read_count |
+|:---|---:|---:|:---|---:|
+| DRS091371 | 39159954 | 32390300 | 82.7128142183211 | 32390300 |
+| DRS091370 | 35443586 | 28999607 | 81.8190546520885 | 28999607 |
+| DRS091369 | 43922552 | 36841645 | 83.8786530436574 | 36841645 |
+| DRS091368 | 29627016 | 25334944 | 85.5129790998864 | 25334944 |
+| DRS091366 | 49606076 | 41361270 | 83.3794432762632 | 41361270 |
 
 ### 3) The taxonomy
 
@@ -72,6 +75,7 @@ its species and genus annotation as well as the catalog in which the msp
 is mostly found.
 
 ``` r
+
 data(taxo)
 taxo[1:5, ] %>% kable()
 ```
@@ -92,6 +96,7 @@ This dataframe is an adjacency matrix encoding the graph with
 to an edge. This object is needed to simulate semi-synthetic data.
 
 ``` r
+
 data(graphs)
 graphs$CRC_JPN[1:5, 1:5] %>% kable()
 ```
@@ -105,6 +110,7 @@ graphs$CRC_JPN[1:5, 1:5] %>% kable()
 | msp_0009 |        0 |        0 |        0 |        0 |        0 |
 
 ``` r
+
 graphs$CRC_JPN[5:10, 87:90] %>% kable()
 ```
 
@@ -142,6 +148,7 @@ commented since it takes few minutes to execute and also because it is
 included in the ‘graphs’ object.
 
 ``` r
+
 # G <- graph_step(data_with_annotation = data$CRC_JPN_CHN_EUR,
 #                 col_module_id = "msp_id",
 #                 annotation_level = "species"
@@ -159,6 +166,7 @@ the function
 [`apply_NeighborFinder()`](../reference/apply_NeighborFinder.md).
 
 ``` r
+
 choose_params_values(
   data_with_annotation = data$CRC_JPN,
   object_of_interest = "Escherichia coli",
@@ -209,6 +217,7 @@ the second is the msps name, and each subsequent column is a sample (see
 above for the abundance table preview).
 
 ``` r
+
 # JAPAN
 res_CRC_JPN <- apply_NeighborFinder(
   data_with_annotation = data$CRC_JPN,
@@ -239,6 +248,7 @@ The `taxo_option` generates the same network but with species names
 instead of msps ones.
 
 ``` r
+
 visualize_network(
   res_CRC_JPN,
   taxo,
@@ -252,6 +262,7 @@ visualize_network(
 ![](NeighborFinder_vignette_files/figure-html/network-JPN-1.png)
 
 ``` r
+
 
 visualize_network(
   res_CRC_JPN,
@@ -290,6 +301,7 @@ function would run only if the following all 3 arguments are given:
   names, it should be consistent with the colnames of “data_with_taxo”.
 
 ``` r
+
 # On CRC patients
 # CHINA
 res_CRC_CHN <- apply_NeighborFinder(
@@ -319,6 +331,7 @@ res_CRC_EUR <- apply_NeighborFinder(
 ```
 
 ``` r
+
 visualize_network(
   res_CRC_CHN,
   taxo,
@@ -332,6 +345,7 @@ visualize_network(
 ![](NeighborFinder_vignette_files/figure-html/network-covariate-1.png)
 
 ``` r
+
 
 visualize_network(
   res_CRC_EUR,
@@ -353,6 +367,7 @@ datasets. One can choose the visualization `threshold`, corresponding to
 the minimum number of datasets in which neighbors have been found.
 
 ``` r
+
 intersections_network(
   res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
   taxo,
@@ -375,6 +390,7 @@ summary table, indicating in which datasets intersections were found
 above the set `threshold`.
 
 ``` r
+
 intersections_table(
   res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
   threshold = 2,
@@ -385,11 +401,11 @@ intersections_table(
 ) %>% kable()
 ```
 
-| node1    | module1          | node2    | module2                 | datasets     | intersections |  mean_coef |
-|:---------|:-----------------|:---------|:------------------------|:-------------|--------------:|-----------:|
-| msp_0005 | Escherichia coli | msp_0030 | Klebsiella pneumoniae   | n\_ 1, n\_ 2 |             2 |  0.1006331 |
-| msp_0005 | Escherichia coli | msp_0103 | Clostridium_AQ innocuum | n\_ 1, n\_ 2 |             2 |  0.0744551 |
-| msp_0005 | Escherichia coli | msp_0208 | Blautia_A faecis        | n\_ 1, n\_ 3 |             2 | -0.1269152 |
+| node1 | module1 | node2 | module2 | datasets | intersections | mean_coef |
+|:---|:---|:---|:---|:---|---:|---:|
+| msp_0005 | Escherichia coli | msp_0030 | Klebsiella pneumoniae | n\_ 1, n\_ 2 | 2 | 0.1006331 |
+| msp_0005 | Escherichia coli | msp_0103 | Clostridium_AQ innocuum | n\_ 1, n\_ 2 | 2 | 0.0744551 |
+| msp_0005 | Escherichia coli | msp_0208 | Blautia_A faecis | n\_ 1, n\_ 3 | 2 | -0.1269152 |
 
 One of the resulting neighbors is *Klebsiella pneumoniae*. It is also
 described in this
