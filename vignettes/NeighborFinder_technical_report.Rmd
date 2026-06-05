@@ -124,7 +124,7 @@ Covariates can be included in the model by considering an $X$ made of two distin
 $D$ the metadata matrix where some columns are considered as covariates.
 Here is the necessary transformation: 
 
-$[\matrix{D&C_{-j0}}]$ $[\matrix{\alpha\\\theta}]$
+$[\matrix{D&C_{-j0}}]$.$[\matrix{\alpha\\\theta}]$
 
 The penalization $\lambda$ only applies on coefficients $\theta_i$ and not on $\alpha$.
 
@@ -169,7 +169,7 @@ Performance scores were way better with this repetition approach than running th
 
 ### How to calibrate the parameters values ?
 
-The function ```apply_neighborfinder()``` has two important parameters (```prev_level``` and ```top_filtering```) that shape the output. It is also acknowledged that the dataset size usually has an impact on the generated network. Our performance assessment strategy therefore consisted in covering a range of values for both parameters, with the aim of providing users with guidelines to pick the most suitable combination for their dataset size. We tested the performance of NeighborFinder on eight shotgun metagenomic cohorts (sample sizes ranging from 347 to 1084) detailed here doi_recherhche_data_gouv.
+The function ```apply_neighborfinder()``` has two important parameters (```prev_level``` and ```top_filtering```) that shape the output. It is also acknowledged that the dataset size usually has an impact on the generated network. Our performance assessment strategy therefore consisted in covering a range of values for both parameters, with the aim of providing users with guidelines to pick the most suitable combination for their dataset size. We tested the performance of NeighborFinder on eight shotgun metagenomic cohorts (sample sizes ranging from 346 to 1084) detailed [here](https://doi.org/10.57745/UPITJ0).
 
 For each of the eight large cohorts, a graph with "cluster-like" structure was generated with the ```graph_step()``` function. A precision matrix $\Omega$ with non-null coefficients respecting the graph topology was produced and then inverted to produce a covariance matrix ${\Sigma}$. Semi-synthetic simulated datasets of sizes n=100, n=250, n=500, and n=1000 samples were generated using gaussian copula from the covariance matrix ${\Sigma}$ and the original count matrix to produce count tables that *(i)* have the same marginal counts distributions as the original cohort *(ii)* while enforcing the correlation between taxa encoded in ${\Sigma}$. The graph edges are here considered as true edges (ground truth).
 
