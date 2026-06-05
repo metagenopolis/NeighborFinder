@@ -123,7 +123,7 @@ where $`z_{min} = {min }_{{ij:B}_{ij}\neq 0}{ log\{{B_{ij}/g(B_i)}}\}`$.
 We consider a linear regression problem where we regress the abundance
 $`C_{j0}`$ of module $`j0`$ against the abundances of all others modules
 $`{(C_j)}_{j\neq j0}`$. The function
-[`glmnet::cv.glmnet()`](https://glmnet.stanford.edu/reference/cv.glmnet.html)
+[`glmnet::cv.glmnet()`](https://rdrr.io/pkg/glmnet/man/cv.glmnet.html)
 is applied on the normalized data 10 times, each time with a different
 seed. The following model is used:
 
@@ -162,7 +162,7 @@ the design matrix of the covariates.
 $`D`$ the metadata matrix where some columns are considered as
 covariates. Here is the necessary transformation:
 
-\$\[\matrix{D&C\_{-j0}}\]\$ \$\[\matrix{\alpha\\\theta}\]\$
+\$\[\matrix{D&C\_{-j0}}\]\$.\$\[\matrix{\alpha\\\theta}\]\$
 
 The penalization $`\lambda`$ only applies on coefficients $`\theta_i`$
 and not on $`\alpha`$.
@@ -236,7 +236,8 @@ consisted in covering a range of values for both parameters, with the
 aim of providing users with guidelines to pick the most suitable
 combination for their dataset size. We tested the performance of
 NeighborFinder on eight shotgun metagenomic cohorts (sample sizes
-ranging from 347 to 1084) detailed here doi_recherhche_data_gouv.
+ranging from 346 to 1084) detailed
+[here](https://doi.org/10.57745/UPITJ0).
 
 For each of the eight large cohorts, a graph with “cluster-like”
 structure was generated with the

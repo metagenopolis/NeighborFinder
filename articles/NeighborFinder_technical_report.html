@@ -214,7 +214,7 @@ of module
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mn>0</mn></mrow><annotation encoding="application/x-tex">j0</annotation></semantics></math>
 against the abundances of all others modules
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>C</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>j</mi><mo>≠</mo><mi>j</mi><mn>0</mn></mrow></msub><annotation encoding="application/x-tex">{(C_j)}_{j\neq j0}</annotation></semantics></math>.
-The function <code><a href="https://glmnet.stanford.edu/reference/cv.glmnet.html" class="external-link">glmnet::cv.glmnet()</a></code> is applied on the
+The function <code><a href="https://rdrr.io/pkg/glmnet/man/cv.glmnet.html" class="external-link">glmnet::cv.glmnet()</a></code> is applied on the
 normalized data 10 times, each time with a different seed. The following
 model is used:</p>
 <p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>j</mi><mn>0</mn></mrow></msub><mo>=</mo><msub><mi>θ</mi><mn>1</mn></msub><msub><mi>C</mi><mn>1</mn></msub><mo>+</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>+</mo><msub><mi>θ</mi><mrow><mi>j</mi><mn>0</mn><mo>−</mo><mn>1</mn></mrow></msub><msub><mi>C</mi><mrow><mi>j</mi><mn>0</mn><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>θ</mi><mrow><mi>j</mi><mn>0</mn><mo>+</mo><mn>1</mn></mrow></msub><msub><mi>C</mi><mrow><mi>j</mi><mn>0</mn><mo>+</mo><mn>1</mn></mrow></msub><mo>+</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>+</mo><msub><mi>θ</mi><mi>p</mi></msub><msub><mi>C</mi><mi>p</mi></msub><mo>+</mo><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">C_{j0} = \theta_1  C_1 +...+ \theta_{j0-1}  C_{j0-1} + \theta_{j0+1}  C_{j0+1} +...+ \theta_p  C_p +\epsilon</annotation></semantics></math></p>
@@ -276,7 +276,7 @@ the design matrix of the covariates.</p>
 <p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
 the metadata matrix where some columns are considered as covariates.
 Here is the necessary transformation:</p>
-<p><span class="math inline">$[\matrix{D&amp;C_{-j0}}]$</span> <span class="math inline">$[\matrix{\alpha\\\theta}]$</span></p>
+<p><span class="math inline">$[\matrix{D&amp;C_{-j0}}]$</span>.<span class="math inline">$[\matrix{\alpha\\\theta}]$</span></p>
 <p>The penalization
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
 only applies on coefficients
@@ -357,8 +357,7 @@ strategy therefore consisted in covering a range of values for both
 parameters, with the aim of providing users with guidelines to pick the
 most suitable combination for their dataset size. We tested the
 performance of NeighborFinder on eight shotgun metagenomic cohorts
-(sample sizes ranging from 347 to 1084) detailed here
-doi_recherhche_data_gouv.</p>
+(sample sizes ranging from 346 to 1084) detailed <a href="https://doi.org/10.57745/UPITJ0" class="external-link">here</a>.</p>
 <p>For each of the eight large cohorts, a graph with “cluster-like”
 structure was generated with the <code><a href="../reference/graph_step.html">graph_step()</a></code> function. A
 precision matrix
