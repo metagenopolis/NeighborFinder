@@ -29,11 +29,13 @@ fusen::fill_description(overwrite = TRUE,
       person("Mathilde", "Sola", email = "mathilde.sola@inrae.fr", role = c("aut", "cre"), comment = c(ORCID = "0009-0009-0436-5078")), 
       person("Mahendra", "Mariadassou", email = "mahendra.mariadassou@inrae.fr", role = c("aut"), comment = c(ORCID = "0000-0003-2986-354X")), 
       person("Magali", "Berland", email = "magali.berland@inrae.fr", role = c("aut"), comment = c(ORCID = "0000-0002-6762-5350"))
-    )
+    ),
+    Note = "This package includes modified copies of functions from the OneNet package (MIT License)."
   )
 )
 # Define License with use_*_license()
-usethis::use_mit_license("Mathilde Sola")
+usethis::use_mit_license("INRAE")
+fs::file_append("LICENSE", "\n\nThis package includes code derived from OneNet (MIT License).\n")
 
 ```
 
@@ -117,7 +119,7 @@ NULL
 # Conversion to count table function with prevalence filter
 
 ```{r fun-get_count_table}
-#' Conversion to count table function with prevalence filter (Extracted from OneNet package)
+#' Conversion to count table function with prevalence filter 
 #' 
 #' @param abund.path String. Path to the abundance table
 #' @param abund.table Dataframe. Abundance table, it should have the bacterial species names as first column
@@ -126,6 +128,31 @@ NULL
 #' @param msp String vector. It indicates bacterial species names, if they are not specified in the abundance table first column
 #' @param verbatim Boolean. Controls verbosity
 #'
+#' @source This function is adapted from the same name function in OneNet package (version 0.3.1),
+#'         which is licensed under the MIT License.
+#'         Original copyright (c) 2021-2024 INRAE.
+#'
+#'         The MIT License text for the original package is as follows:
+#'         ---
+#'         Permission is hereby granted, free of charge, to any person obtaining a copy
+#'         of this software and associated documentation files (the "Software"), to deal
+#'         in the Software without restriction, including without limitation the rights
+#'         to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#'         copies of the Software, and to permit persons to whom the Software is
+#'         furnished to do so, subject to the following conditions:
+#'
+#'         The above copyright notice and this permission notice shall be included in all
+#'         copies or substantial portions of the Software.
+#'
+#'         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#'         IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#'         FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#'         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#'         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#'         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#'         SOFTWARE.
+#'         ---
+#' 
 #' @return A list containing
 #'  \item{data: }{the final count table (tibble)}
 #'  \item{prevalences: }{a tibble gathering the prevalence of each bacterial species}
@@ -277,7 +304,7 @@ test_that("identify_module works", {
 # Simulate data
 
 ```{r fun-simulate_from_ecdf}
-#' Simulate data (extracted from OneNet package)
+#' Simulate data
 #' Generates synthetic count data based on empirical cumulative distribution (ecdf) of real count data
 #'
 #' @param real_data Matrix. Contains real count data of size n by p
@@ -286,6 +313,31 @@ test_that("identify_module works", {
 #' @param seed Numeric. Seed number for data generation
 #' @param verbatim Boolean. If TRUE: iteration and index calculation for each step are printed out
 #' 
+#' @source This function is adapted from the same name function in OneNet package (version 0.3.1),
+#'         which is licensed under the MIT License.
+#'         Original copyright (c) 2021-2024 INRAE.
+#'
+#'         The MIT License text for the original package is as follows:
+#'         ---
+#'         Permission is hereby granted, free of charge, to any person obtaining a copy
+#'         of this software and associated documentation files (the "Software"), to deal
+#'         in the Software without restriction, including without limitation the rights
+#'         to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#'         copies of the Software, and to permit persons to whom the Software is
+#'         furnished to do so, subject to the following conditions:
+#'
+#'         The above copyright notice and this permission notice shall be included in all
+#'         copies or substantial portions of the Software.
+#'
+#'         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#'         IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#'         FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#'         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#'         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#'         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#'         SOFTWARE.
+#'         ---
+#'          
 #' @return Matrix. The vector from the upper triangular part of A.mat
 #' @export
 
@@ -419,6 +471,31 @@ test_that("SimCluster works", {
 #' @param verbatim Boolean. Controls verbosity
 #' @param signed Boolean. TRUE for simulating both positive and negative partial correlations. Default is to FALSE, which implies only negative partial correlations
 #'
+#' @source This function is adapted from the same name function in OneNet package (version 0.3.1),
+#'         which is licensed under the MIT License.
+#'         Original copyright (c) 2021-2024 INRAE.
+#'
+#'         The MIT License text for the original package is as follows:
+#'         ---
+#'         Permission is hereby granted, free of charge, to any person obtaining a copy
+#'         of this software and associated documentation files (the "Software"), to deal
+#'         in the Software without restriction, including without limitation the rights
+#'         to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#'         copies of the Software, and to permit persons to whom the Software is
+#'         furnished to do so, subject to the following conditions:
+#'
+#'         The above copyright notice and this permission notice shall be included in all
+#'         copies or substantial portions of the Software.
+#'
+#'         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#'         IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#'         FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#'         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#'         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#'         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#'         SOFTWARE.
+#'         ---
+#'         
 #' @return List. Containing the simulated discrete counts, the corresponding true partial correlation matrix from the latent Gaussian layer of the model and the original graph structure that was used
 #' @export
 
@@ -572,6 +649,7 @@ test_that("graph_step works", {
 # For eps and atleast, users do not have to specify any values. Default should be enough.
 #' @param eps epsilon in eq (2) of the paper "Yoon, Gaynanova, Müller (2019), Frontiers in Genetics". positive shifts to all non-zero compositions. Refer to the paper for more details. eps = absolute value of minimum of log ratio counts plus c.
 #' @param atleast default value is 1. Constant c which ensures all nonzero values to be strictly positive. default is 1.
+#' @reference Yoon G, Gaynanova I and Müller CL (2019) Microbial Networks in SPRING - Semi-parametric Rank-Based Correlation and Partial Correlation Estimation for Quantitative Microbiome Data. Front. Genet. 10:516. \doi{10.3389/fgene.2019.00516}
 #'
 #' @return \code{mclr} returns a data matrix of the same dimension with input data matrix.
 #' @export
