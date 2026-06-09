@@ -124,7 +124,7 @@ Covariates can be included in the model by considering an $X$ made of two distin
 $D$ the metadata matrix where some columns are considered as covariates.
 Here is the necessary transformation: 
 
-$[\matrix{D&C_{-j0}}]$.$[\matrix{\alpha\\\theta}]$
+$\pmatrix{D&C_{-j0}} \pmatrix{\alpha\\\theta}$
 
 The penalization $\lambda$ only applies on coefficients $\theta_i$ and not on $\alpha$.
 
