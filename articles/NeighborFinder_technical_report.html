@@ -276,8 +276,15 @@ the design matrix of the covariates.</p>
 <p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
 the metadata matrix where some columns are considered as covariates.
 Here is the necessary transformation:</p>
-<p><span class="math inline">$\pmatrix{D&amp;C_{-j0}}
-\pmatrix{\alpha\\\theta}$</span></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>D</mi></mtd><mtd columnalign="center" style="text-align: center"><msub><mi>C</mi><mrow><mi>−</mi><mi>j</mi><mn>0</mn></mrow></msub></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>α</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>θ</mi></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\begin{pmatrix}
+D &amp; C_{-j0}
+\end{pmatrix}
+\begin{pmatrix}
+\alpha \\
+\theta
+\end{pmatrix}
+</annotation></semantics></math></p>
 <p>The penalization
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
 only applies on coefficients
