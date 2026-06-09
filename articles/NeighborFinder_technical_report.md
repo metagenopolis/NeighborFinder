@@ -162,7 +162,7 @@ the design matrix of the covariates.
 $`D`$ the metadata matrix where some columns are considered as
 covariates. Here is the necessary transformation:
 
-\$\[\matrix{D&C\_{-j0}}\]\$.\$\[\matrix{\alpha\\\theta}\]\$
+\$\pmatrix{D&C\_{-j0}} \pmatrix{\alpha\\\theta}\$
 
 The penalization $`\lambda`$ only applies on coefficients $`\theta_i`$
 and not on $`\alpha`$.
