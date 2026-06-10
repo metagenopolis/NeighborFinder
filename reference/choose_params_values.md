@@ -67,14 +67,7 @@ Dataframe. Returns F1 rates before and after using NeighborFinder()
 ## Examples
 
 ``` r
-data(data)
-data(graphs)
-choose_params_values(data_with_annotation = data$CRC_JPN, object_of_interest = "Escherichia coli", sample_size = 100, prev_list = c(0.20, 0.30), filtering_list = c(10, 20), graph_file = graphs$CRC_JPN, col_module_id = "msp_id", annotation_level = "species")
-#> Defining and saving true neighbors...
-#> Calculating scores...
-#>   prev_level filtering_top F1_before F1_after
-#> 1        0.2            10    0.0120     0.00
-#> 2        0.2            20    0.0120     0.67
-#> 3        0.3            10    0.0058     0.67
-#> 4        0.3            20    0.0058     1.00
+# data(data)
+# data(graphs)
+# choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
 ```

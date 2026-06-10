@@ -220,7 +220,7 @@ real data extracted from this
 - [`find_module_neighbors()`](find_module_neighbors.md) : Apply
   cv.glmnet() for a given mmodule ID
 - [`get_count_table()`](get_count_table.md) : Conversion to count table
-  function with prevalence filter (Extracted from OneNet package)
+  function with prevalence filter
 - [`graph_step()`](graph_step.md) : Generate a graph with a
   "cluster-like" structure, only needed for simulation purposes
 - [`graphs`](graphs.md) : graphs
@@ -242,13 +242,12 @@ real data extracted from this
   prevalence level
 - [`prev_for_selected_nodes()`](prev_for_selected_nodes.md) : Extract
   edges in graph involving any module in object_of_interest set
-- [`res_by_filtering()`](res_by_filtering.md) : Give results from
-  cvglm_to_coeffs_by_object() for each filtering top percentage
+- [`result_example`](result_example.md) : result_example
 - [`simulate_by_prevalence()`](simulate_by_prevalence.md) : List the
   simulated count tables by level of prevalence
 - [`simulate_from_ecdf()`](simulate_from_ecdf.md) : Simulate data
-  (extracted from OneNet package) Generates synthetic count data based
-  on empirical cumulative distribution (ecdf) of real count data
+  Generates synthetic count data based on empirical cumulative
+  distribution (ecdf) of real count data
 - [`taxo`](taxo.md) : taxo
 - [`test_filter()`](test_filter.md) : Render a table gathering precision
   and recall rates before and after filtering on coefficient values

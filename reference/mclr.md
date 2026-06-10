@@ -39,3 +39,11 @@ mclr(dat, base = exp(1), tol = 1e-16, eps = NULL, atleast = 1)
 
 `mclr` returns a data matrix of the same dimension with input data
 matrix.
+
+## Details
+
+This function implements the mclr normalization introduced in Yoon G,
+Gaynanova I and Müller CL (2019) Microbial Networks in SPRING -
+Semi-parametric Rank-Based Correlation and Partial Correlation
+Estimation for Quantitative Microbiome Data. Front. Genet. 10:516.
+[doi:10.3389/fgene.2019.00516](https://doi.org/10.3389/fgene.2019.00516)
