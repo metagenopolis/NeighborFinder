@@ -55,5 +55,14 @@ graphs<-list(CRC_JPN=G_JPN, CRC_JPN_CHN_EUR=G_CRC)
 
 usethis::use_data(graphs, overwrite = TRUE)
 
+## Creation of results for a use case example
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
+res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
+
+result_example <- list(res_CRC_JPN=res_CRC_JPN, res_CRC_CHN=res_CRC_CHN, res_CRC_EUR=res_CRC_EUR)
+
+usethis::use_data(result_example, overwrite = TRUE)
+
 
 

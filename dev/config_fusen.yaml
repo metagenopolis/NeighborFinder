@@ -31,6 +31,7 @@ flat_NeighborFinder.Rmd:
   - R/data-for-crc-patients.R
   - R/metadata-for-crc-patients.R
   - R/graphs-for-crc-patients.R
+  - R/result-for-a-use-case-example.R
   - R/pipe-function.R
   tests:
   - tests/testthat/test-get_count_table.R
@@ -44,7 +45,6 @@ flat_NeighborFinder.Rmd:
   - tests/testthat/test-norm_data.R
   - tests/testthat/test-compute_precision.R
   - tests/testthat/test-compute_recall.R
-  - tests/testthat/test-choose_params_values.R
   - tests/testthat/test-apply_nf_simple.R
   - tests/testthat/test-apply_neighborfinder.R
   - tests/testthat/test-intersections_table.R
