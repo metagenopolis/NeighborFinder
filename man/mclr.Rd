@@ -23,3 +23,6 @@ mclr(dat, base = exp(1), tol = 1e-16, eps = NULL, atleast = 1)
 \description{
 Modified central log ratio (mclr) transformation extracted from the SPRING package
 }
+\details{
+This function implements the mclr normalization introduced in Yoon G, Gaynanova I and Müller CL (2019) Microbial Networks in SPRING - Semi-parametric Rank-Based Correlation and Partial Correlation Estimation for Quantitative Microbiome Data. Front. Genet. 10:516. \doi{10.3389/fgene.2019.00516}
+}
