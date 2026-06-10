@@ -15,9 +15,9 @@
 #' @return Dataframe. Returns F1 rates before and after using NeighborFinder()
 #' @export
 #' @examples
-#' data(data)
-#' data(graphs)
-#' choose_params_values(data_with_annotation = data$CRC_JPN, object_of_interest = "Escherichia coli", sample_size = 100, prev_list = c(0.20, 0.30), filtering_list = c(10, 20), graph_file = graphs$CRC_JPN, col_module_id = "msp_id", annotation_level = "species")
+#' # data(data)
+#' # data(graphs)
+#' # choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
 choose_params_values <- function(data_with_annotation, object_of_interest, sample_size, prev_list = c(0.2, 0.3, 0.4), filtering_list = c(10, 20, 30), graph_file = NULL, col_module_id, annotation_level) {
   # Loading graph
   if (is.null(graph_file)) {

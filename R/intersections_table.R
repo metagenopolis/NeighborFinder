@@ -13,13 +13,8 @@
 #' @export
 #' @examples
 #' data(taxo)
-#' data(data)
-#' data(metadata)
-#' res_CRC_JPN <- apply_NeighborFinder(data$CRC_JPN, object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species")
-#' res_CRC_CHN <- apply_NeighborFinder(data$CRC_CHN, object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species", covar = ~study_accession, meta_df = metadata$CRC_CHN, sample_col = "secondary_sample_accession")
-#' res_CRC_EUR <- apply_NeighborFinder(data$CRC_EUR, object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species", covar = ~study_accession, meta_df = metadata$CRC_EUR, sample_col = "secondary_sample_accession")
-#'
-#' intersections_table(res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold = 2, taxo, col_module_id = "msp_id", annotation_level = "species", "Escherichia coli")
+#' data(result_example)
+#' intersections_table(res_list = list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), threshold = 2, taxo, col_module_id = "msp_id", annotation_level = "species", "Escherichia coli")
 intersections_table <- function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest) {
   # Gathering all results from datasets
   for (l in 1:length(res_list)) {
