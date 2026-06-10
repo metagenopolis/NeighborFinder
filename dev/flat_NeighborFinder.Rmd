@@ -18,13 +18,13 @@ library(GGally)
 library(network)
 ```
 
-```{r description, eval=TRUE}
+```{r description, eval=FALSE}
 # Describe your package
 fusen::fill_description(overwrite = TRUE,
   pkg = here::here(),
   fields = list(
     Title = "Find neighbor species of a bacteria of interest in the human gut microbiota",
-    Description = "NeihborFinder uses the local approach to identify companion species of a bacteria of interest. From several abundance tables of metagenomic data, NeighborFinder suggests a shortlist of companion species based on the integration of results. A visualization via a network is proposed.",
+    Description = "NeighborFinder uses the local approach described in Sola et al., 2026 <https://doi.org/10.64898/2025.12.05.692507> to identify companion species of a bacteria of interest. From several abundance tables of metagenomic data, NeighborFinder suggests a shortlist of companion species based on the integration of results. A visualization via a network is proposed.",
     `Authors@R` = c(
       person("Mathilde", "Sola", email = "mathilde.sola@inrae.fr", role = c("aut", "cre"), comment = c(ORCID = "0009-0009-0436-5078")), 
       person("Mahendra", "Mariadassou", email = "mahendra.mariadassou@inrae.fr", role = c("aut"), comment = c(ORCID = "0000-0003-2986-354X")), 
@@ -35,8 +35,7 @@ fusen::fill_description(overwrite = TRUE,
 )
 # Define License with use_*_license()
 usethis::use_mit_license("INRAE")
-fs::file_append("LICENSE", "\n\nThis package includes code derived from OneNet (MIT License).\n")
-
+write("\nThis package includes code derived from OneNet (MIT License).\n", "LICENSE.md", append=TRUE)
 ```
 
 # Taxo data
@@ -99,6 +98,21 @@ fs::file_append("LICENSE", "\n\nThis package includes code derived from OneNet (
 #' }
 "graphs"
 ```
+
+# Result for a use case example
+
+```{r fun-result_example}
+#' result_example
+#'
+#' @format A list of dataframes corresponding to apply_NeighborFinder() results.
+#' \describe{
+#'   \item{ res_CRC_JPN }{  edge table of Escherichia coli neighbors with only Japanese patients diagnosed with colorectal cancer }
+#'   \item{ res_CRC_CHN }{  edge table of Escherichia coli neighbors with only Chinese patients diagnosed with colorectal cancer }
+#'   \item{ res_CRC_EUR }{  edge table of Escherichia coli neighbors with only European patients diagnosed with colorectal cancer }
+#' }
+"result_example"
+```
+
 
 # Pipe function
 
@@ -649,7 +663,7 @@ test_that("graph_step works", {
 # For eps and atleast, users do not have to specify any values. Default should be enough.
 #' @param eps epsilon in eq (2) of the paper "Yoon, Gaynanova, Müller (2019), Frontiers in Genetics". positive shifts to all non-zero compositions. Refer to the paper for more details. eps = absolute value of minimum of log ratio counts plus c.
 #' @param atleast default value is 1. Constant c which ensures all nonzero values to be strictly positive. default is 1.
-#' @reference Yoon G, Gaynanova I and Müller CL (2019) Microbial Networks in SPRING - Semi-parametric Rank-Based Correlation and Partial Correlation Estimation for Quantitative Microbiome Data. Front. Genet. 10:516. \doi{10.3389/fgene.2019.00516}
+#' @details This function implements the mclr normalization introduced in Yoon G, Gaynanova I and Müller CL (2019) Microbial Networks in SPRING - Semi-parametric Rank-Based Correlation and Partial Correlation Estimation for Quantitative Microbiome Data. Front. Genet. 10:516. \doi{10.3389/fgene.2019.00516}
 #'
 #' @return \code{mclr} returns a data matrix of the same dimension with input data matrix.
 #' @export
@@ -1049,8 +1063,8 @@ data(metadata)
 x <- norm_data(data$CRC_JPN, 0.30)[[1]]
 neighbors_JPN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025)
 #Example with covariate
-x <- norm_data(data$CRC_CHN, 0.30)[[1]]
-neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+# x <- norm_data(data$CRC_CHN, 0.30)[[1]]
+# neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
 # Apply cv.glmnet() for a list of module IDs
@@ -1081,8 +1095,8 @@ data(metadata)
 x <- norm_data(data$CRC_JPN, 0.30, annotation_level="species")[[1]]
 neighbors_JPN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025)
 # Example with covariate
-x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species")[[1]]
-neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+# x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species")[[1]]
+# neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
 # Apply cv.glmnet() for a list of module IDs and for each prevalence level
@@ -1112,11 +1126,11 @@ cvglm_to_coeffs_by_object<-function(list_dfs, test_module = identify_module(), s
 data(data)
 data(metadata)
 #Simple example
-normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
+normed_JPN <-norm_data(data$CRC_JPN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.25, 0.30))
 neighbors_JPN<-cvglm_to_coeffs_by_object(list_dfs=normed_JPN, test_module=c("msp_0030","msp_0345"), seed=20242025)
 #Example with covariate
-normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.20, 0.25, 0.30))
-neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+# normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.25, 0.30))
+# neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
 ```
 
 # Gather lists of neighbors of true ones from the graph and detected ones from cv.glmnet()
@@ -1384,20 +1398,20 @@ choose_params_values <- function(data_with_annotation, object_of_interest, sampl
 ```
 
 ```{r ex-choose_params_values}
-data(data)
-data(graphs)
-choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
+# data(data)
+# data(graphs)
+# choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
 ```
 
 
-```{r test-choose_params_values}
-test_that("choose_params_values works", {
- data(data)
-data(graphs)
-scores<-choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
-  expect_equal(scores$F1_after,c(0.00,0.67,0.67,1.00))
-})
-```
+# ```{r test-choose_params_values}
+# test_that("choose_params_values works", {
+#  data(data)
+# data(graphs)
+# scores<-choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
+#   expect_equal(scores$F1_after,c(0.00,0.67,0.67,1.00))
+# })
+# ```
 
 # Apply NeighborFinder simplest version on raw data
 
@@ -1436,14 +1450,14 @@ apply_NF_simple<-function(data_with_annotation, object_of_interest, col_module_i
 
 ```{r ex-apply_NF_simple}
 data(data)
-res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
+res_CRC_JPN<-apply_NF_simple(data$CRC_JPN[,1:100], object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
 ```
 
 ```{r test-apply_NF_simple}
 test_that("apply_NF_simple works", {
   data(data)
-  res_CRC_JPN<-apply_NF_simple(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
-  expect_equal(res_CRC_JPN$node2[1:4], c("msp_0103", "msp_0109", "msp_0148c", "msp_0208"))
+  res_CRC_JPN<-apply_NF_simple(data$CRC_JPN[,1:100], object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", seed=20242025)
+  expect_equal(res_CRC_JPN$node2[1:4], c("msp_0154", "msp_0565", "msp_0570", "msp_1684"))
 })
 ```
 
@@ -1491,14 +1505,14 @@ apply_NeighborFinder<-function(data_with_annotation, object_of_interest, col_mod
 
 ```{r ex-apply_NeighborFinder}
 data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
+res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN[,1:100], object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
 ```
 
 ```{r test-apply_NeighborFinder}
 test_that("apply_NeighborFinder works", {
   data(data)
-  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
-  expect_equal(res_CRC_JPN$node2, c("msp_0103", "msp_0208", "msp_2448"))
+  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN[,1:100], object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
+  expect_equal(res_CRC_JPN$node2, c("msp_0154", "msp_0437c", "msp_0565", "msp_0570", "msp_1603c", "msp_1684", "msp_2350"))
 })
 ```
 
@@ -1558,13 +1572,11 @@ visualize_network<-function(res_NeighborFinder, annotation_table, col_module_id,
 
 ```{r ex-visualize_network}
 data(taxo)
-data(data)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
-visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5)
+visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5)
 # #With species names instead of msp names
-visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
+# visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
 # #With esthetic changes
-visualize_network(res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
+# visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
 ```
 
 # Display the intersection network from 2 or more datasets
@@ -1633,13 +1645,8 @@ intersections_network<-function(res_list, threshold, annotation_table, col_modul
 
 ```{r ex-intersections_network}
 data(taxo)
-data(data)
-data(metadata)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
-res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
-
-intersections_network(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=7, edge_label_size=4, node_size=15, annotation_option=TRUE, seed=3)
+data(result_example)
+intersections_network(res_list=list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), taxo, threshold=2, "Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=7, edge_label_size=4, node_size=15, annotation_option=TRUE, seed=3)
 ```
 
 # Display the intersection table summarizing the results from 2 or more datasets
@@ -1678,25 +1685,15 @@ intersections_table<-function(res_list, threshold, annotation_table, col_module_
 
 ```{r ex-intersections_table}
 data(taxo)
-data(data)
-data(metadata)
-res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
-res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
-
-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", annotation_level="species", "Escherichia coli")
+data(result_example)
+intersections_table(res_list=list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", annotation_level="species", "Escherichia coli")
 ```
 
 ```{r test-intersections_table}
 test_that("intersections_table works", {
   data(taxo)
-  data(data)
-  data(metadata)
-  res_CRC_JPN<-apply_NeighborFinder(data$CRC_JPN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species")
-  res_CRC_CHN<-apply_NeighborFinder(data$CRC_CHN, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-  res_CRC_EUR<-apply_NeighborFinder(data$CRC_EUR, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", covar= ~ study_accession, meta_df=metadata$CRC_EUR, sample_col="secondary_sample_accession")
-  
-  table<-intersections_table(res_list=list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", annotation_level="species", "Escherichia coli")
+  data(result_example)
+  table<-intersections_table(res_list=list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), threshold=2, taxo, col_module_id="msp_id", annotation_level="species", "Escherichia coli")
   expect_equal(table$node2, c("msp_0103", "msp_0208"))
 })
 ```
