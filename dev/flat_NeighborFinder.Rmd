@@ -232,7 +232,7 @@ get_count_table <- function(
 
   #Prevalence filtering
   counts <- data_table %>%
-    dplyr::mutate(prev = rowMeans(. > 0), msp = species) %>%
+    dplyr::mutate(prev = rowMeans(data_table > 0), msp = species) %>%
     dplyr::filter(.data$prev > prev.min)
   prevs <- counts %>% dplyr::select(dplyr::all_of(c("prev", "msp")))
   counts = counts %>% dplyr::select(-dplyr::all_of(c("prev", "msp"))) %>% t()
@@ -1122,7 +1122,7 @@ simulate_by_prevalence <- function(
         )
       df_counts <- data_with_annotation_filtered %>%
         dplyr::select(
-          -all_of(c(annotation_level, col_module_id))
+          -dplyr::all_of(c(annotation_level, col_module_id))
         ) %>%
         t()
       colnames(df_counts) <- data_with_annotation_filtered %>%
@@ -1274,13 +1274,13 @@ prev_for_selected_nodes <- function(
   truth <- G_object[, colSums(G_object) != 0] %>%
     tibble::as_tibble(rownames = "node1") %>%
     tidyr::pivot_longer(
-      -all_of("node1"),
+      -dplyr::all_of("node1"),
       values_to = "Edge",
       names_to = "node2"
     ) %>%
-    dplyr::select(order(everything())) %>%
+    dplyr::select(order(dplyr::everything())) %>%
     dplyr::filter(.data$Edge != 0) %>%
-    dplyr::select(-all_of("Edge"))
+    dplyr::select(-dplyr::all_of("Edge"))
   ## Add prevalences for node1 and node2
   truth <- truth %>%
     dplyr::left_join(prev_df, by = dplyr::join_by("node1" == "id_module")) %>%
@@ -1844,7 +1844,7 @@ final_step <- function(df_truth, df_glm, robustness_step = NULL) {
           unique() %>%
           dplyr::summarize(
             seeds_detect = dplyr::n(),
-            med = median(.data$coef)
+            coef = median(.data$coef)
           ) %>%
           dplyr::filter(.data$seeds_detect >= 5) %>%
           dplyr::select(-dplyr::all_of("seeds_detect")) %>%
@@ -1856,7 +1856,6 @@ final_step <- function(df_truth, df_glm, robustness_step = NULL) {
             sep = "_msp"
           ) %>%
           dplyr::mutate(node2 = paste0("msp", .data$node2)) %>%
-          dplyr::rename(coef = med) %>%
           dplyr::mutate(prev_level = prev, filtering_top = top)
         if (!nrow(df)) {
           df <- inference %>%
@@ -2215,11 +2214,11 @@ choose_params_values <- function(
   res <- test_filter(before, after, prev_list) %>%
     dplyr::mutate(
       F1_before = harm_mean(.data$precision_before, .data$recall_before) %>%
-        signif(., 2)
+        signif(2)
     ) %>%
     dplyr::mutate(
       F1_after = harm_mean(.data$precision_after, .data$recall_after) %>%
-        signif(., 2)
+        signif(2)
     ) %>%
     dplyr::select(
       -dplyr::all_of(c(
@@ -2241,6 +2240,7 @@ choose_params_values <- function(
 ```
 
 ```{r ex-choose_params_values}
+#' \dontrun{
 data(data)
 data(graphs)
 choose_params_values(
@@ -2253,6 +2253,7 @@ choose_params_values(
   col_module_id = "msp_id",
   annotation_level = "species"
 )
+#' }
 ```
 
 <!-- 
@@ -2419,7 +2420,7 @@ apply_NeighborFinder <- function(
     dplyr::mutate(pair = paste(.data$node1, .data$node2, sep = "_")) %>%
     dplyr::group_by(.data$pair) %>%
     unique() %>%
-    dplyr::summarize(seeds_detect = dplyr::n(), med = median(.data$coef)) %>%
+    dplyr::summarize(seeds_detect = dplyr::n(), coef = median(.data$coef)) %>%
     dplyr::filter(.data$seeds_detect >= 5) %>%
     dplyr::select(-dplyr::all_of("seeds_detect")) %>%
     unique() %>%
@@ -2429,8 +2430,7 @@ apply_NeighborFinder <- function(
       into = c("node1", "node2"),
       sep = "_msp"
     ) %>%
-    dplyr::mutate(node2 = paste0("msp", .data$node2)) %>%
-    dplyr::rename(coef = med)
+    dplyr::mutate(node2 = paste0("msp", .data$node2))
 }
 ```
 
