@@ -194,7 +194,6 @@ NULL
 #'  \item{data: }{the final count table (tibble)}
 #'  \item{prevalences: }{a tibble gathering the prevalence of each bacterial species}
 #' @export
-
 get_count_table <- function(
   abund.path = NULL,
   abund.table = NULL,
@@ -204,11 +203,11 @@ get_count_table <- function(
   msp = NULL
 ) {
   if (!is.null(abund.path)) {
-    metaformat <- tail(strsplit(abund.path, "[.]")[[1]], 1)
+    metaformat <- utils::tail(strsplit(abund.path, "[.]")[[1]], 1)
     if (metaformat == "rds") {
       data_table <- as.matrix(readRDS(abund.path))
     } else {
-      data_table <- as.matrix(read.delim(abund.path))
+      data_table <- as.matrix(utils::read.delim(abund.path))
     }
   } else {
     data_table <- abund.table
@@ -517,7 +516,7 @@ simulate_from_ecdf <- function(
   ## function to the uniform r.v.
   for (j in 1:p) {
     ## quantile(x, ., type = 1) is the inverse of the empirical distribution function of x
-    sim_counts[, j] <- quantile(
+    sim_counts[, j] <- stats::quantile(
       x = real_data[, j],
       probs = mv_unif[, j],
       names = FALSE,
@@ -559,7 +558,7 @@ SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
     Z <- Z %*% t(Z)
     diag(Z) <- 0
     ZZ <- ToVec(Z)
-    G <- ToSym(rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
+    G <- ToSym(stats::rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
     G[is.na(G)] <- 0
     return(G)
   }
@@ -607,7 +606,7 @@ SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
     Z <- Z %*% t(Z)
     diag(Z) <- 0
     ZZ <- ToVec(Z)
-    G <- ToSym(rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
+    G <- ToSym(stats::rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
     return(G)
   }
 }
@@ -779,7 +778,7 @@ new_synth_data <- function(
   }
   dimnames(G) <- list(species, species)
   faithful_param <- generator_param(G = G, signed = signed)
-  parcor <- -cov2cor(as.matrix(faithful_param$Omega))
+  parcor <- -stats::cov2cor(as.matrix(faithful_param$Omega))
 
   if (verbatim) {
     cat("Simulation from real data ecdf...")
@@ -1537,7 +1536,7 @@ test_that("norm_data works", {
 #'
 #' @return Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient
 #' @export
-
+#' @importFrom stats coef
 find_module_neighbors <- function(
   df,
   module,
@@ -1578,10 +1577,10 @@ find_module_neighbors <- function(
     }
     ## process formula to build covariate matrix
     if (!rlang::is_formula(covar)) {
-      covar <- as.formula(paste("~", paste(covar, collapse = "+")))
+      covar <- stats::as.formula(paste("~", paste(covar, collapse = "+")))
     }
     meta_df <- meta_df[rownames(df), ]
-    covariates <- model.matrix(covar, meta_df)
+    covariates <- stats::model.matrix(covar, meta_df)
     covariates <- covariates[,
       !colnames(covariates) == "(Intersect)",
       drop = FALSE
@@ -1730,7 +1729,7 @@ neighbors_JPN <- cvglm_to_coeffs_by_object(
 #'
 #' @return Dataframe. Returns for each level of prevalence and module ID, the list of true and/or detected neighbors and the corresponding list of coefficients
 #' @export
-
+#' @importFrom stats median
 final_step <- function(df_truth, df_glm, robustness_step = NULL) {
   truth <- df_truth %>%
     dplyr::bind_rows(.id = "prev_level") %>%
@@ -2041,7 +2040,7 @@ scores <- test_filter(neighbors, neighbors2)
 #'
 #' @return Dataframe. Returns F1 rates before and after using NeighborFinder()
 #' @export
-
+#' @importFrom stats quantile
 choose_params_values <- function(
   data_with_annotation,
   object_of_interest,
@@ -2185,7 +2184,7 @@ choose_params_values <- function(
 #'
 #' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
-
+#' @importFrom stats quantile
 apply_NF_simple <- function(
   data_with_annotation,
   object_of_interest,
@@ -2276,7 +2275,7 @@ test_that("apply_NF_simple works", {
 #'
 #' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
-
+#' @importFrom stats median
 apply_NeighborFinder <- function(
   data_with_annotation,
   object_of_interest,
