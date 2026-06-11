@@ -1624,9 +1624,16 @@ neighbors_JPN <- find_module_neighbors(
   module = "msp_0030",
   seed = 20242025
 )
-#Example with covariate
+# Example with covariate
 # x <- norm_data(data$CRC_CHN, 0.30)[[1]]
-# neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+# neighbors_CHN <- find_module_neighbors(
+#   df = x,
+#   module = "msp_0030",
+#   seed = 20242025,
+#   covar = ~study_accession,
+#   meta_df = metadata$CRC_CHN,
+#   sample_col = "secondary_sample_accession"
+# )
 ```
 
 # Apply cv.glmnet() for a list of module IDs
@@ -1664,8 +1671,15 @@ neighbors_JPN <- find_all_module_neighbors(
   seed = 20242025
 )
 # Example with covariate
-# x <- norm_data(data$CRC_CHN, 0.30, annotation_level="species")[[1]]
-# neighbors_CHN<-find_all_module_neighbors(df=x, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+# x <- norm_data(data$CRC_CHN, 0.30, annotation_level = "species")[[1]]
+# neighbors_CHN <- find_all_module_neighbors(
+#   df = x,
+#   test_module = c("msp_0030", "msp_0345"),
+#   seed = 20242025,
+#   covar = ~study_accession,
+#   meta_df = metadata$CRC_CHN,
+#   sample_col = "secondary_sample_accession"
+# )
 ```
 
 # Apply cv.glmnet() for a list of module IDs and for each prevalence level
@@ -1714,8 +1728,20 @@ neighbors_JPN <- cvglm_to_coeffs_by_object(
   seed = 20242025
 )
 #Example with covariate
-# normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.25, 0.30))
-# neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+# normed_CHN <- norm_data(
+#   data$CRC_CHN,
+#   col_module_id = "msp_id",
+#   annotation_level = "species",
+#   prev_list = c(0.25, 0.30)
+# )
+# neighbors_CHN <- cvglm_to_coeffs_by_object(
+#   list_dfs = normed_CHN,
+#   test_module = c("msp_0030", "msp_0345"),
+#   seed = 20242025,
+#   covar = ~study_accession,
+#   meta_df = metadata$CRC_CHN,
+#   sample_col = "secondary_sample_accession"
+# )
 ```
 
 # Gather lists of neighbors of true ones from the graph and detected ones from cv.glmnet()
@@ -2151,10 +2177,19 @@ choose_params_values <- function(
 ```{r ex-choose_params_values}
 # data(data)
 # data(graphs)
-# choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
+# choose_params_values(
+#   data_with_annotation = data$CRC_JPN,
+#   object_of_interest = "Escherichia coli",
+#   sample_size = 100,
+#   prev_list = c(0.20, 0.30),
+#   filtering_list = c(10, 20),
+#   graph_file = graphs$CRC_JPN,
+#   col_module_id = "msp_id",
+#   annotation_level = "species"
+# )
 ```
 
-
+<!-- 
 # ```{r test-choose_params_values}
 # test_that("choose_params_values works", {
 #  data(data)
@@ -2162,7 +2197,7 @@ choose_params_values <- function(
 # scores<-choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
 #   expect_equal(scores$F1_after,c(0.00,0.67,0.67,1.00))
 # })
-# ```
+# ``` -->
 
 # Apply NeighborFinder simplest version on raw data
 
@@ -2496,9 +2531,29 @@ visualize_network(
   label_size = 5
 )
 # #With species names instead of msp names
-# visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
+# visualize_network(
+#   result_example$res_CRC_JPN,
+#   taxo,
+#   object_of_interest = "Escherichia coli",
+#   col_module_id = "msp_id",
+#   annotation_level = "species",
+#   label_size = 5,
+#   annotation_option = TRUE,
+#   seed = 2
+# )
 # #With esthetic changes
-# visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
+# visualize_network(
+#   result_example$res_CRC_JPN,
+#   taxo,
+#   object_of_interest = "Escherichia coli",
+#   col_module_id = "msp_id",
+#   annotation_level = "species",
+#   annotation_option = TRUE,
+#   node_size = 15,
+#   label_size = 6,
+#   object_color = "orange",
+#   seed = 2
+# )
 ```
 
 # Display the intersection network from 2 or more datasets
