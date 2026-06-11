@@ -321,7 +321,10 @@ module_to_node <- function(
   annotation_level
 ) {
   node_dict <- annotation_table %>%
-    dplyr::select(all_of(col_module_id), !!rlang::sym(annotation_level)) %>%
+    dplyr::select(
+      dplyr::all_of(col_module_id),
+      !!rlang::sym(annotation_level)
+    ) %>%
     tibble::deframe()
   node_dict[module] %>% unname() %>% as.character()
 }
@@ -1053,7 +1056,9 @@ simulate_by_prevalence <- function(
   }
 
   abund_table <- data_with_annotation %>%
-    dplyr::select(-all_of(col_module_id), -!!rlang::sym(annotation_level))
+    dplyr::select(
+      -dplyr::all_of(c(col_module_id, annotation_level))
+    )
   modules <- data_with_annotation %>% dplyr::pull(col_module_id)
   sample_id <- abund_table %>% colnames()
 
@@ -1075,15 +1080,14 @@ simulate_by_prevalence <- function(
         id_module = modules,
         prevalence = abund_table %>% data.matrix() %>% `>`(0) %>% rowMeans()
       )
-      prev_df_filtered <- prev_df %>% dplyr::filter(prevalence > 0.15)
+      prev_df_filtered <- prev_df %>% dplyr::filter(.data$prevalence > 0.15)
       data_with_annotation_filtered <- data_with_annotation %>%
         dplyr::filter(
-          !!rlang::sym(col_module_id) %in% prev_df_filtered$id_module
+          .data[[col_module_id]] %in% prev_df_filtered$id_module
         )
       df_counts <- data_with_annotation_filtered %>%
         dplyr::select(
-          -!!rlang::sym(annotation_level),
-          -!!rlang::sym(col_module_id)
+          -all_of(c(annotation_level, col_module_id))
         ) %>%
         t()
       colnames(df_counts) <- data_with_annotation_filtered %>%
@@ -1093,7 +1097,7 @@ simulate_by_prevalence <- function(
     df_sim <- new_synth_data(
       df_counts,
       n = sample_size,
-      graph = as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))),
+      graph = as.matrix(G %>% dplyr::select(-.data[[annotation_level]])),
       verbatim = FALSE,
       seed = seed
     )
@@ -1332,7 +1336,7 @@ test_that("prev_for_selected_nodes works", {
 
 truth_by_prevalence <- function(edge_table, prev_list) {
   for_one_prev <- function(prev) {
-    edge_table %>% dplyr::filter(prev1 >= prev, prev2 >= prev)
+    edge_table %>% dplyr::filter(.data$prev1 >= prev, .data$prev2 >= prev)
   }
   cat("Defining and saving true neighbors...\n")
   purrr::map(prev_list, for_one_prev) %>% rlang::set_names(prev_list)
@@ -1951,22 +1955,22 @@ test_filter <- function(df_before, df_after, prevs = NULL) {
   scores_before <- df_before %>%
     dplyr::mutate(
       precision_before = purrr::pmap_dbl(
-        list(node2_true, node2_detected),
+        list(.data$node2_true, .data$node2_detected),
         compute_precision
       ),
       recall_before = purrr::pmap_dbl(
-        list(node2_true, node2_detected),
+        list(.data$node2_true, .data$node2_detected),
         compute_recall
       )
     )
   scores_after <- df_after %>%
     dplyr::mutate(
       precision_after = purrr::pmap_dbl(
-        list(node2_true, node2_detected),
+        list(.data$node2_true, .data$node2_detected),
         compute_precision
       ),
       recall_after = purrr::pmap_dbl(
-        list(node2_true, node2_detected),
+        list(.data$node2_true, .data$node2_detected),
         compute_recall
       )
     )
@@ -1980,12 +1984,14 @@ test_filter <- function(df_before, df_after, prevs = NULL) {
       by = c("prev_level", "node1")
     ) %>%
       dplyr::select(
-        prev_level,
-        filtering_top,
-        precision_before,
-        recall_before,
-        precision_after,
-        recall_after
+        dplyr::all_of(c(
+          "prev_level",
+          "filtering_top",
+          "precision_before",
+          "recall_before",
+          "precision_after",
+          "recall_after"
+        ))
       ) %>%
       dplyr::mutate_all(~ replace(., is.na(.), 0))
 
@@ -1994,7 +2000,7 @@ test_filter <- function(df_before, df_after, prevs = NULL) {
     if (is.null(prevs)) {
       return(res)
     } else {
-      return(res %>% dplyr::filter(prev_level %in% prevs))
+      return(res %>% dplyr::filter(.data$prev_level %in% prevs))
     }
   }
 }
@@ -2413,6 +2419,7 @@ test_that("apply_NeighborFinder works", {
 #' @return Network. Visualization of NeighborFinder results. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude.
 #' @export
 #' @importFrom sna gplot
+#' @importFrom rlang .data
 visualize_network <- function(
   res_NeighborFinder,
   annotation_table,
@@ -2467,13 +2474,13 @@ visualize_network <- function(
     res <- res_NeighborFinder %>%
       dplyr::mutate(
         node1 = module_to_node(
-          module = node1,
+          module = .data$node1,
           annotation_table = annotation_table,
           col_module_id = col_module_id,
           annotation_level = annotation_level
         ),
         node2 = module_to_node(
-          module = node2,
+          module = .data$node2,
           annotation_table = annotation_table,
           col_module_id = col_module_id,
           annotation_level = annotation_level
