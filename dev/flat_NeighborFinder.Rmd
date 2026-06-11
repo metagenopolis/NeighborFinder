@@ -1214,7 +1214,7 @@ prev_for_selected_nodes <- function(
   prev_df <- tibble::tibble(
     id_module = data_with_annotation %>% dplyr::pull(paste(col_module_id)),
     prev = data_with_annotation %>%
-      dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id)) %>%
+      dplyr::select(-dplyr::all_of(c(annotation_level, col_module_id))) %>%
       data.matrix() %>%
       `>`(0) %>%
       rowMeans()
@@ -1230,7 +1230,7 @@ prev_for_selected_nodes <- function(
   }
 
   G_object <- G[object_index, ] %>%
-    dplyr::select(-!!rlang::sym(annotation_level))
+    dplyr::select(-dplyr::all_of(annotation_level))
 
   if (!nrow(G_object)) {
     return(tibble::tibble())
@@ -1238,17 +1238,21 @@ prev_for_selected_nodes <- function(
 
   truth <- G_object[, colSums(G_object) != 0] %>%
     tibble::as_tibble(rownames = "node1") %>%
-    tidyr::pivot_longer(-node1, values_to = "Edge", names_to = "node2") %>%
-    dplyr::select(order(colnames(.))) %>%
-    dplyr::filter(Edge != 0) %>%
-    dplyr::select(-Edge)
+    tidyr::pivot_longer(
+      -all_of("node1"),
+      values_to = "Edge",
+      names_to = "node2"
+    ) %>%
+    dplyr::select(order(everything())) %>%
+    dplyr::filter(.data$Edge != 0) %>%
+    dplyr::select(-all_of("Edge"))
   ## Add prevalences for node1 and node2
   truth <- truth %>%
-    dplyr::left_join(prev_df, by = dplyr::join_by(node1 == id_module)) %>%
+    dplyr::left_join(prev_df, by = dplyr::join_by("node1" == "id_module")) %>%
     ## and rename prev with suffix matching corresponding module
     dplyr::left_join(
       prev_df,
-      by = dplyr::join_by(node2 == id_module),
+      by = dplyr::join_by("node2" == "id_module"),
       suffix = c("1", "2")
     )
   truth
