@@ -11,6 +11,7 @@
 #'
 #' @return Dataframe. Returns the module ID, its detected neighbor and the corresponding coefficient
 #' @export
+#' @importFrom stats coef
 #' @examples
 #' data(data)
 #' data(metadata)
@@ -64,10 +65,10 @@ find_module_neighbors <- function(
     }
     ## process formula to build covariate matrix
     if (!rlang::is_formula(covar)) {
-      covar <- as.formula(paste("~", paste(covar, collapse = "+")))
+      covar <- stats::as.formula(paste("~", paste(covar, collapse = "+")))
     }
     meta_df <- meta_df[rownames(df), ]
-    covariates <- model.matrix(covar, meta_df)
+    covariates <- stats::model.matrix(covar, meta_df)
     covariates <- covariates[,
       !colnames(covariates) == "(Intersect)",
       drop = FALSE

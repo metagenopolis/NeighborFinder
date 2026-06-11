@@ -61,11 +61,11 @@ get_count_table <- function(
   msp = NULL
 ) {
   if (!is.null(abund.path)) {
-    metaformat <- tail(strsplit(abund.path, "[.]")[[1]], 1)
+    metaformat <- utils::tail(strsplit(abund.path, "[.]")[[1]], 1)
     if (metaformat == "rds") {
       data_table <- as.matrix(readRDS(abund.path))
     } else {
-      data_table <- as.matrix(read.delim(abund.path))
+      data_table <- as.matrix(utils::read.delim(abund.path))
     }
   } else {
     data_table <- abund.table

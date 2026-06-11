@@ -178,7 +178,7 @@ new_synth_data <- function(
   }
   dimnames(G) <- list(species, species)
   faithful_param <- generator_param(G = G, signed = signed)
-  parcor <- -cov2cor(as.matrix(faithful_param$Omega))
+  parcor <- -stats::cov2cor(as.matrix(faithful_param$Omega))
 
   if (verbatim) {
     cat("Simulation from real data ecdf...")

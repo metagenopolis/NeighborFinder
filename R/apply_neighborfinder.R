@@ -15,6 +15,7 @@
 #'
 #' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
+#' @importFrom stats median
 #' @examples
 #' data(data)
 #' res_CRC_JPN <- apply_NeighborFinder(

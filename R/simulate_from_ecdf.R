@@ -60,7 +60,7 @@ simulate_from_ecdf <- function(
   ## function to the uniform r.v.
   for (j in 1:p) {
     ## quantile(x, ., type = 1) is the inverse of the empirical distribution function of x
-    sim_counts[, j] <- quantile(
+    sim_counts[, j] <- stats::quantile(
       x = real_data[, j],
       probs = mv_unif[, j],
       names = FALSE,

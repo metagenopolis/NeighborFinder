@@ -29,7 +29,7 @@ SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
     Z <- Z %*% t(Z)
     diag(Z) <- 0
     ZZ <- ToVec(Z)
-    G <- ToSym(rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
+    G <- ToSym(stats::rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
     G[is.na(G)] <- 0
     return(G)
   }
@@ -77,7 +77,7 @@ SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
     Z <- Z %*% t(Z)
     diag(Z) <- 0
     ZZ <- ToVec(Z)
-    G <- ToSym(rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
+    G <- ToSym(stats::rbinom(p * (p - 1) / 2, 1, alpha * ZZ + beta * (1 - ZZ)))
     return(G)
   }
 }

@@ -14,6 +14,7 @@
 #'
 #' @return Dataframe. Returns F1 rates before and after using NeighborFinder()
 #' @export
+#' @importFrom stats quantile
 #' @examples
 #' # data(data)
 #' # data(graphs)

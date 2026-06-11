@@ -8,6 +8,7 @@
 #'
 #' @return Dataframe. Returns for each level of prevalence and module ID, the list of true and/or detected neighbors and the corresponding list of coefficients
 #' @export
+#' @importFrom stats median
 #' @examples
 #' # Dataframe with true neighbors
 #' df_true <- list(
