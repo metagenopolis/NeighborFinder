@@ -322,8 +322,7 @@ module_to_node <- function(
 ) {
   node_dict <- annotation_table %>%
     dplyr::select(
-      dplyr::all_of(col_module_id),
-      !!rlang::sym(annotation_level)
+      dplyr::all_of(c(col_module_id, annotation_level))
     ) %>%
     tibble::deframe()
   node_dict[module] %>% unname() %>% as.character()
@@ -1449,7 +1448,7 @@ norm_data <- function(
           `>`(0) %>%
           rowMeans()
       )
-      prev_df_filtered <- prev_df %>% dplyr::filter(prevalence > prev)
+      prev_df_filtered <- prev_df %>% dplyr::filter(.data$prevalence > prev)
       data_with_annotation_filtered <- data_with_annotation %>%
         dplyr::filter(
           !!rlang::sym(col_module_id) %in% prev_df_filtered$id_module
