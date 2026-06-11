@@ -11,3 +11,6 @@
 ^Meta$
 ^\.vscode$
 ^[.]?air[.]toml$
+^\.github$
+^data-raw$
+README.Rmd
