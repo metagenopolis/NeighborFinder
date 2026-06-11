@@ -12,5 +12,5 @@
 ^\.vscode$
 ^[.]?air[.]toml$
 ^\.github$
-^data-raw$
+^data_raw$
 README.Rmd
