@@ -9,3 +9,5 @@
 ^ci/lib$
 ^doc$
 ^Meta$
+^\.vscode$
+^[.]?air[.]toml$
