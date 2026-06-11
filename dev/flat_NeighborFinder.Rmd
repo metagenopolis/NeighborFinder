@@ -1802,74 +1802,89 @@ neighbors_JPN <- cvglm_to_coeffs_by_object(
 final_step <- function(df_truth, df_glm, robustness_step = NULL) {
   truth <- df_truth %>%
     dplyr::bind_rows(.id = "prev_level") %>%
-    dplyr::mutate(prev_level = as.numeric(prev_level)) %>%
-    dplyr::summarize(node2_true = list(node2), .by = c(prev_level, node1))
+    dplyr::mutate(prev_level = as.numeric(.data$prev_level)) %>%
+    dplyr::summarize(
+      node2_true = list(.data$node2),
+      .by = dplyr::all_of(c("prev_level", "node1"))
+    )
 
-  if (robustness_step != TRUE) {
+  if (!robustness_step) {
     inference <- df_glm %>%
       dplyr::bind_rows(.id = "prev_level") %>%
-      dplyr::filter(filtering_top == 100) %>%
-      dplyr::mutate(prev_level = as.numeric(prev_level)) %>%
+      dplyr::filter(.data$filtering_top == 100) %>%
+      dplyr::mutate(prev_level = as.numeric(.data$prev_level)) %>%
       dplyr::summarize(
-        node2_detected = list(node2),
-        node2_coef = list(coef),
-        .by = c(prev_level, node1)
+        node2_detected = list(.data$node2),
+        node2_coef = list(.data$coef),
+        .by = dplyr::all_of(c("prev_level", "node1"))
       )
 
-    result <- dplyr::full_join(
+    res_list <- dplyr::full_join(
       truth,
       inference,
       by = c("prev_level", "node1")
     ) %>%
-      lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>%
-      do.call(cbind, .) %>%
+      lapply(function(col) ifelse(sapply(col, is.null), 0, col))
+    result <- do.call(cbind, res_list) %>%
       tibble::as_tibble()
   } else if (robustness_step == TRUE) {
     inference <- df_glm %>%
       dplyr::bind_rows(.id = "prev_level") %>%
-      dplyr::filter(., filtering_top != 100) %>%
-      dplyr::mutate(prev_level = as.numeric(prev_level))
+      dplyr::filter(.data$filtering_top != 100) %>%
+      dplyr::mutate(prev_level = as.numeric(.data$prev_level))
     res <- c()
     for (prev in unique(inference$prev_level)) {
       for (top in unique(inference$filtering_top)) {
         df <- inference %>%
-          dplyr::filter(prev_level == prev & filtering_top == top) %>%
-          dplyr::mutate(pair = paste(node1, node2, sep = "_")) %>%
-          dplyr::group_by(pair) %>%
+          dplyr::filter(
+            prev_level == .data$prev & filtering_top == .data$top
+          ) %>%
+          dplyr::mutate(pair = paste(.data$node1, .data$node2, sep = "_")) %>%
+          dplyr::group_by(.data$pair) %>%
           unique() %>%
-          dplyr::summarize(seeds_detect = dplyr::n(), med = median(coef)) %>%
-          dplyr::filter(seeds_detect >= 5) %>%
-          dplyr::select(-seeds_detect) %>%
+          dplyr::summarize(
+            seeds_detect = dplyr::n(),
+            med = median(.data$coef)
+          ) %>%
+          dplyr::filter(.data$seeds_detect >= 5) %>%
+          dplyr::select(-dplyr::all_of("seeds_detect")) %>%
           unique() %>%
           dplyr::ungroup() %>%
-          tidyr::separate(pair, into = c("node1", "node2"), sep = "_msp") %>%
-          dplyr::mutate(node2 = paste0("msp", node2)) %>%
+          tidyr::separate(
+            tidyr::all_of(c("pair")),
+            into = c("node1", "node2"),
+            sep = "_msp"
+          ) %>%
+          dplyr::mutate(node2 = paste0("msp", .data$node2)) %>%
           dplyr::rename(coef = med) %>%
-          dplyr::mutate(prev_level = prev, filtering_top = top)
+          dplyr::mutate(prev_level = .data$prev, filtering_top = .data$top)
         if (!nrow(df)) {
           df <- inference %>%
-            dplyr::filter(prev_level == prev, filtering_top == top) %>%
+            dplyr::filter(
+              .data$prev_level == prev,
+              .data$filtering_top == top
+            ) %>%
             dplyr::slice_head(n = 1) %>%
             dplyr::mutate(node2 = 0, coef = 0) %>%
-            dplyr::select(-SEED)
+            dplyr::select(-dplyr::all_of("SEED"))
         }
         res <- rbind(res, df)
       }
     }
     inference_robust <- res %>%
       dplyr::summarize(
-        node2_detected = list(node2),
-        node2_coef = list(coef),
-        .by = c(prev_level, filtering_top, node1)
+        node2_detected = list(.data$node2),
+        node2_coef = list(.data$coef),
+        .by = dplyr::all_of(c("prev_level", "filtering_top", "node1"))
       )
 
-    result <- dplyr::full_join(
+    res_list <- dplyr::full_join(
       truth,
       inference_robust,
       by = c("prev_level", "node1")
     ) %>%
-      lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>%
-      do.call(cbind, .) %>%
+      lapply(function(col) ifelse(sapply(col, is.null), 0, col))
+    result <- do.call(cbind, res_list) %>%
       tibble::as_tibble()
   }
   result
