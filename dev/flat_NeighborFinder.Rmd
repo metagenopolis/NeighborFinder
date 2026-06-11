@@ -2750,24 +2750,28 @@ intersections_table <- function(
 ) {
   #Gathering all results from datasets
   for (l in 1:length(res_list)) {
-    res_list[[l]] <- res_list[[l]] %>% dplyr::mutate(dataset = paste("n_", l))
+    res_list[[l]] <- res_list[[l]] %>% dplyr::mutate(dataset = paste0("n_", l))
   }
   #Counting in how many cohorts each neighbor was found
   inter <- dplyr::bind_rows(res_list) %>%
     tibble::tibble() %>%
-    dplyr::mutate(pair = paste(node1, node2, sep = "_")) %>%
-    dplyr::group_by(pair) %>%
+    dplyr::mutate(pair = paste(.data$node1, .data$node2, sep = "_")) %>%
+    dplyr::group_by(.data$pair) %>%
     dplyr::summarize(
-      datasets = list(dataset),
-      intersections = list(dataset) %>% unlist() %>% length(),
-      mean_coef = mean(coef)
+      datasets = list(.data$dataset),
+      intersections = purrr::map_int(.data$datasets, length),
+      mean_coef = mean(.data$coef)
     ) %>%
     dplyr::ungroup() %>%
-    tidyr::separate(pair, into = c("node1", "node2"), sep = "_msp") %>%
-    dplyr::mutate(node2 = paste0("msp", node2))
+    tidyr::separate(
+      dplyr::all_of("pair"),
+      into = c("node1", "node2"),
+      sep = "_msp"
+    ) %>%
+    dplyr::mutate(node2 = paste0("msp", .data$node2))
 
   #Keeping only neighbors found in more than n cohort(s)
-  res_intersections <- inter %>% dplyr::filter(intersections >= threshold)
+  res_intersections <- inter %>% dplyr::filter(.data$intersections >= threshold)
   if (nrow(res_intersections) == 0) {
     return(message(
       "No intersection was found between the results provided, try to lower the threshold.\n"
@@ -2777,27 +2781,27 @@ intersections_table <- function(
   res_intersections %>%
     dplyr::mutate(
       module1 = module_to_node(
-        module = node1,
+        module = .data$node1,
         annotation_table = annotation_table,
         col_module_id = col_module_id,
         annotation_level = annotation_level
       ),
       module2 = module_to_node(
-        module = node2,
+        module = .data$node2,
         annotation_table = annotation_table,
         col_module_id = col_module_id,
         annotation_level = annotation_level
       )
     ) %>%
-    dplyr::select(
-      node1,
-      module1,
-      node2,
-      module2,
-      datasets,
-      intersections,
-      mean_coef
-    ) %>%
+    dplyr::select(dplyr::all_of(c(
+      "node1",
+      "module1",
+      "node2",
+      "module2",
+      "datasets",
+      "intersections",
+      "mean_coef"
+    ))) %>%
     as.data.frame()
 }
 ```
