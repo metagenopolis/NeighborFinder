@@ -63,7 +63,9 @@ simulate_by_prevalence <- function(
   }
 
   abund_table <- data_with_annotation %>%
-    dplyr::select(-all_of(col_module_id), -!!rlang::sym(annotation_level))
+    dplyr::select(
+      -dplyr::all_of(c(col_module_id, annotation_level))
+    )
   modules <- data_with_annotation %>% dplyr::pull(col_module_id)
   sample_id <- abund_table %>% colnames()
 
@@ -85,15 +87,14 @@ simulate_by_prevalence <- function(
         id_module = modules,
         prevalence = abund_table %>% data.matrix() %>% `>`(0) %>% rowMeans()
       )
-      prev_df_filtered <- prev_df %>% dplyr::filter(prevalence > 0.15)
+      prev_df_filtered <- prev_df %>% dplyr::filter(.data$prevalence > 0.15)
       data_with_annotation_filtered <- data_with_annotation %>%
         dplyr::filter(
-          !!rlang::sym(col_module_id) %in% prev_df_filtered$id_module
+          .data[[col_module_id]] %in% prev_df_filtered$id_module
         )
       df_counts <- data_with_annotation_filtered %>%
         dplyr::select(
-          -!!rlang::sym(annotation_level),
-          -!!rlang::sym(col_module_id)
+          -dplyr::all_of(c(annotation_level, col_module_id))
         ) %>%
         t()
       colnames(df_counts) <- data_with_annotation_filtered %>%
@@ -103,7 +104,7 @@ simulate_by_prevalence <- function(
     df_sim <- new_synth_data(
       df_counts,
       n = sample_size,
-      graph = as.matrix(G %>% dplyr::select(-!!rlang::sym(annotation_level))),
+      graph = as.matrix(G %>% dplyr::select(-.data[[annotation_level]])),
       verbatim = FALSE,
       seed = seed
     )

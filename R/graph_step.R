@@ -11,6 +11,7 @@
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
+#' @importFrom rlang `:=`
 #' @examples
 #' tiny_data <- data.frame(
 #'   species = c(
@@ -48,7 +49,7 @@ graph_step <- function(
   if (data_type == "shotgun") {
     counts <- get_count_table(
       abund.table = data_with_annotation %>%
-        dplyr::select(-!!rlang::sym(annotation_level)),
+        dplyr::select(-dplyr::all_of(annotation_level)),
       sample.id = colnames(data_with_annotation),
       prev.min = 0.15,
       verbatim = FALSE
@@ -59,20 +60,18 @@ graph_step <- function(
       id_module = data_with_annotation %>% dplyr::pull(paste(col_module_id)),
       prevalence = data_with_annotation %>%
         dplyr::select(
-          -!!rlang::sym(annotation_level),
-          -!!rlang::sym(col_module_id)
+          -dplyr::all_of(c(annotation_level, col_module_id))
         ) %>%
         data.matrix() %>%
         `>`(0) %>%
         rowMeans()
     )
-    prev_df_filtered <- prev_df %>% dplyr::filter(prevalence > 0.15)
+    prev_df_filtered <- prev_df %>% dplyr::filter(.data$prevalence > 0.15)
     data_with_annotation_filtered <- data_with_annotation %>%
-      dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+      dplyr::filter(.data[[col_module_id]] %in% prev_df_filtered$id_module)
     counts <- data_with_annotation_filtered %>%
       dplyr::select(
-        -!!rlang::sym(annotation_level),
-        -!!rlang::sym(col_module_id)
+        -dplyr::all_of(c(annotation_level, col_module_id))
       ) %>%
       t()
     colnames(counts) <- data_with_annotation_filtered %>%

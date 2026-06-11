@@ -44,5 +44,12 @@ neighbors_JPN <- find_module_neighbors(
 )
 # Example with covariate
 # x <- norm_data(data$CRC_CHN, 0.30)[[1]]
-# neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
+# neighbors_CHN <- find_module_neighbors(
+#   df = x,
+#   module = "msp_0030",
+#   seed = 20242025,
+#   covar = ~study_accession,
+#   meta_df = metadata$CRC_CHN,
+#   sample_col = "secondary_sample_accession"
+# )
 }

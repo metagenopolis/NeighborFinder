@@ -16,6 +16,7 @@
 #' @return Network. Visualization of NeighborFinder results. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude.
 #' @export
 #' @importFrom sna gplot
+#' @importFrom rlang .data
 #' @examples
 #' data(taxo)
 #' visualize_network(
@@ -27,9 +28,29 @@
 #'   label_size = 5
 #' )
 #' # #With species names instead of msp names
-#' # visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
+#' # visualize_network(
+#' #   result_example$res_CRC_JPN,
+#' #   taxo,
+#' #   object_of_interest = "Escherichia coli",
+#' #   col_module_id = "msp_id",
+#' #   annotation_level = "species",
+#' #   label_size = 5,
+#' #   annotation_option = TRUE,
+#' #   seed = 2
+#' # )
 #' # #With esthetic changes
-#' # visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
+#' # visualize_network(
+#' #   result_example$res_CRC_JPN,
+#' #   taxo,
+#' #   object_of_interest = "Escherichia coli",
+#' #   col_module_id = "msp_id",
+#' #   annotation_level = "species",
+#' #   annotation_option = TRUE,
+#' #   node_size = 15,
+#' #   label_size = 6,
+#' #   object_color = "orange",
+#' #   seed = 2
+#' # )
 visualize_network <- function(
   res_NeighborFinder,
   annotation_table,
@@ -84,13 +105,13 @@ visualize_network <- function(
     res <- res_NeighborFinder %>%
       dplyr::mutate(
         node1 = module_to_node(
-          module = node1,
+          module = .data$node1,
           annotation_table = annotation_table,
           col_module_id = col_module_id,
           annotation_level = annotation_level
         ),
         node2 = module_to_node(
-          module = node2,
+          module = .data$node2,
           annotation_table = annotation_table,
           col_module_id = col_module_id,
           annotation_level = annotation_level

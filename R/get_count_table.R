@@ -90,12 +90,12 @@ get_count_table <- function(
 
   # Prevalence filtering
   counts <- data_table %>%
-    dplyr::mutate(prev = rowMeans(. > 0), msp = species) %>%
-    dplyr::filter(prev > prev.min)
-  prevs <- counts %>% dplyr::select(prev, msp)
+    dplyr::mutate(prev = rowMeans(data_table > 0), msp = species) %>%
+    dplyr::filter(.data$prev > prev.min)
+  prevs <- counts %>% dplyr::select(dplyr::all_of(c("prev", "msp")))
   counts <- counts %>%
-    dplyr::select(-msp, -prev) %>%
-    t(.)
+    dplyr::select(-dplyr::all_of(c("prev", "msp"))) %>%
+    t()
   colnames(counts) <- prevs$msp
   # Set minimal positive value to 1
   cst <- 1 / min(counts[counts != 0])

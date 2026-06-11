@@ -59,22 +59,22 @@ test_filter <- function(df_before, df_after, prevs = NULL) {
   scores_before <- df_before %>%
     dplyr::mutate(
       precision_before = purrr::pmap_dbl(
-        list(node2_true, node2_detected),
+        list(.data$node2_true, .data$node2_detected),
         compute_precision
       ),
       recall_before = purrr::pmap_dbl(
-        list(node2_true, node2_detected),
+        list(.data$node2_true, .data$node2_detected),
         compute_recall
       )
     )
   scores_after <- df_after %>%
     dplyr::mutate(
       precision_after = purrr::pmap_dbl(
-        list(node2_true, node2_detected),
+        list(.data$node2_true, .data$node2_detected),
         compute_precision
       ),
       recall_after = purrr::pmap_dbl(
-        list(node2_true, node2_detected),
+        list(.data$node2_true, .data$node2_detected),
         compute_recall
       )
     )
@@ -88,12 +88,14 @@ test_filter <- function(df_before, df_after, prevs = NULL) {
       by = c("prev_level", "node1")
     ) %>%
       dplyr::select(
-        prev_level,
-        filtering_top,
-        precision_before,
-        recall_before,
-        precision_after,
-        recall_after
+        dplyr::all_of(c(
+          "prev_level",
+          "filtering_top",
+          "precision_before",
+          "recall_before",
+          "precision_after",
+          "recall_after"
+        ))
       ) %>%
       dplyr::mutate_all(~ replace(., is.na(.), 0))
 
@@ -102,7 +104,7 @@ test_filter <- function(df_before, df_after, prevs = NULL) {
     if (is.null(prevs)) {
       return(res)
     } else {
-      return(res %>% dplyr::filter(prev_level %in% prevs))
+      return(res %>% dplyr::filter(.data$prev_level %in% prevs))
     }
   }
 }

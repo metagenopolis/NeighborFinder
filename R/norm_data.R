@@ -63,7 +63,7 @@ norm_data <- function(
           `>`(0) %>%
           rowMeans()
       )
-      prev_df_filtered <- prev_df %>% dplyr::filter(prevalence > prev)
+      prev_df_filtered <- prev_df %>% dplyr::filter(.data$prevalence > prev)
       data_with_annotation_filtered <- data_with_annotation %>%
         dplyr::filter(
           !!rlang::sym(col_module_id) %in% prev_df_filtered$id_module

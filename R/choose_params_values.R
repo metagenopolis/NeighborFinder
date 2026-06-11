@@ -16,9 +16,20 @@
 #' @export
 #' @importFrom stats quantile
 #' @examples
-#' # data(data)
-#' # data(graphs)
-#' # choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
+#' \dontrun{
+#' data(data)
+#' data(graphs)
+#' choose_params_values(
+#'   data_with_annotation = data$CRC_JPN,
+#'   object_of_interest = "Escherichia coli",
+#'   sample_size = 100,
+#'   prev_list = c(0.20, 0.30),
+#'   filtering_list = c(10, 20),
+#'   graph_file = graphs$CRC_JPN,
+#'   col_module_id = "msp_id",
+#'   annotation_level = "species"
+#' )
+#' }
 choose_params_values <- function(
   data_with_annotation,
   object_of_interest,
@@ -82,7 +93,9 @@ choose_params_values <- function(
       res <- purrr::map_dfr(
         filtering_list,
         ~ df_glm %>%
-          dplyr::filter(abs(coef) > quantile(abs(coef), 1 - .x / 100)) %>%
+          dplyr::filter(
+            abs(.data$coef) > quantile(abs(.data$coef), 1 - .x / 100)
+          ) %>%
           dplyr::mutate(filtering_top = .x)
       )
     }
@@ -104,16 +117,20 @@ choose_params_values <- function(
   }
   res <- test_filter(before, after, prev_list) %>%
     dplyr::mutate(
-      F1_before = harm_mean(precision_before, recall_before) %>% signif(., 2)
+      F1_before = harm_mean(.data$precision_before, .data$recall_before) %>%
+        signif(2)
     ) %>%
     dplyr::mutate(
-      F1_after = harm_mean(precision_after, recall_after) %>% signif(., 2)
+      F1_after = harm_mean(.data$precision_after, .data$recall_after) %>%
+        signif(2)
     ) %>%
     dplyr::select(
-      -precision_before,
-      -recall_before,
-      -precision_after,
-      -recall_after
+      -dplyr::all_of(c(
+        "precision_before",
+        "recall_before",
+        "precision_after",
+        "recall_after"
+      ))
     )
   res$F1_before[is.na(res$F1_before)] <- 0
   res$F1_after[is.na(res$F1_after)] <- 0
@@ -121,6 +138,6 @@ choose_params_values <- function(
   if (!nrow(res)) {
     return(tibble::tibble())
   } else {
-    res %>% dplyr::mutate(prev_level = as.numeric(prev_level))
+    res %>% dplyr::mutate(prev_level = as.numeric(.data$prev_level))
   }
 }

@@ -6,7 +6,8 @@ test_that("apply_NeighborFinder works", {
     data$CRC_JPN[, 1:100],
     object_of_interest = "Escherichia coli",
     col_module_id = "msp_id",
-    annotation_level = "species"
+    annotation_level = "species",
+    .seed = 123
   )
   expect_equal(
     res_CRC_JPN$node2,

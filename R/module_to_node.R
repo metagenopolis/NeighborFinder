@@ -43,7 +43,9 @@ module_to_node <- function(
   annotation_level
 ) {
   node_dict <- annotation_table %>%
-    dplyr::select(all_of(col_module_id), !!rlang::sym(annotation_level)) %>%
+    dplyr::select(
+      dplyr::all_of(c(col_module_id, annotation_level))
+    ) %>%
     tibble::deframe()
   node_dict[module] %>%
     unname() %>%

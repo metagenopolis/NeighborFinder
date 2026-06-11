@@ -36,7 +36,7 @@
 #' tiny_true_edges <- truth_by_prevalence(tiny_truth, c(0.20, 0.30))
 truth_by_prevalence <- function(edge_table, prev_list) {
   for_one_prev <- function(prev) {
-    edge_table %>% dplyr::filter(prev1 >= prev, prev2 >= prev)
+    edge_table %>% dplyr::filter(.data$prev1 >= prev, .data$prev2 >= prev)
   }
   cat("Defining and saving true neighbors...\n")
   purrr::map(prev_list, for_one_prev) %>% rlang::set_names(prev_list)
