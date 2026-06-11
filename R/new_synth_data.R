@@ -43,7 +43,14 @@
 #' @export
 #' @examples
 #' tiny_data <- data.frame(
-#'   species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact", "Three bact A", "Three bact B"),
+#'   species = c(
+#'     "One bacteria",
+#'     "One bacterium L",
+#'     "One bacterium G",
+#'     "Two bact",
+#'     "Three bact A",
+#'     "Three bact B"
+#'   ),
 #'   msp_name = c("msp_1", "msp_2", "msp_3", "msp_4", "msp_5", "msp_6"),
 #'   SAMPLE1 = c(0, 1.328425e-06, 0, 1.527688e-07, 0, 0),
 #'   SAMPLE2 = c(1.251707e-07, 0, 3.985320e-07, 0, 1.33607e-04, 0.8675e-03),
@@ -53,16 +60,50 @@
 #'   SAMPLE6 = c(0.26417e-06, 0, 1.0077e-05, 3.983320e-08, 0, 0)
 #' )
 #'
-#' count_table <- get_count_table(abund.table = tiny_data %>% dplyr::select(-species), sample.id = colnames(tiny_data), prev.min = 0.1)
-#' tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) %>% suppressWarnings()
-#' sim_data <- new_synth_data(count_table$data, n = 50, graph = as.matrix(tiny_graph %>% dplyr::select(-species)), verbatim = FALSE, seed = 20242025) %>% suppressWarnings()
-new_synth_data <- function(real_data, graph_type = "cluster", must_connect = TRUE, graph = NULL, n = 300,
-                           seed = 10010, r = 50, dens = 4, k = 3, verbatim = TRUE, signed = FALSE) {
+#' count_table <- get_count_table(
+#'   abund.table = tiny_data %>% dplyr::select(-species),
+#'   sample.id = colnames(tiny_data),
+#'   prev.min = 0.1
+#' )
+#' tiny_graph <- graph_step(
+#'   tiny_data,
+#'   col_module_id = "msp_name",
+#'   annotation_level = "species",
+#'   seed = 20242025
+#' ) %>%
+#'   suppressWarnings()
+#' sim_data <- new_synth_data(
+#'   count_table$data,
+#'   n = 50,
+#'   graph = as.matrix(tiny_graph %>% dplyr::select(-species)),
+#'   verbatim = FALSE,
+#'   seed = 20242025
+#' ) %>%
+#'   suppressWarnings()
+new_synth_data <- function(
+  real_data,
+  graph_type = "cluster",
+  must_connect = TRUE,
+  graph = NULL,
+  n = 300,
+  seed = 10010,
+  r = 50,
+  dens = 4,
+  k = 3,
+  verbatim = TRUE,
+  signed = FALSE
+) {
   p <- ncol(real_data)
   species <- colnames(real_data)
 
   # Functions extracted from EMtree package to remove dependency
-  generator_graph <- function(p = 20, graph = "cluster", dens = 0.3, r = 2, k = 3) {
+  generator_graph <- function(
+    p = 20,
+    graph = "cluster",
+    dens = 0.3,
+    r = 2,
+    k = 3
+  ) {
     theta <- matrix(0, p, p)
     if (graph == "cluster") {
       theta <- SimCluster(p, k = k, dens, r)
@@ -78,7 +119,9 @@ new_synth_data <- function(real_data, graph_type = "cluster", must_connect = TRU
     }
     D <- diag(sumlignes + v)
     if (signed) {
-      Gsign <- ToSym(ToVec(G * matrix(2 * stats::rbinom(p^2, 1, 0.3) - 1, p, p)))
+      Gsign <- ToSym(ToVec(
+        G * matrix(2 * stats::rbinom(p^2, 1, 0.3) - 1, p, p)
+      ))
       omega <- lambda * D + Gsign
       while (min(eigen(omega)$values) < 1e-10 & lambda < 1000) {
         lambda <- 1.1 * lambda
@@ -99,29 +142,55 @@ new_synth_data <- function(real_data, graph_type = "cluster", must_connect = TRU
   if (is.null(graph)) {
     if (!must_connect) {
       set.seed(seed)
-      G <- as.matrix(generator_graph(p = p, graph = graph_type, dens = dens / p, r, k))
+      G <- as.matrix(generator_graph(
+        p = p,
+        graph = graph_type,
+        dens = dens / p,
+        r,
+        k
+      ))
     } else {
       i <- 0
       connect <- FALSE
       while (!connect) {
         i <- i + 1
         set.seed(i)
-        G <- as.matrix(generator_graph(p = p, graph = graph_type, dens = dens / p, r, k))
+        G <- as.matrix(generator_graph(
+          p = p,
+          graph = graph_type,
+          dens = dens / p,
+          r,
+          k
+        ))
         graph <- igraph::graph_from_adjacency_matrix(G)
         connect <- igraph::is_connected(graph)
       }
     }
   } else {
-    if (!all(species %in% colnames(graph)) || !all(species %in% rownames(graph))) stop("Some species in the abundance dataset do not appear in the provided graph.")
+    if (
+      !all(species %in% colnames(graph)) || !all(species %in% rownames(graph))
+    ) {
+      stop(
+        "Some species in the abundance dataset do not appear in the provided graph."
+      )
+    }
     G <- graph[species, species]
   }
   dimnames(G) <- list(species, species)
   faithful_param <- generator_param(G = G, signed = signed)
   parcor <- -cov2cor(as.matrix(faithful_param$Omega))
 
-  if (verbatim) cat("Simulation from real data ecdf...")
+  if (verbatim) {
+    cat("Simulation from real data ecdf...")
+  }
 
-  simu_counts <- simulate_from_ecdf(real_data, Sigma = faithful_param$Sigma, n = n, seed = seed, verbatim = verbatim)
+  simu_counts <- simulate_from_ecdf(
+    real_data,
+    Sigma = faithful_param$Sigma,
+    n = n,
+    seed = seed,
+    verbatim = verbatim
+  )
   simulated_data <- list(counts = simu_counts, par.cor = parcor, G = G)
   simulated_data
 }

@@ -19,18 +19,46 @@
 #' @export
 #' @examples
 #' data(data)
-#' res_CRC_JPN <- apply_NF_simple(data$CRC_JPN[, 1:100], object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species", seed = 20242025)
-apply_NF_simple <- function(data_with_annotation, object_of_interest, col_module_id, annotation_level, prev_level = 0.30, filtering_top = 20, seed = NULL, ...) {
+#' res_CRC_JPN <- apply_NF_simple(
+#'   data$CRC_JPN[, 1:100],
+#'   object_of_interest = "Escherichia coli",
+#'   col_module_id = "msp_id",
+#'   annotation_level = "species",
+#'   seed = 20242025
+#' )
+apply_NF_simple <- function(
+  data_with_annotation,
+  object_of_interest,
+  col_module_id,
+  annotation_level,
+  prev_level = 0.30,
+  filtering_top = 20,
+  seed = NULL,
+  ...
+) {
   if (is.null(seed)) {
-    stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")
+    stop(
+      "No seed provided, make sure you've set and recorded the random seed of your session for reproducibility"
+    )
   }
   # Normalize data
-  normed_data <- norm_data(data_with_annotation = data_with_annotation, col_module_id = col_module_id, prev_list = c(prev_level), annotation_level = annotation_level)
+  normed_data <- norm_data(
+    data_with_annotation = data_with_annotation,
+    col_module_id = col_module_id,
+    prev_list = c(prev_level),
+    annotation_level = annotation_level
+  )
   # Find neighbors with cv.glmnet
   df_glm <- cvglm_to_coeffs_by_object(
     list_dfs = normed_data,
-    test_module = identify_module(object_of_interest = object_of_interest, annotation_table = data_with_annotation, col_module_id = col_module_id, annotation_level = annotation_level),
-    seed = seed, ...
+    test_module = identify_module(
+      object_of_interest = object_of_interest,
+      annotation_table = data_with_annotation,
+      col_module_id = col_module_id,
+      annotation_level = annotation_level
+    ),
+    seed = seed,
+    ...
   )
   if (!nrow(df_glm)) {
     return(tibble::tibble(.rows = 0))

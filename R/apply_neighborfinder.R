@@ -17,8 +17,21 @@
 #' @export
 #' @examples
 #' data(data)
-#' res_CRC_JPN <- apply_NeighborFinder(data$CRC_JPN[, 1:100], object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species")
-apply_NeighborFinder <- function(data_with_annotation, object_of_interest, col_module_id, annotation_level, prev_level = 0.30, filtering_top = 20, ...) {
+#' res_CRC_JPN <- apply_NeighborFinder(
+#'   data$CRC_JPN[, 1:100],
+#'   object_of_interest = "Escherichia coli",
+#'   col_module_id = "msp_id",
+#'   annotation_level = "species"
+#' )
+apply_NeighborFinder <- function(
+  data_with_annotation,
+  object_of_interest,
+  col_module_id,
+  annotation_level,
+  prev_level = 0.30,
+  filtering_top = 20,
+  ...
+) {
   # Performance depends on the number of samples in the dataset, please choose the good comination of prev_level and filtering_top
   # The function runs for 10 seed and filters results if found in more than half the seeds to return robust results
   set.seed(seed = 123)
@@ -28,9 +41,15 @@ apply_NeighborFinder <- function(data_with_annotation, object_of_interest, col_m
   for (one_seed in seeds10) {
     res_repet_seeds <- rbind(
       res_repet_seeds,
-      apply_NF_simple(data_with_annotation, object_of_interest, col_module_id,
-        annotation_level, prev_level, filtering_top,
-        seed = one_seed, ...
+      apply_NF_simple(
+        data_with_annotation,
+        object_of_interest,
+        col_module_id,
+        annotation_level,
+        prev_level,
+        filtering_top,
+        seed = one_seed,
+        ...
       ) %>%
         dplyr::mutate(SEED = one_seed)
     )

@@ -14,8 +14,26 @@
 #' @examples
 #' data(taxo)
 #' data(result_example)
-#' intersections_table(res_list = list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), threshold = 2, taxo, col_module_id = "msp_id", annotation_level = "species", "Escherichia coli")
-intersections_table <- function(res_list, threshold, annotation_table, col_module_id, annotation_level, object_of_interest) {
+#' intersections_table(
+#'   res_list = list(
+#'     result_example$res_CRC_JPN,
+#'     result_example$res_CRC_CHN,
+#'     result_example$res_CRC_EUR
+#'   ),
+#'   threshold = 2,
+#'   taxo,
+#'   col_module_id = "msp_id",
+#'   annotation_level = "species",
+#'   "Escherichia coli"
+#' )
+intersections_table <- function(
+  res_list,
+  threshold,
+  annotation_table,
+  col_module_id,
+  annotation_level,
+  object_of_interest
+) {
   # Gathering all results from datasets
   for (l in 1:length(res_list)) {
     res_list[[l]] <- res_list[[l]] %>% dplyr::mutate(dataset = paste("n_", l))
@@ -25,7 +43,11 @@ intersections_table <- function(res_list, threshold, annotation_table, col_modul
     tibble::tibble() %>%
     dplyr::mutate(pair = paste(node1, node2, sep = "_")) %>%
     dplyr::group_by(pair) %>%
-    dplyr::summarize(datasets = list(dataset), intersections = list(dataset) %>% unlist() %>% length(), mean_coef = mean(coef)) %>%
+    dplyr::summarize(
+      datasets = list(dataset),
+      intersections = list(dataset) %>% unlist() %>% length(),
+      mean_coef = mean(coef)
+    ) %>%
     dplyr::ungroup() %>%
     tidyr::separate(pair, into = c("node1", "node2"), sep = "_msp") %>%
     dplyr::mutate(node2 = paste0("msp", node2))
@@ -33,14 +55,34 @@ intersections_table <- function(res_list, threshold, annotation_table, col_modul
   # Keeping only neighbors found in more than n cohort(s)
   res_intersections <- inter %>% dplyr::filter(intersections >= threshold)
   if (nrow(res_intersections) == 0) {
-    return(message("No intersection was found between the results provided, try to lower the threshold.\n"))
+    return(message(
+      "No intersection was found between the results provided, try to lower the threshold.\n"
+    ))
   }
   # Give taxonomic correspondence
   res_intersections %>%
     dplyr::mutate(
-      module1 = module_to_node(module = node1, annotation_table = annotation_table, col_module_id = col_module_id, annotation_level = annotation_level),
-      module2 = module_to_node(module = node2, annotation_table = annotation_table, col_module_id = col_module_id, annotation_level = annotation_level)
+      module1 = module_to_node(
+        module = node1,
+        annotation_table = annotation_table,
+        col_module_id = col_module_id,
+        annotation_level = annotation_level
+      ),
+      module2 = module_to_node(
+        module = node2,
+        annotation_table = annotation_table,
+        col_module_id = col_module_id,
+        annotation_level = annotation_level
+      )
     ) %>%
-    dplyr::select(node1, module1, node2, module2, datasets, intersections, mean_coef) %>%
+    dplyr::select(
+      node1,
+      module1,
+      node2,
+      module2,
+      datasets,
+      intersections,
+      mean_coef
+    ) %>%
     as.data.frame()
 }

@@ -18,12 +18,30 @@
 #' @importFrom sna gplot
 #' @examples
 #' data(taxo)
-#' visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species", label_size = 5)
+#' visualize_network(
+#'   result_example$res_CRC_JPN,
+#'   taxo,
+#'   object_of_interest = "Escherichia coli",
+#'   col_module_id = "msp_id",
+#'   annotation_level = "species",
+#'   label_size = 5
+#' )
 #' # #With species names instead of msp names
 #' # visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)
 #' # #With esthetic changes
 #' # visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)
-visualize_network <- function(res_NeighborFinder, annotation_table, col_module_id, annotation_level, object_of_interest, annotation_option = FALSE, node_size = 12, label_size = 4, object_color = "cadetblue2", seed = NULL) {
+visualize_network <- function(
+  res_NeighborFinder,
+  annotation_table,
+  col_module_id,
+  annotation_level,
+  object_of_interest,
+  annotation_option = FALSE,
+  node_size = 12,
+  label_size = 4,
+  object_color = "cadetblue2",
+  seed = NULL
+) {
   if (!nrow(res_NeighborFinder)) {
     return(message("No neighbors were found."))
   }
@@ -33,39 +51,87 @@ visualize_network <- function(res_NeighborFinder, annotation_table, col_module_i
     net <- network::network(res, matrix.type = "edgelist")
     network::set.edge.attribute(net, "weights", res$coef)
     # Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% identify_module(object_of_interest = object_of_interest, annotation_table = annotation_table, col_module_id = col_module_id, annotation_level = annotation_level), object_color, "grey85")
+    palette <- dplyr::if_else(
+      network::network.vertex.names(net) %in%
+        identify_module(
+          object_of_interest = object_of_interest,
+          annotation_table = annotation_table,
+          col_module_id = col_module_id,
+          annotation_level = annotation_level
+        ),
+      object_color,
+      "grey85"
+    )
     # Plot network
     if (!is.null(seed)) {
       set.seed(seed)
     }
-    GGally::ggnet2(net,
-      edge.size = 20 * abs(res$coef), edge.color = ifelse(res$coef >= 0, "green4", "red3"), edge.alpha = 0.5,
-      node.color = palette, size = node_size, label = TRUE,
-      legend.position = "none", max_size = label_size, mode = "kamadakawai", layout.exp = 0.2
+    GGally::ggnet2(
+      net,
+      edge.size = 20 * abs(res$coef),
+      edge.color = ifelse(res$coef >= 0, "green4", "red3"),
+      edge.alpha = 0.5,
+      node.color = palette,
+      size = node_size,
+      label = TRUE,
+      legend.position = "none",
+      max_size = label_size,
+      mode = "kamadakawai",
+      layout.exp = 0.2
     )
   } else {
     # Give taxonomic correspondence
     res <- res_NeighborFinder %>%
       dplyr::mutate(
-        node1 = module_to_node(module = node1, annotation_table = annotation_table, col_module_id = col_module_id, annotation_level = annotation_level),
-        node2 = module_to_node(module = node2, annotation_table = annotation_table, col_module_id = col_module_id, annotation_level = annotation_level)
+        node1 = module_to_node(
+          module = node1,
+          annotation_table = annotation_table,
+          col_module_id = col_module_id,
+          annotation_level = annotation_level
+        ),
+        node2 = module_to_node(
+          module = node2,
+          annotation_table = annotation_table,
+          col_module_id = col_module_id,
+          annotation_level = annotation_level
+        )
       )
     # Build network
     net <- network::network(res, matrix.type = "edgelist")
     network::set.edge.attribute(net, "weights", res$coef)
     # Identify species of interest in a different color
-    palette <- dplyr::if_else(network::network.vertex.names(net) %in% module_to_node(
-      module = identify_module(object_of_interest = object_of_interest, annotation_table = annotation_table, col_module_id = col_module_id, annotation_level = annotation_level),
-      annotation_table = annotation_table, col_module_id = col_module_id, annotation_level = annotation_level
-    ), object_color, "grey85")
+    palette <- dplyr::if_else(
+      network::network.vertex.names(net) %in%
+        module_to_node(
+          module = identify_module(
+            object_of_interest = object_of_interest,
+            annotation_table = annotation_table,
+            col_module_id = col_module_id,
+            annotation_level = annotation_level
+          ),
+          annotation_table = annotation_table,
+          col_module_id = col_module_id,
+          annotation_level = annotation_level
+        ),
+      object_color,
+      "grey85"
+    )
     # Plot network
     if (!is.null(seed)) {
       set.seed(seed)
     }
-    GGally::ggnet2(net,
-      edge.size = 20 * abs(res$coef), edge.color = ifelse(res$coef >= 0, "green4", "red3"), edge.alpha = 0.5,
-      node.color = palette, size = node_size, label = TRUE,
-      legend.position = "none", max_size = label_size, mode = "kamadakawai", layout.exp = 0.2
+    GGally::ggnet2(
+      net,
+      edge.size = 20 * abs(res$coef),
+      edge.color = ifelse(res$coef >= 0, "green4", "red3"),
+      edge.alpha = 0.5,
+      node.color = palette,
+      size = node_size,
+      label = TRUE,
+      legend.position = "none",
+      max_size = label_size,
+      mode = "kamadakawai",
+      layout.exp = 0.2
     )
   }
 }

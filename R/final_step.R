@@ -12,21 +12,32 @@
 #' # Dataframe with true neighbors
 #' df_true <- list(
 #'   tibble::tibble(
-#'     node1 = c("msp_1", "msp_1", "msp_2", "msp_3"), node2 = c("msp_55", "msp_20", "msp_3", "msp_18"),
-#'     prev1 = c(0.28, 0.28, 0.96, 0.75), prev2 = c(0.76, 0.25, 0.75, 0.60)
+#'     node1 = c("msp_1", "msp_1", "msp_2", "msp_3"),
+#'     node2 = c("msp_55", "msp_20", "msp_3", "msp_18"),
+#'     prev1 = c(0.28, 0.28, 0.96, 0.75),
+#'     prev2 = c(0.76, 0.25, 0.75, 0.60)
 #'   ),
-#'   tibble::tibble(node1 = c("msp_2", "msp_3"), node2 = c("msp_3", "msp_18"), prev1 = c(0.96, 0.75), prev2 = c(0.75, 0.60))
-#' ) %>% rlang::set_names(c("0.20", "0.30"))
+#'   tibble::tibble(
+#'     node1 = c("msp_2", "msp_3"),
+#'     node2 = c("msp_3", "msp_18"),
+#'     prev1 = c(0.96, 0.75),
+#'     prev2 = c(0.75, 0.60)
+#'   )
+#' ) %>%
+#'   rlang::set_names(c("0.20", "0.30"))
 #'
 #' # Dataframe with detected neighbors
 #' df_detected <- list(
 #'   tibble::tibble(
-#'     prev_level = c("0.20", "0.30", "0.30", "0.30"), node1 = c("msp_2", "msp_2", "msp_3", "msp_3"),
-#'     node2 = c("msp_3", "msp_3", "msp_18", "msp_8"), coef = c(0.406, -0.025, 0.160, 0.005),
+#'     prev_level = c("0.20", "0.30", "0.30", "0.30"),
+#'     node1 = c("msp_2", "msp_2", "msp_3", "msp_3"),
+#'     node2 = c("msp_3", "msp_3", "msp_18", "msp_8"),
+#'     coef = c(0.406, -0.025, 0.160, 0.005),
 #'     filtering_top = c(100, 100, 100, 100)
 #'   ),
 #'   tibble::tibble()
-#' ) %>% rlang::set_names(c("0.20", "0.30"))
+#' ) %>%
+#'   rlang::set_names(c("0.20", "0.30"))
 #' # Use final_step() to gather both
 #' neighbors <- final_step(df_true, df_detected, robustness_step = FALSE)
 final_step <- function(df_truth, df_glm, robustness_step = NULL) {
@@ -46,7 +57,11 @@ final_step <- function(df_truth, df_glm, robustness_step = NULL) {
         .by = c(prev_level, node1)
       )
 
-    result <- dplyr::full_join(truth, inference, by = c("prev_level", "node1")) %>%
+    result <- dplyr::full_join(
+      truth,
+      inference,
+      by = c("prev_level", "node1")
+    ) %>%
       lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>%
       do.call(cbind, .) %>%
       tibble::as_tibble()
@@ -82,13 +97,18 @@ final_step <- function(df_truth, df_glm, robustness_step = NULL) {
         res <- rbind(res, df)
       }
     }
-    inference_robust <- res %>% dplyr::summarize(
-      node2_detected = list(node2),
-      node2_coef = list(coef),
-      .by = c(prev_level, filtering_top, node1)
-    )
+    inference_robust <- res %>%
+      dplyr::summarize(
+        node2_detected = list(node2),
+        node2_coef = list(coef),
+        .by = c(prev_level, filtering_top, node1)
+      )
 
-    result <- dplyr::full_join(truth, inference_robust, by = c("prev_level", "node1")) %>%
+    result <- dplyr::full_join(
+      truth,
+      inference_robust,
+      by = c("prev_level", "node1")
+    ) %>%
       lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>%
       do.call(cbind, .) %>%
       tibble::as_tibble()

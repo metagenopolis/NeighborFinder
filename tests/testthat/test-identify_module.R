@@ -4,7 +4,20 @@ test_that("identify_module works", {
   df_taxo <- data.frame(
     msp_name = c("msp_1", "msp_2", "msp_3", "msp_4"),
     genus = c("One", "One", "One", "Two"),
-    species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact")
+    species = c(
+      "One bacteria",
+      "One bacterium L",
+      "One bacterium G",
+      "Two bact"
+    )
   )
-  expect_equal(identify_module(object_of_interest = "One", annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "species"), c("msp_1", "msp_2", "msp_3"))
+  expect_equal(
+    identify_module(
+      object_of_interest = "One",
+      annotation_table = df_taxo,
+      col_module_id = "msp_name",
+      annotation_level = "species"
+    ),
+    c("msp_1", "msp_2", "msp_3")
+  )
 })

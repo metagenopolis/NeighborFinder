@@ -2,7 +2,12 @@
 
 test_that("norm_data works", {
   tiny_data <- data.frame(
-    species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact"),
+    species = c(
+      "One bacteria",
+      "One bacterium L",
+      "One bacterium G",
+      "Two bact"
+    ),
     msp_name = c("msp_1", "msp_2", "msp_3", "msp_4"),
     SAMPLE1 = c(0, 1.328425e-06, 0, 1.527688e-07),
     SAMPLE2 = c(1.251707e-07, 1.251707e-07, 3.985320e-07, 0),
@@ -17,5 +22,15 @@ test_that("norm_data works", {
     msp_4 = c(3.438051, 0.000000, 8.040536, 0.000000)
   )
   rownames(expected_normed0.2) <- c("SAMPLE1", "SAMPLE2", "SAMPLE3", "SAMPLE4")
-  expect_equal(norm_data(tiny_data, col_module_id = "msp_name", annotation_level = "species", prev_list = c(0.20))[[1]] %>% as.data.frame() %>% round(digits = 5), expected_normed0.2 %>% round(digits = 5))
+  expect_equal(
+    norm_data(
+      tiny_data,
+      col_module_id = "msp_name",
+      annotation_level = "species",
+      prev_list = c(0.20)
+    )[[1]] %>%
+      as.data.frame() %>%
+      round(digits = 5),
+    expected_normed0.2 %>% round(digits = 5)
+  )
 })

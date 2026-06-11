@@ -3,6 +3,17 @@
 test_that("intersections_table works", {
   data(taxo)
   data(result_example)
-  table <- intersections_table(res_list = list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), threshold = 2, taxo, col_module_id = "msp_id", annotation_level = "species", "Escherichia coli")
+  table <- intersections_table(
+    res_list = list(
+      result_example$res_CRC_JPN,
+      result_example$res_CRC_CHN,
+      result_example$res_CRC_EUR
+    ),
+    threshold = 2,
+    taxo,
+    col_module_id = "msp_id",
+    annotation_level = "species",
+    "Escherichia coli"
+  )
   expect_equal(table$node2, c("msp_0103", "msp_0208"))
 })

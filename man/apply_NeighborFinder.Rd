@@ -37,5 +37,10 @@ Apply NeighborFinder on raw data
 }
 \examples{
 data(data)
-res_CRC_JPN <- apply_NeighborFinder(data$CRC_JPN[, 1:100], object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species")
+res_CRC_JPN <- apply_NeighborFinder(
+  data$CRC_JPN[, 1:100],
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species"
+)
 }

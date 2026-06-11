@@ -36,7 +36,9 @@ SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
 
   ## Modern handling of NA in adjacency matrices
   if (mode == "igraph>=2.2") {
-    if (r < 1) stop("To achieve a cluster-like structure, provide a value of r > 1.")
+    if (r < 1) {
+      stop("To achieve a cluster-like structure, provide a value of r > 1.")
+    }
 
     alpha <- dens / (1 / k + (k - 1) / (k * r))
 
@@ -44,15 +46,26 @@ SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
       r_max <- (k - 1) / (k * dens - 1)
       dens_max <- (1 / k + (k - 1) / (k * r))
       warning(
-        paste0("User-specified values are not admissible, consider decreasing k, dens or r.\n  Maximum admissible values for dens is ", round(dens_max, 3), " and for r is ", round(r_max, 3))
+        paste0(
+          "User-specified values are not admissible, consider decreasing k, dens or r.\n  Maximum admissible values for dens is ",
+          round(dens_max, 3),
+          " and for r is ",
+          round(r_max, 3)
+        )
       )
     }
 
     if (r_max < 1) {
-      message(paste0("Maximum value for r is below 1, decreasing target density to ", round(0.99 * dens_max, 3)))
+      message(paste0(
+        "Maximum value for r is below 1, decreasing target density to ",
+        round(0.99 * dens_max, 3)
+      ))
       dens <- 0.99 * dens_max
     } else {
-      cat(paste0("Maximum value for r is below 1, decreasing target intra/inter ratio to ", round(0.99 * r_max, 3)))
+      cat(paste0(
+        "Maximum value for r is below 1, decreasing target intra/inter ratio to ",
+        round(0.99 * r_max, 3)
+      ))
       r <- 0.99 * r_max
     }
 

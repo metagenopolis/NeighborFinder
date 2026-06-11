@@ -16,13 +16,26 @@
 #' data(metadata)
 #' # Simple example
 #' x <- norm_data(data$CRC_JPN, 0.30)[[1]]
-#' neighbors_JPN <- find_module_neighbors(df = x, module = "msp_0030", seed = 20242025)
+#' neighbors_JPN <- find_module_neighbors(
+#'   df = x,
+#'   module = "msp_0030",
+#'   seed = 20242025
+#' )
 #' # Example with covariate
 #' # x <- norm_data(data$CRC_CHN, 0.30)[[1]]
 #' # neighbors_CHN<-find_module_neighbors(df=x, module="msp_0030", seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df = NULL, sample_col = NULL) {
+find_module_neighbors <- function(
+  df,
+  module,
+  seed = NULL,
+  covar = NULL,
+  meta_df = NULL,
+  sample_col = NULL
+) {
   if (is.null(seed)) {
-    stop("No seed provided, make sure you've set and recorded the random seed of your session for reproducibility")
+    stop(
+      "No seed provided, make sure you've set and recorded the random seed of your session for reproducibility"
+    )
   } else {
     set.seed(seed)
   }
@@ -31,11 +44,17 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
   penalized_features <- colnames(df)
   if (!is.null(covar)) {
     ## Stop if no metadata provided
-    if (is.null(meta_df)) stop("Please provide a metadata table.")
+    if (is.null(meta_df)) {
+      stop("Please provide a metadata table.")
+    }
     ## Stop if no sample column provided
-    if (is.null(sample_col)) stop("Please indicate the column of sample names in metadata.")
+    if (is.null(sample_col)) {
+      stop("Please indicate the column of sample names in metadata.")
+    }
     ## Stop if no covariate provided
-    if (is.null(covar) && (!is.null(sample_col) || !is.null(meta_df))) stop("covar is NULL, please indicate a covariate present in meta_df.")
+    if (is.null(covar) && (!is.null(sample_col) || !is.null(meta_df))) {
+      stop("covar is NULL, please indicate a covariate present in meta_df.")
+    }
     ## Process metadata to match abundance table
     if (!is.null(sample_col) && sample_col %in% colnames(meta_df)) {
       rownames(meta_df) <- meta_df[[sample_col]]
@@ -49,9 +68,14 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
     }
     meta_df <- meta_df[rownames(df), ]
     covariates <- model.matrix(covar, meta_df)
-    covariates <- covariates[, !colnames(covariates) == "(Intersect)", drop = FALSE]
+    covariates <- covariates[,
+      !colnames(covariates) == "(Intersect)",
+      drop = FALSE
+    ]
     if (nrow(covariates) < nrow(df)) {
-      stop("Some samples were dropped, likely because of missing data in the covariates.")
+      stop(
+        "Some samples were dropped, likely because of missing data in the covariates."
+      )
     }
     p_covar <- ncol(covariates)
     df <- cbind(df, covariates)
@@ -62,7 +86,16 @@ find_module_neighbors <- function(df, module, seed = NULL, covar = NULL, meta_df
   if (!length(col)) {
     return(tibble::tibble(.rows = 0))
   }
-  res_glm <- glmnet::cv.glmnet(df[, -col], df[, col], penalty.factor = penalty_factor[-col]) %>% coef(s = "lambda.min")
-  tibble::tibble(node1 = module, node2 = rownames(res_glm), coef = as.numeric(res_glm)) %>%
+  res_glm <- glmnet::cv.glmnet(
+    df[, -col],
+    df[, col],
+    penalty.factor = penalty_factor[-col]
+  ) %>%
+    coef(s = "lambda.min")
+  tibble::tibble(
+    node1 = module,
+    node2 = rownames(res_glm),
+    coef = as.numeric(res_glm)
+  ) %>%
     dplyr::filter(coef != 0, node2 %in% penalized_features)
 }

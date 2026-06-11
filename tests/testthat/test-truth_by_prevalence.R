@@ -14,5 +14,8 @@ test_that("truth_by_prevalence works", {
     prev1 = c(0.5, 0.5, 0.75, 0.75),
     prev2 = c(0.75, 0.5, 0.5, 0.5)
   )
-  expect_equal(truth_by_prevalence(tiny_truth, c(0.30))[[1]], expected_true_edges0.3)
+  expect_equal(
+    truth_by_prevalence(tiny_truth, c(0.30))[[1]],
+    expected_true_edges0.3
+  )
 })
