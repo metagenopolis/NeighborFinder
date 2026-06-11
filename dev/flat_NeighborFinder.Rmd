@@ -853,7 +853,7 @@ sim_data <- new_synth_data(
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
-
+#' @importFrom rlang `:=`
 graph_step <- function(
   data_with_annotation,
   col_module_id,
@@ -865,7 +865,7 @@ graph_step <- function(
   if (data_type == "shotgun") {
     counts <- get_count_table(
       abund.table = data_with_annotation %>%
-        dplyr::select(-!!rlang::sym(annotation_level)),
+        dplyr::select(-dplyr::all_of(annotation_level)),
       sample.id = colnames(data_with_annotation),
       prev.min = 0.15,
       verbatim = FALSE
@@ -876,20 +876,18 @@ graph_step <- function(
       id_module = data_with_annotation %>% dplyr::pull(paste(col_module_id)),
       prevalence = data_with_annotation %>%
         dplyr::select(
-          -!!rlang::sym(annotation_level),
-          -!!rlang::sym(col_module_id)
+          -dplyr::all_of(c(annotation_level, col_module_id))
         ) %>%
         data.matrix() %>%
         `>`(0) %>%
         rowMeans()
     )
-    prev_df_filtered <- prev_df %>% dplyr::filter(prevalence > 0.15)
+    prev_df_filtered <- prev_df %>% dplyr::filter(.data$prevalence > 0.15)
     data_with_annotation_filtered <- data_with_annotation %>%
-      dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+      dplyr::filter(.data[[col_module_id]] %in% prev_df_filtered$id_module)
     counts <- data_with_annotation_filtered %>%
       dplyr::select(
-        -!!rlang::sym(annotation_level),
-        -!!rlang::sym(col_module_id)
+        -dplyr::all_of(c(annotation_level, col_module_id))
       ) %>%
       t()
     colnames(counts) <- data_with_annotation_filtered %>%
@@ -940,19 +938,57 @@ tiny_graph <- graph_step(
 ```
 
 ```{r test-graph_step}
-# test_that("graph_step works", {
-#   data(data)
-#   data(graphs)
-#   expect_equal(
-#     graph_step(
-#       data$CRC_JPN_CHN_EUR,
-#       col_module_id = "msp_id",
-#       annotation_level = "species",
-#       seed = 10010
-#     ),
-#     graphs$CRC_JPN_CHN_EUR
-#   )
-# })
+test_that("graph_step works", {
+  tiny_data <- data.frame(
+    species = c(
+      "One bacteria",
+      "One bacterium L",
+      "One bacterium G",
+      "Two bact",
+      "Three bact A",
+      "Three bact B"
+    ),
+    msp_name = c("msp_1", "msp_2", "msp_3", "msp_4", "msp_5", "msp_6"),
+    SAMPLE1 = c(0, 1.328425e-06, 0, 1.527688e-07, 0, 0),
+    SAMPLE2 = c(1.251707e-07, 0, 3.985320e-07, 0, 1.33607e-04, 0.8675e-03),
+    SAMPLE3 = c(0, 0, 4.926046e-09, 5.626392e-06, 0, 0.662e-03),
+    SAMPLE4 = c(0, 0, 2.98320e-05, 0, 1.275e-04, 0),
+    SAMPLE5 = c(0.0976, 0.9862, 2.98320e-03, 0, 3.9754e-03, 0),
+    SAMPLE6 = c(0.26417e-06, 0, 1.0077e-05, 3.983320e-08, 0, 0)
+  )
+
+  tiny_graph <- structure(
+    list(
+      msp_1 = c(0, 1, 0, 0, 0, 1),
+      msp_2 = c(1, 0, 1, 1, 1, 0),
+      msp_3 = c(0, 1, 0, 0, 1, 1),
+      msp_4 = c(0, 1, 0, 0, 0, 1),
+      msp_5 = c(0, 1, 1, 0, 0, 1),
+      msp_6 = c(1, 0, 1, 1, 1, 0),
+      species = c(
+        "One bacteria",
+        "One bacterium L",
+        "One bacterium G",
+        "Two bact",
+        "Three bact A",
+        "Three bact B"
+      )
+    ),
+    row.names = c("msp_1", "msp_2", "msp_3", "msp_4", "msp_5", "msp_6"),
+    class = "data.frame"
+  )
+
+  expect_equal(
+    graph_step(
+      tiny_data,
+      col_module_id = "msp_name",
+      annotation_level = "species",
+      seed = 20242025
+    ) %>%
+      suppressWarnings(),
+    tiny_graph
+  )
+})
 ```
 
 # Modified central log ratio (mclr) transformation
