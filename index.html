@@ -121,8 +121,8 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
-<span><span class="va">plot_JPN</span> <span class="op">+</span> <span class="va">plot_JPN_annot</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>widths<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-network-ex-1.png" width="100%"></p>
+<span><span class="va">plot_JPN</span> <span class="op">+</span> <span class="va">plot_JPN_annot</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>widths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-network-ex-1.png" alt="" width="100%"></p>
 <p><strong>4. Use different datasets</strong></p>
 <p>We can repeat the process to the two other datasets: the Chinese patients (<code>data$CRC_CHN</code>) and the European patients (<code>data$CRC_EUR</code>).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -171,29 +171,29 @@
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot_JPN</span> <span class="op">|</span> <span class="va">plot_CHN</span> <span class="op">|</span> <span class="va">plot_EUR</span></span></code></pre></div>
-<p><img src="reference/figures/README-plot-multiple-1.png" width="100%"></p>
+<p><img src="reference/figures/README-plot-multiple-1.png" alt="" width="100%"></p>
 <p><strong>5. Aggregate the results</strong></p>
 <p>The results from all three datasets are combined. In this aggregated network, we selected the edges detected in at least 2 out of the 3 datasets.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">final_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/intersections_network.html">intersections_network</a></span><span class="op">(</span></span>
-<span> res_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">res_CRC_JPN</span>, <span class="va">res_CRC_CHN</span>, <span class="va">res_CRC_EUR</span><span class="op">)</span>,</span>
-<span> <span class="va">taxo</span>,</span>
-<span> threshold <span class="op">=</span> <span class="fl">2</span>,</span>
-<span> <span class="st">"Escherichia coli"</span>,</span>
-<span> col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span>
-<span> annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span>
-<span> label_size <span class="op">=</span> <span class="fl">7</span>,</span>
-<span> edge_label_size <span class="op">=</span> <span class="fl">4</span>,</span>
-<span> node_size <span class="op">=</span> <span class="fl">15</span></span>
+<span>  res_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">res_CRC_JPN</span>, <span class="va">res_CRC_CHN</span>, <span class="va">res_CRC_EUR</span><span class="op">)</span>,</span>
+<span>  <span class="va">taxo</span>,</span>
+<span>  threshold <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  <span class="st">"Escherichia coli"</span>,</span>
+<span>  col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span>
+<span>  annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">7</span>,</span>
+<span>  edge_label_size <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  node_size <span class="op">=</span> <span class="fl">15</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_spacer.html" class="external-link">plot_spacer</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="va">final_net</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_spacer.html" class="external-link">plot_spacer</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>widths<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>,<span class="fl">1</span>,<span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-intersections-net-1.png" width="100%"></p>
+<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_spacer.html" class="external-link">plot_spacer</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="va">final_net</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_spacer.html" class="external-link">plot_spacer</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>widths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-intersections-net-1.png" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="full-tutorial">Full tutorial<a class="anchor" aria-label="anchor" href="#full-tutorial"></a>
 </h2>
-<p>The <a href="articles/NeighborFinder_vignette.html">vignette</a> provides an overview of the various use cases of NeighborFinder through examples based on real data extracted from this <a href="https://doi.org/10.57745/7IVO3E" class="external-link">repository</a>.</p>
+<p>The <a href="https://metagenopolis.github.io/NeighborFinder/articles/NeighborFinder_vignette.html" class="external-link">vignette</a> provides an overview of the various use cases of NeighborFinder through examples based on real data extracted from this <a href="https://doi.org/10.57745/7IVO3E" class="external-link">repository</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
