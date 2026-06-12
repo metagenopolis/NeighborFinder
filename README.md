@@ -117,10 +117,10 @@ plot_JPN_annot <- visualize_network(
 )
 
 library(patchwork)
-plot_JPN + plot_JPN_annot + plot_layout(widths=c(1,1.3))
+plot_JPN + plot_JPN_annot + plot_layout(widths = c(1, 1.3))
 ```
 
-<img src="man/figures/README-network-ex-1.png" width="100%" />
+<img src="man/figures/README-network-ex-1.png" alt="" width="100%" />
 
 **4. Use different datasets**
 
@@ -177,7 +177,7 @@ plot_EUR <- visualize_network(
 plot_JPN | plot_CHN | plot_EUR
 ```
 
-<img src="man/figures/README-plot-multiple-1.png" width="100%" />
+<img src="man/figures/README-plot-multiple-1.png" alt="" width="100%" />
 
 **5. Aggregate the results**
 
@@ -187,25 +187,26 @@ datasets.
 
 ``` r
 final_net <- intersections_network(
- res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
- taxo,
- threshold = 2,
- "Escherichia coli",
- col_module_id = "msp_id",
- annotation_level = "species",
- label_size = 7,
- edge_label_size = 4,
- node_size = 15
+  res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
+  taxo,
+  threshold = 2,
+  "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  label_size = 7,
+  edge_label_size = 4,
+  node_size = 15
 )
 
-plot_spacer() + final_net + plot_spacer() + plot_layout(widths=c(0.5,1,0.5))
+plot_spacer() + final_net + plot_spacer() + plot_layout(widths = c(0.5, 1, 0.5))
 ```
 
-<img src="man/figures/README-intersections-net-1.png" width="100%" />
+<img src="man/figures/README-intersections-net-1.png" alt="" width="100%" />
 
 ## Full tutorial
 
-The [vignette](articles/NeighborFinder_vignette.html) provides an
-overview of the various use cases of NeighborFinder through examples
-based on real data extracted from this
+The
+[vignette](https://metagenopolis.github.io/NeighborFinder/articles/NeighborFinder_vignette.html)
+provides an overview of the various use cases of NeighborFinder through
+examples based on real data extracted from this
 [repository](https://doi.org/10.57745/7IVO3E).
