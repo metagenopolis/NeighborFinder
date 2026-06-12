@@ -185,6 +185,6 @@ plot_spacer() + final_net + plot_spacer() + plot_layout(widths = c(0.5, 1, 0.5))
 
 ## Full tutorial
 
-The [vignette](articles/NeighborFinder_vignette.html) provides an overview of the various use cases of NeighborFinder 
+The [vignette](https://metagenopolis.github.io/NeighborFinder/articles/NeighborFinder_vignette.html) provides an overview of the various use cases of NeighborFinder 
 through examples based on real data extracted from this [repository](https://doi.org/10.57745/7IVO3E).
 
