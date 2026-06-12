@@ -119,7 +119,23 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="data.html">data</a></span><span class="op">(</span><span class="va">taxo</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="data.html">data</a></span><span class="op">(</span><span class="va">result_example</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">intersections_network</span><span class="op">(</span>res_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_JPN</span>, <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_CHN</span>, <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_EUR</span><span class="op">)</span>, <span class="va">taxo</span>, threshold <span class="op">=</span> <span class="fl">2</span>, <span class="st">"Escherichia coli"</span>, col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>, annotation_level <span class="op">=</span> <span class="st">"species"</span>, label_size <span class="op">=</span> <span class="fl">7</span>, edge_label_size <span class="op">=</span> <span class="fl">4</span>, node_size <span class="op">=</span> <span class="fl">15</span>, annotation_option <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">intersections_network</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  res_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_JPN</span>,</span></span>
+<span class="r-in"><span>    <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_CHN</span>,</span></span>
+<span class="r-in"><span>    <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_EUR</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="va">taxo</span>,</span></span>
+<span class="r-in"><span>  threshold <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"Escherichia coli"</span>,</span></span>
+<span class="r-in"><span>  col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span></span>
+<span class="r-in"><span>  annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span></span>
+<span class="r-in"><span>  label_size <span class="op">=</span> <span class="fl">7</span>,</span></span>
+<span class="r-in"><span>  edge_label_size <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>  node_size <span class="op">=</span> <span class="fl">15</span>,</span></span>
+<span class="r-in"><span>  annotation_option <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">3</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="intersections_network-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>

@@ -59,5 +59,10 @@ tiny_data <- data.frame(
   SAMPLE4 = c(0, 0, 2.98320e-05, 0)
 )
 
-tiny_normed <- norm_data(tiny_data, col_module_id = "msp_name", annotation_level = "species", prev_list = c(0.20, 0.30))
+tiny_normed <- norm_data(
+  tiny_data,
+  col_module_id = "msp_name",
+  annotation_level = "species",
+  prev_list = c(0.20, 0.30)
+)
 ```

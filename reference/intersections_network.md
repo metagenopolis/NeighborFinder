@@ -90,5 +90,21 @@ negative.
 ``` r
 data(taxo)
 data(result_example)
-intersections_network(res_list = list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), taxo, threshold = 2, "Escherichia coli", col_module_id = "msp_id", annotation_level = "species", label_size = 7, edge_label_size = 4, node_size = 15, annotation_option = TRUE, seed = 3)
+intersections_network(
+  res_list = list(
+    result_example$res_CRC_JPN,
+    result_example$res_CRC_CHN,
+    result_example$res_CRC_EUR
+  ),
+  taxo,
+  threshold = 2,
+  "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  label_size = 7,
+  edge_label_size = 4,
+  node_size = 15,
+  annotation_option = TRUE,
+  seed = 3
+)
 ```

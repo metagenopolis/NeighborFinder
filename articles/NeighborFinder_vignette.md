@@ -403,9 +403,9 @@ intersections_table(
 
 | node1 | module1 | node2 | module2 | datasets | intersections | mean_coef |
 |:---|:---|:---|:---|:---|---:|---:|
-| msp_0005 | Escherichia coli | msp_0030 | Klebsiella pneumoniae | n\_ 1, n\_ 2 | 2 | 0.1006331 |
-| msp_0005 | Escherichia coli | msp_0103 | Clostridium_AQ innocuum | n\_ 1, n\_ 2 | 2 | 0.0744551 |
-| msp_0005 | Escherichia coli | msp_0208 | Blautia_A faecis | n\_ 1, n\_ 3 | 2 | -0.1269152 |
+| msp_0005 | Escherichia coli | msp_0030 | Klebsiella pneumoniae | n_1, n_2 | 2 | 0.1006331 |
+| msp_0005 | Escherichia coli | msp_0103 | Clostridium_AQ innocuum | n_1, n_2 | 2 | 0.0744551 |
+| msp_0005 | Escherichia coli | msp_0208 | Blautia_A faecis | n_1, n_3 | 2 | -0.1269152 |
 
 One of the resulting neighbors is *Klebsiella pneumoniae*. It is also
 described in this

@@ -61,10 +61,21 @@ found
 ``` r
 data(taxo)
 data(result_example)
-intersections_table(res_list = list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), threshold = 2, taxo, col_module_id = "msp_id", annotation_level = "species", "Escherichia coli")
-#>      node1          module1    node2                 module2   datasets
-#> 1 msp_0005 Escherichia coli msp_0103 Clostridium_AQ innocuum n_ 1, n_ 2
-#> 2 msp_0005 Escherichia coli msp_0208        Blautia_A faecis n_ 1, n_ 3
+intersections_table(
+  res_list = list(
+    result_example$res_CRC_JPN,
+    result_example$res_CRC_CHN,
+    result_example$res_CRC_EUR
+  ),
+  threshold = 2,
+  taxo,
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  "Escherichia coli"
+)
+#>      node1          module1    node2                 module2 datasets
+#> 1 msp_0005 Escherichia coli msp_0103 Clostridium_AQ innocuum n_1, n_2
+#> 2 msp_0005 Escherichia coli msp_0208        Blautia_A faecis n_1, n_3
 #>   intersections   mean_coef
 #> 1             2  0.07445512
 #> 2             2 -0.12691516

@@ -83,13 +83,28 @@
 <span class="r-in"><span>  species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A a"</span>, <span class="st">"B a"</span>, <span class="st">"C c"</span>, <span class="st">"D b"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Correspondence for one specific msp</span></span></span>
-<span class="r-in"><span><span class="fu">module_to_node</span><span class="op">(</span><span class="st">"msp_1"</span>, annotation_table <span class="op">=</span> <span class="va">df_taxo</span>, col_module_id <span class="op">=</span> <span class="st">"msp_name"</span>, annotation_level <span class="op">=</span> <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">module_to_node</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"msp_1"</span>,</span></span>
+<span class="r-in"><span>  annotation_table <span class="op">=</span> <span class="va">df_taxo</span>,</span></span>
+<span class="r-in"><span>  col_module_id <span class="op">=</span> <span class="st">"msp_name"</span>,</span></span>
+<span class="r-in"><span>  annotation_level <span class="op">=</span> <span class="st">"species"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A a"</span>
 <span class="r-in"><span><span class="co"># or for several msps</span></span></span>
-<span class="r-in"><span><span class="fu">module_to_node</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"msp_1"</span>, <span class="st">"msp_3"</span>, <span class="st">"msp_4"</span><span class="op">)</span>, annotation_table <span class="op">=</span> <span class="va">df_taxo</span>, col_module_id <span class="op">=</span> <span class="st">"msp_name"</span>, annotation_level <span class="op">=</span> <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">module_to_node</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"msp_1"</span>, <span class="st">"msp_3"</span>, <span class="st">"msp_4"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  annotation_table <span class="op">=</span> <span class="va">df_taxo</span>,</span></span>
+<span class="r-in"><span>  col_module_id <span class="op">=</span> <span class="st">"msp_name"</span>,</span></span>
+<span class="r-in"><span>  annotation_level <span class="op">=</span> <span class="st">"species"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A a" "C c" "D b"</span>
 <span class="r-in"><span><span class="co"># and if one msp is repeated</span></span></span>
-<span class="r-in"><span><span class="fu">module_to_node</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"msp_1"</span>, <span class="st">"msp_1"</span>, <span class="st">"msp_2"</span><span class="op">)</span>, annotation_table <span class="op">=</span> <span class="va">df_taxo</span>, col_module_id <span class="op">=</span> <span class="st">"msp_name"</span>, annotation_level <span class="op">=</span> <span class="st">"genus"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">module_to_node</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"msp_1"</span>, <span class="st">"msp_1"</span>, <span class="st">"msp_2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  annotation_table <span class="op">=</span> <span class="va">df_taxo</span>,</span></span>
+<span class="r-in"><span>  col_module_id <span class="op">=</span> <span class="st">"msp_name"</span>,</span></span>
+<span class="r-in"><span>  annotation_level <span class="op">=</span> <span class="st">"genus"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A" "A" "B"</span>
 </code></pre></div>
     </div>

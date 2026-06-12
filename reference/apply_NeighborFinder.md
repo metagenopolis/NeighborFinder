@@ -12,6 +12,7 @@ apply_NeighborFinder(
   annotation_level,
   prev_level = 0.3,
   filtering_top = 20,
+  .seed = 123,
   ...
 )
 ```
@@ -50,6 +51,11 @@ apply_NeighborFinder(
   Numeric. The filtering top percentage to be studied. Required format
   is: 10 for top 10%
 
+- .seed:
+
+  Integer. Top level RNG seed to control the generation of RNG seed for
+  the inner loop or NULL if reproducibility is not required.
+
 - ...:
 
   Additional arguments passed on to
@@ -65,5 +71,11 @@ corresponding coefficients calculated by cv.glmnet()
 
 ``` r
 data(data)
-res_CRC_JPN <- apply_NeighborFinder(data$CRC_JPN[, 1:100], object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species")
+res_CRC_JPN <- apply_NeighborFinder(
+  data$CRC_JPN[, 1:100],
+  object_of_interest = "Escherichia coli",
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  .seed = 123
+)
 ```

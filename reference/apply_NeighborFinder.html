@@ -49,6 +49,7 @@
 <span>  <span class="va">annotation_level</span>,</span>
 <span>  prev_level <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>  filtering_top <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  .seed <span class="op">=</span> <span class="fl">123</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -81,6 +82,10 @@
 <dd><p>Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10%</p></dd>
 
 
+<dt id="arg--seed">.seed<a class="anchor" aria-label="anchor" href="#arg--seed"></a></dt>
+<dd><p>Integer. Top level RNG seed to control the generation of RNG seed for the inner loop or NULL if reproducibility is not required.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed on to <code><a href="apply_NF_simple.html">apply_NF_simple()</a></code></p></dd>
 
@@ -93,7 +98,13 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="data.html">data</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">res_CRC_JPN</span> <span class="op">&lt;-</span> <span class="fu">apply_NeighborFinder</span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">CRC_JPN</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>, object_of_interest <span class="op">=</span> <span class="st">"Escherichia coli"</span>, col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>, annotation_level <span class="op">=</span> <span class="st">"species"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res_CRC_JPN</span> <span class="op">&lt;-</span> <span class="fu">apply_NeighborFinder</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">data</span><span class="op">$</span><span class="va">CRC_JPN</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>  object_of_interest <span class="op">=</span> <span class="st">"Escherichia coli"</span>,</span></span>
+<span class="r-in"><span>  col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span></span>
+<span class="r-in"><span>  annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span></span>
+<span class="r-in"><span>  .seed <span class="op">=</span> <span class="fl">123</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

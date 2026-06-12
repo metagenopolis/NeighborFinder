@@ -89,10 +89,21 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="data.html">data</a></span><span class="op">(</span><span class="va">taxo</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="data.html">data</a></span><span class="op">(</span><span class="va">result_example</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">intersections_table</span><span class="op">(</span>res_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_JPN</span>, <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_CHN</span>, <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_EUR</span><span class="op">)</span>, threshold <span class="op">=</span> <span class="fl">2</span>, <span class="va">taxo</span>, col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>, annotation_level <span class="op">=</span> <span class="st">"species"</span>, <span class="st">"Escherichia coli"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      node1          module1    node2                 module2   datasets</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 msp_0005 Escherichia coli msp_0103 Clostridium_AQ innocuum n_ 1, n_ 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 msp_0005 Escherichia coli msp_0208        Blautia_A faecis n_ 1, n_ 3</span>
+<span class="r-in"><span><span class="fu">intersections_table</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  res_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_JPN</span>,</span></span>
+<span class="r-in"><span>    <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_CHN</span>,</span></span>
+<span class="r-in"><span>    <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_EUR</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>,</span></span>
+<span class="r-in"><span>  threshold <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>  <span class="va">taxo</span>,</span></span>
+<span class="r-in"><span>  col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span></span>
+<span class="r-in"><span>  annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"Escherichia coli"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      node1          module1    node2                 module2 datasets</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 msp_0005 Escherichia coli msp_0103 Clostridium_AQ innocuum n_1, n_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 msp_0005 Escherichia coli msp_0208        Blautia_A faecis n_1, n_3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   intersections   mean_coef</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1             2  0.07445512</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2             2 -0.12691516</span>

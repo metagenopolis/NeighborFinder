@@ -94,7 +94,11 @@ tiny_data <- data.frame(
   SAMPLE4 = c(0, 0, 2.98320e-05, 0)
 )
 # Applying a prevalence filter of 30% on the new count_table
-count_table <- get_count_table(abund.table = tiny_data, sample.id = colnames(tiny_data), prev.min = 0.3)
+count_table <- get_count_table(
+  abund.table = tiny_data,
+  sample.id = colnames(tiny_data),
+  prev.min = 0.3
+)
 #> Preprocessing step output for species prevalence>30% : 
 #>    -from 4 to 3 species
 #>    -from 50% to 41.7% zero values.

@@ -49,12 +49,27 @@ df_taxo <- data.frame(
   species = c("A a", "B a", "C c", "D b")
 )
 # Correspondence for one specific msp
-module_to_node("msp_1", annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "species")
+module_to_node(
+  "msp_1",
+  annotation_table = df_taxo,
+  col_module_id = "msp_name",
+  annotation_level = "species"
+)
 #> [1] "A a"
 # or for several msps
-module_to_node(c("msp_1", "msp_3", "msp_4"), annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "species")
+module_to_node(
+  c("msp_1", "msp_3", "msp_4"),
+  annotation_table = df_taxo,
+  col_module_id = "msp_name",
+  annotation_level = "species"
+)
 #> [1] "A a" "C c" "D b"
 # and if one msp is repeated
-module_to_node(c("msp_1", "msp_1", "msp_2"), annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "genus")
+module_to_node(
+  c("msp_1", "msp_1", "msp_2"),
+  annotation_table = df_taxo,
+  col_module_id = "msp_name",
+  annotation_level = "genus"
+)
 #> [1] "A" "A" "B"
 ```

@@ -127,7 +127,11 @@ Original copyright (c) 2021-2024 INRAE.</p>
 <span class="r-in"><span>  SAMPLE4 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">2.98320e-05</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Applying a prevalence filter of 30% on the new count_table</span></span></span>
-<span class="r-in"><span><span class="va">count_table</span> <span class="op">&lt;-</span> <span class="fu">get_count_table</span><span class="op">(</span>abund.table <span class="op">=</span> <span class="va">tiny_data</span>, sample.id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">tiny_data</span><span class="op">)</span>, prev.min <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">count_table</span> <span class="op">&lt;-</span> <span class="fu">get_count_table</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  abund.table <span class="op">=</span> <span class="va">tiny_data</span>,</span></span>
+<span class="r-in"><span>  sample.id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">tiny_data</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  prev.min <span class="op">=</span> <span class="fl">0.3</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Preprocessing step output for species prevalence&gt;30% : </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    -from 4 to 3 species</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    -from 50% to 41.7% zero values.</span>

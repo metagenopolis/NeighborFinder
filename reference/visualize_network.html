@@ -108,12 +108,39 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="data.html">data</a></span><span class="op">(</span><span class="va">taxo</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">visualize_network</span><span class="op">(</span><span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_JPN</span>, <span class="va">taxo</span>, object_of_interest <span class="op">=</span> <span class="st">"Escherichia coli"</span>, col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>, annotation_level <span class="op">=</span> <span class="st">"species"</span>, label_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">visualize_network</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">result_example</span><span class="op">$</span><span class="va">res_CRC_JPN</span>,</span></span>
+<span class="r-in"><span>  <span class="va">taxo</span>,</span></span>
+<span class="r-in"><span>  object_of_interest <span class="op">=</span> <span class="st">"Escherichia coli"</span>,</span></span>
+<span class="r-in"><span>  col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span></span>
+<span class="r-in"><span>  annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span></span>
+<span class="r-in"><span>  label_size <span class="op">=</span> <span class="fl">5</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="visualize_network-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># #With species names instead of msp names</span></span></span>
-<span class="r-in"><span><span class="co"># visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", label_size=5, annotation_option=TRUE, seed=2)</span></span></span>
+<span class="r-in"><span><span class="co"># visualize_network(</span></span></span>
+<span class="r-in"><span><span class="co">#   result_example$res_CRC_JPN,</span></span></span>
+<span class="r-in"><span><span class="co">#   taxo,</span></span></span>
+<span class="r-in"><span><span class="co">#   object_of_interest = "Escherichia coli",</span></span></span>
+<span class="r-in"><span><span class="co">#   col_module_id = "msp_id",</span></span></span>
+<span class="r-in"><span><span class="co">#   annotation_level = "species",</span></span></span>
+<span class="r-in"><span><span class="co">#   label_size = 5,</span></span></span>
+<span class="r-in"><span><span class="co">#   annotation_option = TRUE,</span></span></span>
+<span class="r-in"><span><span class="co">#   seed = 2</span></span></span>
+<span class="r-in"><span><span class="co"># )</span></span></span>
 <span class="r-in"><span><span class="co"># #With esthetic changes</span></span></span>
-<span class="r-in"><span><span class="co"># visualize_network(result_example$res_CRC_JPN, taxo, object_of_interest="Escherichia coli", col_module_id="msp_id", annotation_level="species", annotation_option=TRUE, node_size=15, label_size=6, object_color= "orange", seed=2)</span></span></span>
+<span class="r-in"><span><span class="co"># visualize_network(</span></span></span>
+<span class="r-in"><span><span class="co">#   result_example$res_CRC_JPN,</span></span></span>
+<span class="r-in"><span><span class="co">#   taxo,</span></span></span>
+<span class="r-in"><span><span class="co">#   object_of_interest = "Escherichia coli",</span></span></span>
+<span class="r-in"><span><span class="co">#   col_module_id = "msp_id",</span></span></span>
+<span class="r-in"><span><span class="co">#   annotation_level = "species",</span></span></span>
+<span class="r-in"><span><span class="co">#   annotation_option = TRUE,</span></span></span>
+<span class="r-in"><span><span class="co">#   node_size = 15,</span></span></span>
+<span class="r-in"><span><span class="co">#   label_size = 6,</span></span></span>
+<span class="r-in"><span><span class="co">#   object_color = "orange",</span></span></span>
+<span class="r-in"><span><span class="co">#   seed = 2</span></span></span>
+<span class="r-in"><span><span class="co"># )</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
