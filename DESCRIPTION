@@ -10,8 +10,8 @@ Authors@R: c(
     person("Magali", "Berland", , "magali.berland@inrae.fr", role = "aut",
            comment = c(ORCID = "0000-0002-6762-5350"))
   )
-Description: NeighborFinder uses the local approach described in Sola et
-    al., 2026 <https://doi.org/10.64898/2025.12.05.692507> to identify
+Description: This package uses the local approach described in Sola et
+    al., 2026 <doi:10.64898/2025.12.05.692507> to identify
     companion species of a bacteria of interest. From several abundance
     tables of metagenomic data, NeighborFinder suggests a shortlist of
     companion species based on the integration of results. A visualization
