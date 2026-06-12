@@ -11,9 +11,17 @@
 #'
 #' @return Dataframe. The dataframe is composed of 0 and 1 corresponding to the existence of edges on the graph.
 #' @export
+#' @importFrom rlang `:=`
 #' @examples
 #' tiny_data <- data.frame(
-#'   species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact", "Three bact A", "Three bact B"),
+#'   species = c(
+#'     "One bacteria",
+#'     "One bacterium L",
+#'     "One bacterium G",
+#'     "Two bact",
+#'     "Three bact A",
+#'     "Three bact B"
+#'   ),
 #'   msp_name = c("msp_1", "msp_2", "msp_3", "msp_4", "msp_5", "msp_6"),
 #'   SAMPLE1 = c(0, 1.328425e-06, 0, 1.527688e-07, 0, 0),
 #'   SAMPLE2 = c(1.251707e-07, 0, 3.985320e-07, 0, 1.33607e-04, 0.8675e-03),
@@ -23,28 +31,63 @@
 #'   SAMPLE6 = c(0.26417e-06, 0, 1.0077e-05, 3.983320e-08, 0, 0)
 #' )
 #'
-#' tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) %>% suppressWarnings()
-graph_step <- function(data_with_annotation, col_module_id, annotation_level, seed = 10010, data_type = "shotgun", ...) {
+#' tiny_graph <- graph_step(
+#'   tiny_data,
+#'   col_module_id = "msp_name",
+#'   annotation_level = "species",
+#'   seed = 20242025
+#' ) %>%
+#'   suppressWarnings()
+graph_step <- function(
+  data_with_annotation,
+  col_module_id,
+  annotation_level,
+  seed = 10010,
+  data_type = "shotgun",
+  ...
+) {
   if (data_type == "shotgun") {
-    counts <- get_count_table(abund.table = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level)), sample.id = colnames(data_with_annotation), prev.min = 0.15, verbatim = FALSE)$data
+    counts <- get_count_table(
+      abund.table = data_with_annotation %>%
+        dplyr::select(-dplyr::all_of(annotation_level)),
+      sample.id = colnames(data_with_annotation),
+      prev.min = 0.15,
+      verbatim = FALSE
+    )$data
   } else if (data_type == "16S") {
     ## Compute prevalence of all modules at the studied level
     prev_df <- tibble::tibble(
       id_module = data_with_annotation %>% dplyr::pull(paste(col_module_id)),
-      prevalence = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>%
-        data.matrix() %>% `>`(0) %>% rowMeans()
+      prevalence = data_with_annotation %>%
+        dplyr::select(
+          -dplyr::all_of(c(annotation_level, col_module_id))
+        ) %>%
+        data.matrix() %>%
+        `>`(0) %>%
+        rowMeans()
     )
-    prev_df_filtered <- prev_df %>% dplyr::filter(prevalence > 0.15)
-    data_with_annotation_filtered <- data_with_annotation %>% dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+    prev_df_filtered <- prev_df %>% dplyr::filter(.data$prevalence > 0.15)
+    data_with_annotation_filtered <- data_with_annotation %>%
+      dplyr::filter(.data[[col_module_id]] %in% prev_df_filtered$id_module)
     counts <- data_with_annotation_filtered %>%
-      dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>%
+      dplyr::select(
+        -dplyr::all_of(c(annotation_level, col_module_id))
+      ) %>%
       t()
-    colnames(counts) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
+    colnames(counts) <- data_with_annotation_filtered %>%
+      dplyr::pull(paste(col_module_id))
   }
   G <- new_synth_data(counts, n = 50, verbatim = FALSE, seed = seed, ...)$G
   dimnames(G) <- list(colnames(counts), colnames(counts))
   G <- G %>%
     as.data.frame() %>%
-    dplyr::mutate(!!rlang::sym(annotation_level) := module_to_node(rownames(G), annotation_table = data_with_annotation, col_module_id = col_module_id, annotation_level = annotation_level))
+    dplyr::mutate(
+      !!rlang::sym(annotation_level) := module_to_node(
+        rownames(G),
+        annotation_table = data_with_annotation,
+        col_module_id = col_module_id,
+        annotation_level = annotation_level
+      )
+    )
   G
 }

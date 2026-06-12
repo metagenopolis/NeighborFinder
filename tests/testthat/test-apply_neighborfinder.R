@@ -2,6 +2,23 @@
 
 test_that("apply_NeighborFinder works", {
   data(data)
-  res_CRC_JPN <- apply_NeighborFinder(data$CRC_JPN[, 1:100], object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species")
-  expect_equal(res_CRC_JPN$node2, c("msp_0154", "msp_0437c", "msp_0565", "msp_0570", "msp_1603c", "msp_1684", "msp_2350"))
+  res_CRC_JPN <- apply_NeighborFinder(
+    data$CRC_JPN[, 1:100],
+    object_of_interest = "Escherichia coli",
+    col_module_id = "msp_id",
+    annotation_level = "species",
+    .seed = 123
+  )
+  expect_equal(
+    res_CRC_JPN$node2,
+    c(
+      "msp_0154",
+      "msp_0437c",
+      "msp_0565",
+      "msp_0570",
+      "msp_1603c",
+      "msp_1684",
+      "msp_2350"
+    )
+  )
 })

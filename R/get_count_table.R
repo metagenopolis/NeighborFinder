@@ -47,14 +47,25 @@
 #'   SAMPLE4 = c(0, 0, 2.98320e-05, 0)
 #' )
 #' # Applying a prevalence filter of 30% on the new count_table
-#' count_table <- get_count_table(abund.table = tiny_data, sample.id = colnames(tiny_data), prev.min = 0.3)
-get_count_table <- function(abund.path = NULL, abund.table = NULL, sample.id = NULL, prev.min, verbatim = TRUE, msp = NULL) {
+#' count_table <- get_count_table(
+#'   abund.table = tiny_data,
+#'   sample.id = colnames(tiny_data),
+#'   prev.min = 0.3
+#' )
+get_count_table <- function(
+  abund.path = NULL,
+  abund.table = NULL,
+  sample.id = NULL,
+  prev.min,
+  verbatim = TRUE,
+  msp = NULL
+) {
   if (!is.null(abund.path)) {
-    metaformat <- tail(strsplit(abund.path, "[.]")[[1]], 1)
+    metaformat <- utils::tail(strsplit(abund.path, "[.]")[[1]], 1)
     if (metaformat == "rds") {
       data_table <- as.matrix(readRDS(abund.path))
     } else {
-      data_table <- as.matrix(read.delim(abund.path))
+      data_table <- as.matrix(utils::read.delim(abund.path))
     }
   } else {
     data_table <- abund.table
@@ -79,12 +90,12 @@ get_count_table <- function(abund.path = NULL, abund.table = NULL, sample.id = N
 
   # Prevalence filtering
   counts <- data_table %>%
-    dplyr::mutate(prev = rowMeans(. > 0), msp = species) %>%
-    dplyr::filter(prev > prev.min)
-  prevs <- counts %>% dplyr::select(prev, msp)
+    dplyr::mutate(prev = rowMeans(data_table > 0), msp = species) %>%
+    dplyr::filter(.data$prev > prev.min)
+  prevs <- counts %>% dplyr::select(dplyr::all_of(c("prev", "msp")))
   counts <- counts %>%
-    dplyr::select(-msp, -prev) %>%
-    t(.)
+    dplyr::select(-dplyr::all_of(c("prev", "msp"))) %>%
+    t()
   colnames(counts) <- prevs$msp
   # Set minimal positive value to 1
   cst <- 1 / min(counts[counts != 0])
@@ -95,10 +106,17 @@ get_count_table <- function(abund.path = NULL, abund.table = NULL, sample.id = N
   if (verbatim) {
     cat(paste0(
       "Preprocessing step output for species prevalence>",
-      prev.min * 100, "% : \n   -from ", length(species),
-      " to ", ncol(counts), " species", "\n   -from ",
-      round(pct_zero_before * 100, 1), "% to ",
-      round(pct_zero_after * 100, 1), "% zero values."
+      prev.min * 100,
+      "% : \n   -from ",
+      length(species),
+      " to ",
+      ncol(counts),
+      " species",
+      "\n   -from ",
+      round(pct_zero_before * 100, 1),
+      "% to ",
+      round(pct_zero_after * 100, 1),
+      "% zero values."
     ))
   }
 

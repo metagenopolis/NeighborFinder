@@ -8,6 +8,7 @@
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
 #' @param prev_level Numeric. The prevalence to be studied. Required format is decimal: 0.20 for 20% of prevalence
 #' @param filtering_top Numeric. The filtering top percentage to be studied. Required format is: 10 for top 10%
+#' @param .seed Integer. Top level RNG seed to control the generation of RNG seed for the inner loop or NULL if reproducibility is not required.
 # @param covar String or formula. Formula or the name of the column of the covariate in the metadata table. Note that "study_accession" is equivalent to ~study_accession
 # @param meta_df Dataframe. The dataframe giving metadata information
 # @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
@@ -15,22 +16,46 @@
 #'
 #' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
+#' @importFrom stats median
 #' @examples
 #' data(data)
-#' res_CRC_JPN <- apply_NeighborFinder(data$CRC_JPN[, 1:100], object_of_interest = "Escherichia coli", col_module_id = "msp_id", annotation_level = "species")
-apply_NeighborFinder <- function(data_with_annotation, object_of_interest, col_module_id, annotation_level, prev_level = 0.30, filtering_top = 20, ...) {
+#' res_CRC_JPN <- apply_NeighborFinder(
+#'   data$CRC_JPN[, 1:100],
+#'   object_of_interest = "Escherichia coli",
+#'   col_module_id = "msp_id",
+#'   annotation_level = "species",
+#'   .seed = 123
+#' )
+apply_NeighborFinder <- function(
+  data_with_annotation,
+  object_of_interest,
+  col_module_id,
+  annotation_level,
+  prev_level = 0.30,
+  filtering_top = 20,
+  .seed = 123,
+  ...
+) {
   # Performance depends on the number of samples in the dataset, please choose the good comination of prev_level and filtering_top
   # The function runs for 10 seed and filters results if found in more than half the seeds to return robust results
-  set.seed(seed = 123)
+  if (!is.null(.seed)) {
+    set.seed(seed = .seed)
+  }
   seeds10 <- sample(1:1000000, 10)
   res_repet_seeds <- data.frame()
 
   for (one_seed in seeds10) {
     res_repet_seeds <- rbind(
       res_repet_seeds,
-      apply_NF_simple(data_with_annotation, object_of_interest, col_module_id,
-        annotation_level, prev_level, filtering_top,
-        seed = one_seed, ...
+      apply_NF_simple(
+        data_with_annotation,
+        object_of_interest,
+        col_module_id,
+        annotation_level,
+        prev_level,
+        filtering_top,
+        seed = one_seed,
+        ...
       ) %>%
         dplyr::mutate(SEED = one_seed)
     )
@@ -39,15 +64,18 @@ apply_NeighborFinder <- function(data_with_annotation, object_of_interest, col_m
     return(tibble::tibble())
   }
   res_repet_seeds %>%
-    dplyr::mutate(pair = paste(node1, node2, sep = "_")) %>%
-    dplyr::group_by(pair) %>%
+    dplyr::mutate(pair = paste(.data$node1, .data$node2, sep = "_")) %>%
+    dplyr::group_by(.data$pair) %>%
     unique() %>%
-    dplyr::summarize(seeds_detect = dplyr::n(), med = median(coef)) %>%
-    dplyr::filter(seeds_detect >= 5) %>%
-    dplyr::select(-seeds_detect) %>%
+    dplyr::summarize(seeds_detect = dplyr::n(), coef = median(.data$coef)) %>%
+    dplyr::filter(.data$seeds_detect >= 5) %>%
+    dplyr::select(-dplyr::all_of("seeds_detect")) %>%
     unique() %>%
     dplyr::ungroup() %>%
-    tidyr::separate(pair, into = c("node1", "node2"), sep = "_msp") %>%
-    dplyr::mutate(node2 = paste0("msp", node2)) %>%
-    dplyr::rename(coef = med)
+    tidyr::separate(
+      dplyr::all_of("pair"),
+      into = c("node1", "node2"),
+      sep = "_msp"
+    ) %>%
+    dplyr::mutate(node2 = paste0("msp", .data$node2))
 }

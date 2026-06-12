@@ -6,5 +6,13 @@ test_that("module_to_node works", {
     genus = c("A", "B", "C", "D"),
     species = c("A a", "B a", "C c", "D b")
   )
-  expect_equal(module_to_node("msp_1", annotation_table = df_taxo, col_module_id = "msp_name", annotation_level = "species"), "A a")
+  expect_equal(
+    module_to_node(
+      "msp_1",
+      annotation_table = df_taxo,
+      col_module_id = "msp_name",
+      annotation_level = "species"
+    ),
+    "A a"
+  )
 })

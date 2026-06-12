@@ -14,11 +14,32 @@
 #'
 #' @return Dataframe. Returns F1 rates before and after using NeighborFinder()
 #' @export
+#' @importFrom stats quantile
 #' @examples
-#' # data(data)
-#' # data(graphs)
-#' # choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
-choose_params_values <- function(data_with_annotation, object_of_interest, sample_size, prev_list = c(0.2, 0.3, 0.4), filtering_list = c(10, 20, 30), graph_file = NULL, col_module_id, annotation_level) {
+#' \dontrun{
+#' data(data)
+#' data(graphs)
+#' choose_params_values(
+#'   data_with_annotation = data$CRC_JPN,
+#'   object_of_interest = "Escherichia coli",
+#'   sample_size = 100,
+#'   prev_list = c(0.20, 0.30),
+#'   filtering_list = c(10, 20),
+#'   graph_file = graphs$CRC_JPN,
+#'   col_module_id = "msp_id",
+#'   annotation_level = "species"
+#' )
+#' }
+choose_params_values <- function(
+  data_with_annotation,
+  object_of_interest,
+  sample_size,
+  prev_list = c(0.2, 0.3, 0.4),
+  filtering_list = c(10, 20, 30),
+  graph_file = NULL,
+  col_module_id,
+  annotation_level
+) {
   # Loading graph
   if (is.null(graph_file)) {
     stop("Please generate the graph beforehand with graph_step() function")
@@ -27,7 +48,13 @@ choose_params_values <- function(data_with_annotation, object_of_interest, sampl
   }
 
   # Extract edge_prevalence table for species of interest
-  true_edges <- prev_for_selected_nodes(data_with_annotation, graph_file, col_module_id, annotation_level, object_of_interest)
+  true_edges <- prev_for_selected_nodes(
+    data_with_annotation,
+    graph_file,
+    col_module_id,
+    annotation_level,
+    object_of_interest
+  )
   if (!nrow(true_edges)) {
     return(tibble::tibble())
   }
@@ -39,25 +66,38 @@ choose_params_values <- function(data_with_annotation, object_of_interest, sampl
   seeds10 <- sample(1:1000000, 10)
   res_glm <- c()
   for (seed in seeds10) {
-    sims <- simulate_by_prevalence(data_with_annotation,
-      prev_list = prev_list, graph_file = graph_file, col_module_id = col_module_id,
-      annotation_level = "species", seed = seed, sample_size = sample_size
+    sims <- simulate_by_prevalence(
+      data_with_annotation,
+      prev_list = prev_list,
+      graph_file = graph_file,
+      col_module_id = col_module_id,
+      annotation_level = "species",
+      seed = seed,
+      sample_size = sample_size
     )
-    df_glm <- cvglm_to_coeffs_by_object(sims,
+    df_glm <- cvglm_to_coeffs_by_object(
+      sims,
       test_module = identify_module(
         object_of_interest = object_of_interest,
         annotation_table = data_with_annotation,
-        col_module_id = col_module_id, annotation_level = annotation_level
+        col_module_id = col_module_id,
+        annotation_level = annotation_level
       ),
       seed = seed
-    ) %>% dplyr::mutate(SEED = seed)
+    ) %>%
+      dplyr::mutate(SEED = seed)
     if (!nrow(df_glm)) {
       return(tibble::tibble())
     } else {
       filtering_list <- c(filtering_list, 100)
-      res <- purrr::map_dfr(filtering_list, ~ df_glm %>%
-        dplyr::filter(abs(coef) > quantile(abs(coef), 1 - .x / 100)) %>%
-        dplyr::mutate(filtering_top = .x))
+      res <- purrr::map_dfr(
+        filtering_list,
+        ~ df_glm %>%
+          dplyr::filter(
+            abs(.data$coef) > quantile(abs(.data$coef), 1 - .x / 100)
+          ) %>%
+          dplyr::mutate(filtering_top = .x)
+      )
     }
     if (!nrow(res)) {
       res <- tibble::tibble()
@@ -76,15 +116,28 @@ choose_params_values <- function(data_with_annotation, object_of_interest, sampl
     hm
   }
   res <- test_filter(before, after, prev_list) %>%
-    dplyr::mutate(F1_before = harm_mean(precision_before, recall_before) %>% signif(., 2)) %>%
-    dplyr::mutate(F1_after = harm_mean(precision_after, recall_after) %>% signif(., 2)) %>%
-    dplyr::select(-precision_before, -recall_before, -precision_after, -recall_after)
+    dplyr::mutate(
+      F1_before = harm_mean(.data$precision_before, .data$recall_before) %>%
+        signif(2)
+    ) %>%
+    dplyr::mutate(
+      F1_after = harm_mean(.data$precision_after, .data$recall_after) %>%
+        signif(2)
+    ) %>%
+    dplyr::select(
+      -dplyr::all_of(c(
+        "precision_before",
+        "recall_before",
+        "precision_after",
+        "recall_after"
+      ))
+    )
   res$F1_before[is.na(res$F1_before)] <- 0
   res$F1_after[is.na(res$F1_after)] <- 0
 
   if (!nrow(res)) {
     return(tibble::tibble())
   } else {
-    res %>% dplyr::mutate(prev_level = as.numeric(prev_level))
+    res %>% dplyr::mutate(prev_level = as.numeric(.data$prev_level))
   }
 }

@@ -39,7 +39,18 @@ Dataframe. Returns F1 rates before and after using NeighborFinder()
 Render a table to give an indication of the values to choose for the prevalence level and the top filtering percentage
 }
 \examples{
-# data(data)
-# data(graphs)
-# choose_params_values(data_with_annotation=data$CRC_JPN, object_of_interest="Escherichia coli", sample_size=100, prev_list=c(0.20,0.30), filtering_list=c(10,20), graph_file=graphs$CRC_JPN, col_module_id="msp_id", annotation_level="species")
+\dontrun{
+data(data)
+data(graphs)
+choose_params_values(
+  data_with_annotation = data$CRC_JPN,
+  object_of_interest = "Escherichia coli",
+  sample_size = 100,
+  prev_list = c(0.20, 0.30),
+  filtering_list = c(10, 20),
+  graph_file = graphs$CRC_JPN,
+  col_module_id = "msp_id",
+  annotation_level = "species"
+)
+}
 }

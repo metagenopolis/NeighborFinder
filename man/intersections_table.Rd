@@ -35,5 +35,16 @@ Display the intersection table summarizing the results from 2 or more datasets
 \examples{
 data(taxo)
 data(result_example)
-intersections_table(res_list = list(result_example$res_CRC_JPN, result_example$res_CRC_CHN, result_example$res_CRC_EUR), threshold = 2, taxo, col_module_id = "msp_id", annotation_level = "species", "Escherichia coli")
+intersections_table(
+  res_list = list(
+    result_example$res_CRC_JPN,
+    result_example$res_CRC_CHN,
+    result_example$res_CRC_EUR
+  ),
+  threshold = 2,
+  taxo,
+  col_module_id = "msp_id",
+  annotation_level = "species",
+  "Escherichia coli"
+)
 }

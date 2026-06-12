@@ -8,5 +8,13 @@ test_that("get_count_table works", {
     SAMPLE3 = c(0, 0, 4.926046e-09, 5.626392e-06),
     SAMPLE4 = c(0, 0, 2.98320e-05, 0)
   )
-  expect_equal(get_count_table(abund.table = tiny_data, sample.id = colnames(tiny_data), prev.min = 0.3, verbatim = FALSE)$prevalences$msp, c("msp_2", "msp_3", "msp_4"))
+  expect_equal(
+    get_count_table(
+      abund.table = tiny_data,
+      sample.id = colnames(tiny_data),
+      prev.min = 0.3,
+      verbatim = FALSE
+    )$prevalences$msp,
+    c("msp_2", "msp_3", "msp_4")
+  )
 })

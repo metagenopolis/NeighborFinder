@@ -76,7 +76,14 @@ Simulate data from some empirical count dataset with a "cluster-like" structure
 }
 \examples{
 tiny_data <- data.frame(
-  species = c("One bacteria", "One bacterium L", "One bacterium G", "Two bact", "Three bact A", "Three bact B"),
+  species = c(
+    "One bacteria",
+    "One bacterium L",
+    "One bacterium G",
+    "Two bact",
+    "Three bact A",
+    "Three bact B"
+  ),
   msp_name = c("msp_1", "msp_2", "msp_3", "msp_4", "msp_5", "msp_6"),
   SAMPLE1 = c(0, 1.328425e-06, 0, 1.527688e-07, 0, 0),
   SAMPLE2 = c(1.251707e-07, 0, 3.985320e-07, 0, 1.33607e-04, 0.8675e-03),
@@ -86,7 +93,24 @@ tiny_data <- data.frame(
   SAMPLE6 = c(0.26417e-06, 0, 1.0077e-05, 3.983320e-08, 0, 0)
 )
 
-count_table <- get_count_table(abund.table = tiny_data \%>\% dplyr::select(-species), sample.id = colnames(tiny_data), prev.min = 0.1)
-tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) \%>\% suppressWarnings()
-sim_data <- new_synth_data(count_table$data, n = 50, graph = as.matrix(tiny_graph \%>\% dplyr::select(-species)), verbatim = FALSE, seed = 20242025) \%>\% suppressWarnings()
+count_table <- get_count_table(
+  abund.table = tiny_data \%>\% dplyr::select(-species),
+  sample.id = colnames(tiny_data),
+  prev.min = 0.1
+)
+tiny_graph <- graph_step(
+  tiny_data,
+  col_module_id = "msp_name",
+  annotation_level = "species",
+  seed = 20242025
+) \%>\%
+  suppressWarnings()
+sim_data <- new_synth_data(
+  count_table$data,
+  n = 50,
+  graph = as.matrix(tiny_graph \%>\% dplyr::select(-species)),
+  verbatim = FALSE,
+  seed = 20242025
+) \%>\%
+  suppressWarnings()
 }

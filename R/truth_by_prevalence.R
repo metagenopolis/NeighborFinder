@@ -17,14 +17,26 @@
 #'   SAMPLE4 = c(0, 0, 2.98320e-05, 0)
 #' )
 #'
-#' tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) %>% suppressWarnings()
+#' tiny_graph <- graph_step(
+#'   tiny_data,
+#'   col_module_id = "msp_name",
+#'   annotation_level = "species",
+#'   seed = 20242025
+#' ) %>%
+#'   suppressWarnings()
 #'
-#' tiny_truth <- prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id = "msp_name", annotation_level = "species", object_of_interest = "bacterium")
+#' tiny_truth <- prev_for_selected_nodes(
+#'   tiny_data,
+#'   tiny_graph,
+#'   col_module_id = "msp_name",
+#'   annotation_level = "species",
+#'   object_of_interest = "bacterium"
+#' )
 #'
 #' tiny_true_edges <- truth_by_prevalence(tiny_truth, c(0.20, 0.30))
 truth_by_prevalence <- function(edge_table, prev_list) {
   for_one_prev <- function(prev) {
-    edge_table %>% dplyr::filter(prev1 >= prev, prev2 >= prev)
+    edge_table %>% dplyr::filter(.data$prev1 >= prev, .data$prev2 >= prev)
   }
   cat("Defining and saving true neighbors...\n")
   purrr::map(prev_list, for_one_prev) %>% rlang::set_names(prev_list)

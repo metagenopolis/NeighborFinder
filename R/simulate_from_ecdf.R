@@ -37,12 +37,22 @@
 #' @return Matrix. The vector from the upper triangular part of A.mat
 #' @export
 
-simulate_from_ecdf <- function(real_data, Sigma, n, seed = 10010, verbatim = FALSE) {
+simulate_from_ecdf <- function(
+  real_data,
+  Sigma,
+  n,
+  seed = 10010,
+  verbatim = FALSE
+) {
   p <- ncol(real_data)
   if (!is.null(seed)) {
     set.seed(seed)
   }
-  mv_norm <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = stats::cov2cor(Sigma))
+  mv_norm <- mvtnorm::rmvnorm(
+    n,
+    mean = rep(0, p),
+    sigma = stats::cov2cor(Sigma)
+  )
   mv_unif <- stats::pnorm(mv_norm)
   ## Matrix of simulated counts
   sim_counts <- matrix(0, n, p)
@@ -50,7 +60,12 @@ simulate_from_ecdf <- function(real_data, Sigma, n, seed = 10010, verbatim = FAL
   ## function to the uniform r.v.
   for (j in 1:p) {
     ## quantile(x, ., type = 1) is the inverse of the empirical distribution function of x
-    sim_counts[, j] <- quantile(x = real_data[, j], probs = mv_unif[, j], names = FALSE, type = 1)
+    sim_counts[, j] <- stats::quantile(
+      x = real_data[, j],
+      probs = mv_unif[, j],
+      names = FALSE,
+      type = 1
+    )
   }
   sim_counts
 }

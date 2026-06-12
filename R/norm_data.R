@@ -20,8 +20,19 @@
 #'   SAMPLE4 = c(0, 0, 2.98320e-05, 0)
 #' )
 #'
-#' tiny_normed <- norm_data(tiny_data, col_module_id = "msp_name", annotation_level = "species", prev_list = c(0.20, 0.30))
-norm_data <- function(data_with_annotation, col_module_id, prev_list = c(0.30), annotation_level, data_type = "shotgun") {
+#' tiny_normed <- norm_data(
+#'   tiny_data,
+#'   col_module_id = "msp_name",
+#'   annotation_level = "species",
+#'   prev_list = c(0.20, 0.30)
+#' )
+norm_data <- function(
+  data_with_annotation,
+  col_module_id,
+  prev_list = c(0.30),
+  annotation_level,
+  data_type = "shotgun"
+) {
   list_norm <- list()
   res <- tibble::tibble()
   # Normalizing for each level of prevalence if prev_list is a vector
@@ -29,27 +40,43 @@ norm_data <- function(data_with_annotation, col_module_id, prev_list = c(0.30), 
   for (prev in prev_list) {
     if (data_type == "shotgun") {
       # Creating count table
-      df_counts <- get_count_table(abund.table = data_with_annotation[, -1], sample.id = colnames(data_with_annotation), prev.min = prev, verbatim = FALSE)
+      df_counts <- get_count_table(
+        abund.table = data_with_annotation[, -1],
+        sample.id = colnames(data_with_annotation),
+        prev.min = prev,
+        verbatim = FALSE
+      )
       # Transformed matrix with mclr
       df_norm <- mclr(df_counts$data)
       colnames(df_norm) <- colnames(df_counts$data)
-    }
-
-    # Alternative if the input data is recovered from 16S sequencing
-    else if (data_type == "16S") {
+    } else if (data_type == "16S") {
+      # Alternative if the input data is recovered from 16S sequencing
       ## Compute prevalence of all modules at the studied level
       prev_df <- tibble::tibble(
         id_module = data_with_annotation %>% dplyr::pull(paste(col_module_id)),
-        prevalence = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>%
-          data.matrix() %>% `>`(0) %>% rowMeans()
+        prevalence = data_with_annotation %>%
+          dplyr::select(
+            -!!rlang::sym(annotation_level),
+            -!!rlang::sym(col_module_id)
+          ) %>%
+          data.matrix() %>%
+          `>`(0) %>%
+          rowMeans()
       )
-      prev_df_filtered <- prev_df %>% dplyr::filter(prevalence > prev)
-      data_with_annotation_filtered <- data_with_annotation %>% dplyr::filter(!!rlang::sym(col_module_id) %in% prev_df_filtered$id_module)
+      prev_df_filtered <- prev_df %>% dplyr::filter(.data$prevalence > prev)
+      data_with_annotation_filtered <- data_with_annotation %>%
+        dplyr::filter(
+          !!rlang::sym(col_module_id) %in% prev_df_filtered$id_module
+        )
       # Arranging data
       df <- data_with_annotation_filtered %>%
-        dplyr::select(-!!rlang::sym(annotation_level), -!!rlang::sym(col_module_id)) %>%
+        dplyr::select(
+          -!!rlang::sym(annotation_level),
+          -!!rlang::sym(col_module_id)
+        ) %>%
         t()
-      colnames(df) <- data_with_annotation_filtered %>% dplyr::pull(paste(col_module_id))
+      colnames(df) <- data_with_annotation_filtered %>%
+        dplyr::pull(paste(col_module_id))
       # Transformed matrix with mclr
       df_norm <- mclr(df)
       colnames(df_norm) <- colnames(df)

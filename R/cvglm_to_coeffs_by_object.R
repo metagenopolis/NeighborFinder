@@ -16,13 +16,41 @@
 #' data(data)
 #' data(metadata)
 #' # Simple example
-#' normed_JPN <- norm_data(data$CRC_JPN, col_module_id = "msp_id", annotation_level = "species", prev_list = c(0.25, 0.30))
-#' neighbors_JPN <- cvglm_to_coeffs_by_object(list_dfs = normed_JPN, test_module = c("msp_0030", "msp_0345"), seed = 20242025)
+#' normed_JPN <- norm_data(
+#'   data$CRC_JPN,
+#'   col_module_id = "msp_id",
+#'   annotation_level = "species",
+#'   prev_list = c(0.25, 0.30)
+#' )
+#' neighbors_JPN <- cvglm_to_coeffs_by_object(
+#'   list_dfs = normed_JPN,
+#'   test_module = c("msp_0030", "msp_0345"),
+#'   seed = 20242025
+#' )
 #' # Example with covariate
-#' # normed_CHN <-norm_data(data$CRC_CHN, col_module_id="msp_id", annotation_level="species", prev_list=c(0.25, 0.30))
-#' # neighbors_CHN<-cvglm_to_coeffs_by_object(list_dfs=normed_CHN, test_module=c("msp_0030","msp_0345"), seed=20242025, covar= ~ study_accession, meta_df=metadata$CRC_CHN, sample_col="secondary_sample_accession")
-cvglm_to_coeffs_by_object <- function(list_dfs, test_module = identify_module(), seed = NULL, ...) {
+#' # normed_CHN <- norm_data(
+#' #   data$CRC_CHN,
+#' #   col_module_id = "msp_id",
+#' #   annotation_level = "species",
+#' #   prev_list = c(0.25, 0.30)
+#' # )
+#' # neighbors_CHN <- cvglm_to_coeffs_by_object(
+#' #   list_dfs = normed_CHN,
+#' #   test_module = c("msp_0030", "msp_0345"),
+#' #   seed = 20242025,
+#' #   covar = ~study_accession,
+#' #   meta_df = metadata$CRC_CHN,
+#' #   sample_col = "secondary_sample_accession"
+#' # )
+cvglm_to_coeffs_by_object <- function(
+  list_dfs,
+  test_module = identify_module(),
+  seed = NULL,
+  ...
+) {
   # cat("Applying NeighborFinder to detect neighbors...\n")
-  purrr::map(list_dfs, function(df) find_all_module_neighbors(df, test_module, seed, ...)) %>%
+  purrr::map(list_dfs, function(df) {
+    find_all_module_neighbors(df, test_module, seed, ...)
+  }) %>%
     dplyr::bind_rows(.id = "prev_level")
 }

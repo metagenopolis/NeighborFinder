@@ -19,10 +19,28 @@
 #'   SAMPLE3 = c(0, 0, 4.926046e-09, 5.626392e-06),
 #'   SAMPLE4 = c(0, 0, 2.98320e-05, 0)
 #' )
-#' tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) %>% suppressWarnings()
+#' tiny_graph <- graph_step(
+#'   tiny_data,
+#'   col_module_id = "msp_name",
+#'   annotation_level = "species",
+#'   seed = 20242025
+#' ) %>%
+#'   suppressWarnings()
 #'
-#' tiny_truth <- prev_for_selected_nodes(tiny_data, tiny_graph, col_module_id = "msp_name", annotation_level = "species", object_of_interest = "bacterium")
-prev_for_selected_nodes <- function(data_with_annotation, graph_file, col_module_id, annotation_level, object_of_interest = NULL) {
+#' tiny_truth <- prev_for_selected_nodes(
+#'   tiny_data,
+#'   tiny_graph,
+#'   col_module_id = "msp_name",
+#'   annotation_level = "species",
+#'   object_of_interest = "bacterium"
+#' )
+prev_for_selected_nodes <- function(
+  data_with_annotation,
+  graph_file,
+  col_module_id,
+  annotation_level,
+  object_of_interest = NULL
+) {
   if (is.null(graph_file)) {
     stop("Please generate the graph beforehand with graph_step() function")
   } else {
@@ -32,7 +50,11 @@ prev_for_selected_nodes <- function(data_with_annotation, graph_file, col_module
   ## Compute prevalence of all modules at the studied level
   prev_df <- tibble::tibble(
     id_module = data_with_annotation %>% dplyr::pull(paste(col_module_id)),
-    prev = data_with_annotation %>% dplyr::select(-!!rlang::sym(annotation_level), -all_of(col_module_id)) %>% data.matrix() %>% `>`(0) %>% rowMeans()
+    prev = data_with_annotation %>%
+      dplyr::select(-dplyr::all_of(c(annotation_level, col_module_id))) %>%
+      data.matrix() %>%
+      `>`(0) %>%
+      rowMeans()
   )
 
   ## Extract edges starting or ending from the object of interest
@@ -44,7 +66,8 @@ prev_for_selected_nodes <- function(data_with_annotation, graph_file, col_module
       stringr::str_detect(paste(object_of_interest))
   }
 
-  G_object <- G[object_index, ] %>% dplyr::select(-!!rlang::sym(annotation_level))
+  G_object <- G[object_index, ] %>%
+    dplyr::select(-dplyr::all_of(annotation_level))
 
   if (!nrow(G_object)) {
     return(tibble::tibble())
@@ -52,14 +75,22 @@ prev_for_selected_nodes <- function(data_with_annotation, graph_file, col_module
 
   truth <- G_object[, colSums(G_object) != 0] %>%
     tibble::as_tibble(rownames = "node1") %>%
-    tidyr::pivot_longer(-node1, values_to = "Edge", names_to = "node2") %>%
-    dplyr::select(order(colnames(.))) %>%
-    dplyr::filter(Edge != 0) %>%
-    dplyr::select(-Edge)
+    tidyr::pivot_longer(
+      -dplyr::all_of("node1"),
+      values_to = "Edge",
+      names_to = "node2"
+    ) %>%
+    dplyr::select(order(dplyr::everything())) %>%
+    dplyr::filter(.data$Edge != 0) %>%
+    dplyr::select(-dplyr::all_of("Edge"))
   ## Add prevalences for node1 and node2
   truth <- truth %>%
-    dplyr::left_join(prev_df, by = dplyr::join_by(node1 == id_module)) %>%
+    dplyr::left_join(prev_df, by = dplyr::join_by("node1" == "id_module")) %>%
     ## and rename prev with suffix matching corresponding module
-    dplyr::left_join(prev_df, by = dplyr::join_by(node2 == id_module), suffix = c("1", "2"))
+    dplyr::left_join(
+      prev_df,
+      by = dplyr::join_by("node2" == "id_module"),
+      suffix = c("1", "2")
+    )
   truth
 }

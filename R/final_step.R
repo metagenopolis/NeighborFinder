@@ -8,89 +8,124 @@
 #'
 #' @return Dataframe. Returns for each level of prevalence and module ID, the list of true and/or detected neighbors and the corresponding list of coefficients
 #' @export
+#' @importFrom stats median
 #' @examples
 #' # Dataframe with true neighbors
 #' df_true <- list(
 #'   tibble::tibble(
-#'     node1 = c("msp_1", "msp_1", "msp_2", "msp_3"), node2 = c("msp_55", "msp_20", "msp_3", "msp_18"),
-#'     prev1 = c(0.28, 0.28, 0.96, 0.75), prev2 = c(0.76, 0.25, 0.75, 0.60)
+#'     node1 = c("msp_1", "msp_1", "msp_2", "msp_3"),
+#'     node2 = c("msp_55", "msp_20", "msp_3", "msp_18"),
+#'     prev1 = c(0.28, 0.28, 0.96, 0.75),
+#'     prev2 = c(0.76, 0.25, 0.75, 0.60)
 #'   ),
-#'   tibble::tibble(node1 = c("msp_2", "msp_3"), node2 = c("msp_3", "msp_18"), prev1 = c(0.96, 0.75), prev2 = c(0.75, 0.60))
-#' ) %>% rlang::set_names(c("0.20", "0.30"))
+#'   tibble::tibble(
+#'     node1 = c("msp_2", "msp_3"),
+#'     node2 = c("msp_3", "msp_18"),
+#'     prev1 = c(0.96, 0.75),
+#'     prev2 = c(0.75, 0.60)
+#'   )
+#' ) %>%
+#'   rlang::set_names(c("0.20", "0.30"))
 #'
 #' # Dataframe with detected neighbors
 #' df_detected <- list(
 #'   tibble::tibble(
-#'     prev_level = c("0.20", "0.30", "0.30", "0.30"), node1 = c("msp_2", "msp_2", "msp_3", "msp_3"),
-#'     node2 = c("msp_3", "msp_3", "msp_18", "msp_8"), coef = c(0.406, -0.025, 0.160, 0.005),
+#'     prev_level = c("0.20", "0.30", "0.30", "0.30"),
+#'     node1 = c("msp_2", "msp_2", "msp_3", "msp_3"),
+#'     node2 = c("msp_3", "msp_3", "msp_18", "msp_8"),
+#'     coef = c(0.406, -0.025, 0.160, 0.005),
 #'     filtering_top = c(100, 100, 100, 100)
 #'   ),
 #'   tibble::tibble()
-#' ) %>% rlang::set_names(c("0.20", "0.30"))
+#' ) %>%
+#'   rlang::set_names(c("0.20", "0.30"))
 #' # Use final_step() to gather both
 #' neighbors <- final_step(df_true, df_detected, robustness_step = FALSE)
 final_step <- function(df_truth, df_glm, robustness_step = NULL) {
   truth <- df_truth %>%
     dplyr::bind_rows(.id = "prev_level") %>%
-    dplyr::mutate(prev_level = as.numeric(prev_level)) %>%
-    dplyr::summarize(node2_true = list(node2), .by = c(prev_level, node1))
+    dplyr::mutate(prev_level = as.numeric(.data$prev_level)) %>%
+    dplyr::summarize(
+      node2_true = list(.data$node2),
+      .by = dplyr::all_of(c("prev_level", "node1"))
+    )
 
-  if (robustness_step != TRUE) {
+  if (!robustness_step) {
     inference <- df_glm %>%
       dplyr::bind_rows(.id = "prev_level") %>%
-      dplyr::filter(filtering_top == 100) %>%
-      dplyr::mutate(prev_level = as.numeric(prev_level)) %>%
+      dplyr::filter(.data$filtering_top == 100) %>%
+      dplyr::mutate(prev_level = as.numeric(.data$prev_level)) %>%
       dplyr::summarize(
-        node2_detected = list(node2),
-        node2_coef = list(coef),
-        .by = c(prev_level, node1)
+        node2_detected = list(.data$node2),
+        node2_coef = list(.data$coef),
+        .by = dplyr::all_of(c("prev_level", "node1"))
       )
 
-    result <- dplyr::full_join(truth, inference, by = c("prev_level", "node1")) %>%
-      lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>%
-      do.call(cbind, .) %>%
+    res_list <- dplyr::full_join(
+      truth,
+      inference,
+      by = c("prev_level", "node1")
+    ) %>%
+      lapply(function(col) ifelse(sapply(col, is.null), 0, col))
+    result <- do.call(cbind, res_list) %>%
       tibble::as_tibble()
   } else if (robustness_step == TRUE) {
     inference <- df_glm %>%
       dplyr::bind_rows(.id = "prev_level") %>%
-      dplyr::filter(., filtering_top != 100) %>%
-      dplyr::mutate(prev_level = as.numeric(prev_level))
+      dplyr::filter(.data$filtering_top != 100) %>%
+      dplyr::mutate(prev_level = as.numeric(.data$prev_level))
     res <- c()
     for (prev in unique(inference$prev_level)) {
       for (top in unique(inference$filtering_top)) {
         df <- inference %>%
-          dplyr::filter(prev_level == prev & filtering_top == top) %>%
-          dplyr::mutate(pair = paste(node1, node2, sep = "_")) %>%
-          dplyr::group_by(pair) %>%
+          dplyr::filter(
+            .data$prev_level == prev & .data$filtering_top == top
+          ) %>%
+          dplyr::mutate(pair = paste(.data$node1, .data$node2, sep = "_")) %>%
+          dplyr::group_by(.data$pair) %>%
           unique() %>%
-          dplyr::summarize(seeds_detect = dplyr::n(), med = median(coef)) %>%
-          dplyr::filter(seeds_detect >= 5) %>%
-          dplyr::select(-seeds_detect) %>%
+          dplyr::summarize(
+            seeds_detect = dplyr::n(),
+            coef = median(.data$coef)
+          ) %>%
+          dplyr::filter(.data$seeds_detect >= 5) %>%
+          dplyr::select(-dplyr::all_of("seeds_detect")) %>%
           unique() %>%
           dplyr::ungroup() %>%
-          tidyr::separate(pair, into = c("node1", "node2"), sep = "_msp") %>%
-          dplyr::mutate(node2 = paste0("msp", node2)) %>%
-          dplyr::rename(coef = med) %>%
+          tidyr::separate(
+            tidyr::all_of(c("pair")),
+            into = c("node1", "node2"),
+            sep = "_msp"
+          ) %>%
+          dplyr::mutate(node2 = paste0("msp", .data$node2)) %>%
           dplyr::mutate(prev_level = prev, filtering_top = top)
         if (!nrow(df)) {
           df <- inference %>%
-            dplyr::filter(prev_level == prev, filtering_top == top) %>%
+            dplyr::filter(
+              .data$prev_level == prev,
+              .data$filtering_top == top
+            ) %>%
             dplyr::slice_head(n = 1) %>%
             dplyr::mutate(node2 = 0, coef = 0) %>%
-            dplyr::select(-SEED)
+            dplyr::select(-dplyr::all_of("SEED"))
         }
         res <- rbind(res, df)
       }
     }
-    inference_robust <- res %>% dplyr::summarize(
-      node2_detected = list(node2),
-      node2_coef = list(coef),
-      .by = c(prev_level, filtering_top, node1)
-    )
+    inference_robust <- res %>%
+      dplyr::summarize(
+        node2_detected = list(.data$node2),
+        node2_coef = list(.data$coef),
+        .by = dplyr::all_of(c("prev_level", "filtering_top", "node1"))
+      )
 
-    result <- dplyr::full_join(truth, inference_robust, by = c("prev_level", "node1")) %>%
-      lapply(., function(col) ifelse(sapply(col, is.null), 0, col)) %>%
-      do.call(cbind, .) %>%
+    res_list <- dplyr::full_join(
+      truth,
+      inference_robust,
+      by = c("prev_level", "node1")
+    ) %>%
+      lapply(function(col) ifelse(sapply(col, is.null), 0, col))
+    result <- do.call(cbind, res_list) %>%
       tibble::as_tibble()
   }
   result

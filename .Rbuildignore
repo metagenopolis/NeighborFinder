@@ -9,3 +9,8 @@
 ^ci/lib$
 ^doc$
 ^Meta$
+^\.vscode$
+^[.]?air[.]toml$
+^\.github$
+^data_raw$
+README.Rmd

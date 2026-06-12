@@ -12,49 +12,91 @@
 #' # Dataframe with true neighbors
 #' list_true <- list(
 #'   tibble::tibble(
-#'     node1 = c("msp_1", "msp_1", "msp_2", "msp_3"), node2 = c("msp_55", "msp_20", "msp_3", "msp_18"),
-#'     prev1 = c(0.28, 0.28, 0.96, 0.75), prev2 = c(0.76, 0.25, 0.75, 0.60)
+#'     node1 = c("msp_1", "msp_1", "msp_2", "msp_3"),
+#'     node2 = c("msp_55", "msp_20", "msp_3", "msp_18"),
+#'     prev1 = c(0.28, 0.28, 0.96, 0.75),
+#'     prev2 = c(0.76, 0.25, 0.75, 0.60)
 #'   ),
-#'   tibble::tibble(node1 = c("msp_2", "msp_3"), node2 = c("msp_3", "msp_18"), prev1 = c(0.96, 0.75), prev2 = c(0.75, 0.60))
-#' ) %>% rlang::set_names(c("0.20", "0.30"))
+#'   tibble::tibble(
+#'     node1 = c("msp_2", "msp_3"),
+#'     node2 = c("msp_3", "msp_18"),
+#'     prev1 = c(0.96, 0.75),
+#'     prev2 = c(0.75, 0.60)
+#'   )
+#' ) %>%
+#'   rlang::set_names(c("0.20", "0.30"))
 #'
 #' # Dataframes with detected neighbors
 #' list_detected <- list(
 #'   tibble::tibble(
-#'     prev_level = c("0.20", "0.30", "0.30", "0.30"), node1 = c("msp_2", "msp_2", "msp_3", "msp_3"),
-#'     node2 = c("msp_3", "msp_3", "msp_18", "msp_8"), coef = c(0.406, -0.025, 0.160, 0.005),
+#'     prev_level = c("0.20", "0.30", "0.30", "0.30"),
+#'     node1 = c("msp_2", "msp_2", "msp_3", "msp_3"),
+#'     node2 = c("msp_3", "msp_3", "msp_18", "msp_8"),
+#'     coef = c(0.406, -0.025, 0.160, 0.005),
 #'     filtering_top = c(100, 100, 100, 100)
 #'   ),
 #'   tibble::tibble()
-#' ) %>% rlang::set_names(c("0.20", "0.30"))
+#' ) %>%
+#'   rlang::set_names(c("0.20", "0.30"))
 #' list_detected2 <- list(
 #'   tibble::tibble(
-#'     prev_level = c("0.20", "0.20"), node1 = c("msp_2", "msp_3"),
-#'     node2 = c("msp_3", "msp_18"), coef = c(0.160, 0.005),
+#'     prev_level = c("0.20", "0.20"),
+#'     node1 = c("msp_2", "msp_3"),
+#'     node2 = c("msp_3", "msp_18"),
+#'     coef = c(0.160, 0.005),
 #'     filtering_top = c(100, 100)
 #'   ),
 #'   tibble::tibble()
-#' ) %>% rlang::set_names(c("0.20", "0.30"))
+#' ) %>%
+#'   rlang::set_names(c("0.20", "0.30"))
 #' # Use final_step() to gather both
 #' neighbors <- final_step(list_true, list_detected, robustness_step = FALSE)
-#' neighbors2 <- final_step(list_true, list_detected2, robustness_step = FALSE) %>% dplyr::mutate(filtering_top = 10)
+#' neighbors2 <- final_step(list_true, list_detected2, robustness_step = FALSE) %>%
+#'   dplyr::mutate(filtering_top = 10)
 #' # Calculate scores
 #' scores <- test_filter(neighbors, neighbors2)
 test_filter <- function(df_before, df_after, prevs = NULL) {
-  scores_before <- df_before %>% dplyr::mutate(
-    precision_before = purrr::pmap_dbl(list(node2_true, node2_detected), compute_precision),
-    recall_before = purrr::pmap_dbl(list(node2_true, node2_detected), compute_recall)
-  )
-  scores_after <- df_after %>% dplyr::mutate(
-    precision_after = purrr::pmap_dbl(list(node2_true, node2_detected), compute_precision),
-    recall_after = purrr::pmap_dbl(list(node2_true, node2_detected), compute_recall)
-  )
+  scores_before <- df_before %>%
+    dplyr::mutate(
+      precision_before = purrr::pmap_dbl(
+        list(.data$node2_true, .data$node2_detected),
+        compute_precision
+      ),
+      recall_before = purrr::pmap_dbl(
+        list(.data$node2_true, .data$node2_detected),
+        compute_recall
+      )
+    )
+  scores_after <- df_after %>%
+    dplyr::mutate(
+      precision_after = purrr::pmap_dbl(
+        list(.data$node2_true, .data$node2_detected),
+        compute_precision
+      ),
+      recall_after = purrr::pmap_dbl(
+        list(.data$node2_true, .data$node2_detected),
+        compute_recall
+      )
+    )
 
   if (!nrow(scores_before) | !nrow(scores_after)) {
     return(tibble::tibble())
   } else {
-    score_table <- dplyr::full_join(scores_before, scores_after, by = c("prev_level", "node1")) %>%
-      dplyr::select(prev_level, filtering_top, precision_before, recall_before, precision_after, recall_after) %>%
+    score_table <- dplyr::full_join(
+      scores_before,
+      scores_after,
+      by = c("prev_level", "node1")
+    ) %>%
+      dplyr::select(
+        dplyr::all_of(c(
+          "prev_level",
+          "filtering_top",
+          "precision_before",
+          "recall_before",
+          "precision_after",
+          "recall_after"
+        ))
+      ) %>%
       dplyr::mutate_all(~ replace(., is.na(.), 0))
 
     res <- score_table %>% # dplyr::summarize(across(precision_before:recall_after, mean), .by = c(prev_level,filtering_top)) %>%
@@ -62,7 +104,7 @@ test_filter <- function(df_before, df_after, prevs = NULL) {
     if (is.null(prevs)) {
       return(res)
     } else {
-      return(res %>% dplyr::filter(prev_level %in% prevs))
+      return(res %>% dplyr::filter(.data$prev_level %in% prevs))
     }
   }
 }

@@ -51,7 +51,21 @@ tiny_data <- data.frame(
   SAMPLE4 = c(0, 0, 2.98320e-05, 0)
 )
 
-tiny_graph <- graph_step(tiny_data, col_module_id = "msp_name", annotation_level = "species", seed = 20242025) \%>\% suppressWarnings()
+tiny_graph <- graph_step(
+  tiny_data,
+  col_module_id = "msp_name",
+  annotation_level = "species",
+  seed = 20242025
+) \%>\%
+  suppressWarnings()
 
-tiny_sims <- simulate_by_prevalence(tiny_data, prev_list = c(0.20, 0.30), graph_file = tiny_graph, col_module_id = "msp_name", annotation_level = "species", sample_size = 500, seed = 20242025)
+tiny_sims <- simulate_by_prevalence(
+  tiny_data,
+  prev_list = c(0.20, 0.30),
+  graph_file = tiny_graph,
+  col_module_id = "msp_name",
+  annotation_level = "species",
+  sample_size = 500,
+  seed = 20242025
+)
 }
