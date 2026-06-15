@@ -259,7 +259,13 @@ visualize_network(
 )
 ```
 
-![](NeighborFinder_vignette_files/figure-html/network-JPN-1.png)
+![Neighbors of E. coli in Japanese patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge width encodes
+magnitude.](NeighborFinder_vignette_files/figure-html/network-JPN-1.png)
+
+Neighbors of E. coli in Japanese patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge width encodes
+magnitude.
 
 ``` r
 
@@ -342,7 +348,13 @@ visualize_network(
 )
 ```
 
-![](NeighborFinder_vignette_files/figure-html/network-covariate-1.png)
+![Neighbors of E. coli in Chinese patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge width encodes
+magnitude.](NeighborFinder_vignette_files/figure-html/network-covariate-1.png)
+
+Neighbors of E. coli in Chinese patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge width encodes
+magnitude.
 
 ``` r
 
@@ -357,7 +369,13 @@ visualize_network(
 )
 ```
 
-![](NeighborFinder_vignette_files/figure-html/network-covariate-2.png)
+![Neighbors of E. coli in European patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge width encodes
+magnitude.](NeighborFinder_vignette_files/figure-html/network-covariate-2.png)
+
+Neighbors of E. coli in European patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge width encodes
+magnitude.
 
 ## Look at the intersection of neighbors found in the 3 subgroups
 
@@ -383,7 +401,16 @@ intersections_network(
 )
 ```
 
-![](NeighborFinder_vignette_files/figure-html/intersections-network-1.png)
+![Neighbors of E. coli in patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge label
+indicates the number of datasets in which the interaction was detected;
+the width is proportional to the mean coefficient
+value.](NeighborFinder_vignette_files/figure-html/intersections-network-1.png)
+
+Neighbors of E. coli in patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge label
+indicates the number of datasets in which the interaction was detected;
+the width is proportional to the mean coefficient value.
 
 Another function used here is equivalent to the network thanks to a
 summary table, indicating in which datasets intersections were found
