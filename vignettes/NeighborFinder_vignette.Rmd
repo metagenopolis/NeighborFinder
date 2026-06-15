@@ -144,7 +144,7 @@ Here is a visualization of NeighborFinder results.
 
 It is possible to adjust the size of nodes and labels. One can also define the color of nodes corresponding to their species of interest. The ```taxo_option``` generates the same network but with species names instead of msps ones.
 
-```{r network-JPN, fig.height=4, fig.width=7, message=FALSE}
+```{r network-JPN, fig.cap=c("Neighbors of E. coli in Japanese patients with CRC. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude.",""), fig.height=4, fig.width=7, message=FALSE}
 visualize_network(
   res_CRC_JPN,
   taxo,
@@ -208,7 +208,7 @@ res_CRC_EUR <- apply_NeighborFinder(
 )
 ```
 
-```{r network-covariate, fig.height=4, fig.width=7, message=FALSE}
+```{r network-covariate, fig.cap=c("Neighbors of E. coli in Chinese patients with CRC. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude.","Neighbors of E. coli in European patients with CRC. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude."), fig.height=4, fig.width=7, message=FALSE}
 visualize_network(
   res_CRC_CHN,
   taxo,
@@ -233,7 +233,7 @@ visualize_network(
 Here is an example of how to merge the results of several datasets into a single network. 
 This operation can be performed with 2 or more datasets. One can choose the visualization ```threshold```, corresponding to the minimum number of datasets in which neighbors have been found.
 
-```{r intersections-network, fig.height=6, fig.width=8}
+```{r intersections-network, fig.cap="Neighbors of E. coli in patients with CRC. Edge color encodes coefficient sign: green if positive, red if negative; edge label indicates the number of datasets in which the interaction was detected; the width is proportional to the mean coefficient value.", fig.height=6, fig.width=8}
 intersections_network(
   res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
   taxo,

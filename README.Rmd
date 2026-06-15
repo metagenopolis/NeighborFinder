@@ -83,7 +83,7 @@ res_CRC_JPN <- apply_NeighborFinder(
 
 The species identified as neighbor can then be visualized using `visualize_network()` with or without taxonomic annotation.
 
-```{r network-ex, fig.height=5, fig.width=10, message=FALSE}
+```{r network-ex, fig.cap=c("Neighbors of E. coli in Japanese patients with CRC. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude.",""), fig.height=5, fig.width=10, message=FALSE}
 plot_JPN <- visualize_network(
   res_CRC_JPN,
   taxo,
@@ -159,7 +159,7 @@ plot_EUR <- visualize_network(
 ```
 
 
-```{r plot-multiple, fig.height=4.5, fig.width=15}
+```{r plot-multiple, fig.cap="Neighbors of E. coli in CRC patients for each geographical area. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude.", fig.height=4.5, fig.width=15}
 plot_JPN | plot_CHN | plot_EUR
 ```
 
@@ -167,7 +167,7 @@ plot_JPN | plot_CHN | plot_EUR
 
 The results from all three datasets are combined. In this aggregated network, we selected the edges detected in at least 2 out of the 3 datasets. 
 
-```{r intersections-net, fig.height=5.5, fig.width=15}
+```{r intersections-net, fig.cap="Neighbors of E. coli in patients with CRC. Edge color encodes coefficient sign: green if positive, red if negative; edge label indicates the number of datasets in which the interaction was detected; the width is proportional to the mean coefficient value.", fig.height=5.5, fig.width=15}
 final_net <- intersections_network(
   res_list = list(res_CRC_JPN, res_CRC_CHN, res_CRC_EUR),
   taxo,

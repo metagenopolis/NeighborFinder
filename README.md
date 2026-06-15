@@ -120,7 +120,17 @@ library(patchwork)
 plot_JPN + plot_JPN_annot + plot_layout(widths = c(1, 1.3))
 ```
 
-<img src="man/figures/README-network-ex-1.png" alt="" width="100%" />
+<div class="figure">
+
+<img src="man/figures/README-network-ex-1.png" alt="Neighbors of E. coli in Japanese patients with CRC. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude." width="100%" />
+<p class="caption">
+
+Neighbors of E. coli in Japanese patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge width encodes
+magnitude.
+</p>
+
+</div>
 
 **4. Use different datasets**
 
@@ -177,7 +187,17 @@ plot_EUR <- visualize_network(
 plot_JPN | plot_CHN | plot_EUR
 ```
 
-<img src="man/figures/README-plot-multiple-1.png" alt="" width="100%" />
+<div class="figure">
+
+<img src="man/figures/README-plot-multiple-1.png" alt="Neighbors of E. coli in CRC patients for each geographical area. Edge color encodes coefficient sign: green if positive, red if negative; edge width encodes magnitude." width="100%" />
+<p class="caption">
+
+Neighbors of E. coli in CRC patients for each geographical area. Edge
+color encodes coefficient sign: green if positive, red if negative; edge
+width encodes magnitude.
+</p>
+
+</div>
 
 **5. Aggregate the results**
 
@@ -201,7 +221,18 @@ final_net <- intersections_network(
 plot_spacer() + final_net + plot_spacer() + plot_layout(widths = c(0.5, 1, 0.5))
 ```
 
-<img src="man/figures/README-intersections-net-1.png" alt="" width="100%" />
+<div class="figure">
+
+<img src="man/figures/README-intersections-net-1.png" alt="Neighbors of E. coli in patients with CRC. Edge color encodes coefficient sign: green if positive, red if negative; edge label indicates the number of datasets in which the interaction was detected; the width is proportional to the mean coefficient value." width="100%" />
+<p class="caption">
+
+Neighbors of E. coli in patients with CRC. Edge color encodes
+coefficient sign: green if positive, red if negative; edge label
+indicates the number of datasets in which the interaction was detected;
+the width is proportional to the mean coefficient value.
+</p>
+
+</div>
 
 ## Full tutorial
 
