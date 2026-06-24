@@ -36,7 +36,7 @@ norm_data <- function(
   list_norm <- list()
   res <- tibble::tibble()
   # Normalizing for each level of prevalence if prev_list is a vector
-  # cat("Normalizing data...\n")
+  # message("Normalizing data...\n")
   for (prev in prev_list) {
     if (data_type == "shotgun") {
       # Creating count table

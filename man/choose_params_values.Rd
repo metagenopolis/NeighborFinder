@@ -12,7 +12,8 @@ choose_params_values(
   filtering_list = c(10, 20, 30),
   graph_file = NULL,
   col_module_id,
-  annotation_level
+  annotation_level,
+  seed = NULL
 )
 }
 \arguments{
@@ -31,15 +32,17 @@ choose_params_values(
 \item{col_module_id}{String. The name of the column with the module names in annotation_table}
 
 \item{annotation_level}{String. The name of the column with the level to be studied. Examples: species, genus, level_1}
+
+\item{seed}{Numeric. The seed number, ensuring reproducibility}
 }
 \value{
-Dataframe. Returns F1 rates before and after using NeighborFinder()
+Dataframe. Returns F1 rates before and after using apply_NeighborFinder()
 }
 \description{
 Render a table to give an indication of the values to choose for the prevalence level and the top filtering percentage
 }
 \examples{
-\dontrun{
+\donttest{
 data(data)
 data(graphs)
 choose_params_values(
@@ -50,7 +53,8 @@ choose_params_values(
   filtering_list = c(10, 20),
   graph_file = graphs$CRC_JPN,
   col_module_id = "msp_id",
-  annotation_level = "species"
+  annotation_level = "species",
+  seed = 123
 )
 }
 }

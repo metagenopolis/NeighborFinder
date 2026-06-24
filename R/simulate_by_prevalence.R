@@ -48,18 +48,20 @@ simulate_by_prevalence <- function(
   col_module_id,
   annotation_level,
   sample_size = 500,
-  seed,
+  seed = NULL,
   verbatim = FALSE,
   data_type = "shotgun"
 ) {
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   if (is.null(graph_file)) {
     stop("Please generate the graph beforehand with graph_step() function")
   } else {
     G <- graph_file
   }
   if (verbatim) {
-    cat("Generating simulated tables for each level of prevalence...\n")
+    message("Generating simulated tables for each level of prevalence...\n")
   }
 
   abund_table <- data_with_annotation %>%
@@ -71,7 +73,7 @@ simulate_by_prevalence <- function(
 
   sim_one_prev <- function(prev) {
     if (verbatim) {
-      cat(glue::glue("p{100*prev}"), sep = "\n")
+      message(glue::glue("p{100*prev}"), sep = "\n")
     }
     if (data_type == "shotgun") {
       # Generating count table
@@ -104,7 +106,7 @@ simulate_by_prevalence <- function(
     df_sim <- new_synth_data(
       df_counts,
       n = sample_size,
-      graph = as.matrix(G %>% dplyr::select(-.data[[annotation_level]])),
+      graph = as.matrix(G %>% dplyr::select(-dplyr::any_of(annotation_level))),
       verbatim = FALSE,
       seed = seed
     )

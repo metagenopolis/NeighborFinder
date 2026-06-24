@@ -86,13 +86,16 @@ new_synth_data <- function(
   must_connect = TRUE,
   graph = NULL,
   n = 300,
-  seed = 10010,
+  seed = NULL,
   r = 50,
   dens = 4,
   k = 3,
   verbatim = TRUE,
   signed = FALSE
 ) {
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   p <- ncol(real_data)
   species <- colnames(real_data)
 
@@ -141,7 +144,6 @@ new_synth_data <- function(
 
   if (is.null(graph)) {
     if (!must_connect) {
-      set.seed(seed)
       G <- as.matrix(generator_graph(
         p = p,
         graph = graph_type,
@@ -181,7 +183,7 @@ new_synth_data <- function(
   parcor <- -stats::cov2cor(as.matrix(faithful_param$Omega))
 
   if (verbatim) {
-    cat("Simulation from real data ecdf...")
+    message("Simulation from real data ecdf...")
   }
 
   simu_counts <- simulate_from_ecdf(

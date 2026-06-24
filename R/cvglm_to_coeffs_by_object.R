@@ -48,7 +48,7 @@ cvglm_to_coeffs_by_object <- function(
   seed = NULL,
   ...
 ) {
-  # cat("Applying NeighborFinder to detect neighbors...\n")
+  # message("Applying NeighborFinder to detect neighbors...\n")
   purrr::map(list_dfs, function(df) {
     find_all_module_neighbors(df, test_module, seed, ...)
   }) %>%

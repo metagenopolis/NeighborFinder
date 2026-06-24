@@ -33,7 +33,7 @@ apply_NF_simple(
 \item{...}{Additional arguments passed on to \code{\link[=cvglm_to_coeffs_by_object]{cvglm_to_coeffs_by_object()}}}
 }
 \value{
-Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
+Dataframe. Returns results after using apply_NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 }
 \description{
 Apply NeighborFinder simplest version on raw data
