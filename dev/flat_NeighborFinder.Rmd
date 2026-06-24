@@ -547,7 +547,14 @@ simulate_from_ecdf <- function(
 #' @return A graph with clusters as an adjacency matrix
 #'
 #' @noRd
-SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2"), seed = NULL) {
+SimCluster <- function(
+  p,
+  k,
+  dens,
+  r,
+  mode = c("igraph<2.2", "igraph>=2.2"),
+  seed = NULL
+) {
   mode <- match.arg(mode)
   if (!is.null(seed)) {
     set.seed(seed)
@@ -703,108 +710,108 @@ new_synth_data <- function(
   verbatim = TRUE,
   signed = FALSE
 ) {
- if (!is.null(seed)) {
-  set.seed(seed)
- }
- p = ncol(real_data)
- species <- colnames(real_data)
- 
- #Functions extracted from EMtree package to remove dependency
- generator_graph <- function(
-  p = 20,
-  graph = "cluster",
-  dens = 0.3,
-  r = 2,
-  k = 3
- ) {
-  theta <- matrix(0, p, p)
-  if (graph == "cluster") {
-   theta <- SimCluster(p, k = k, dens, r)
+  if (!is.null(seed)) {
+    set.seed(seed)
   }
-  return(theta = Matrix::Matrix(theta, sparse = TRUE))
- }
- generator_param <- function(G, signed = FALSE, v = 0.01) {
-  lambda <- 1
-  p <- ncol(G)
-  sumlignes <- rowSums(matrix(G, p, p))
-  if (sum(sumlignes == 0) != 0) {
-   sumlignes[sumlignes == 0] <- 0.1
-  }
-  D <- diag(sumlignes + v)
-  if (signed) {
-   Gsign <- ToSym(ToVec(
-    G * matrix(2 * stats::rbinom(p^2, 1, 0.3) - 1, p, p)
-   ))
-   omega <- lambda * D + Gsign
-   while (min(eigen(omega)$values) < 1e-10 & lambda < 1000) {
-    lambda <- 1.1 * lambda
-    omega <- lambda * D + Gsign
-   }
-  } else {
-   omega <- lambda * D + G
-   while (min(eigen(omega)$values) < 1e-10) {
-    lambda <- 1.1 * lambda
-    omega <- lambda * D + G
-   }
-  }
-  sigma <- solve(omega)
-  sim <- list(Sigma = sigma, Omega = omega, Lambda = lambda)
-  sim
- }
- 
- if (is.null(graph)) {
-  if (!must_connect) {
-   G <- as.matrix(generator_graph(
-    p = p,
-    graph = graph_type,
-    dens = dens / p,
-    r,
-    k
-   ))
-  } else {
-   i <- 0
-   connect <- FALSE
-   while (!connect) {
-    i <- i + 1
-    set.seed(i)
-    G <- as.matrix(generator_graph(
-     p = p,
-     graph = graph_type,
-     dens = dens / p,
-     r,
-     k
-    ))
-    graph <- igraph::graph_from_adjacency_matrix(G)
-    connect <- igraph::is_connected(graph)
-   }
-  }
- } else {
-  if (
-   !all(species %in% colnames(graph)) || !all(species %in% rownames(graph))
+  p = ncol(real_data)
+  species <- colnames(real_data)
+
+  #Functions extracted from EMtree package to remove dependency
+  generator_graph <- function(
+    p = 20,
+    graph = "cluster",
+    dens = 0.3,
+    r = 2,
+    k = 3
   ) {
-   stop(
-    "Some species in the abundance dataset do not appear in the provided graph."
-   )
+    theta <- matrix(0, p, p)
+    if (graph == "cluster") {
+      theta <- SimCluster(p, k = k, dens, r)
+    }
+    return(theta = Matrix::Matrix(theta, sparse = TRUE))
   }
-  G <- graph[species, species]
- }
- dimnames(G) <- list(species, species)
- faithful_param <- generator_param(G = G, signed = signed)
- parcor <- -stats::cov2cor(as.matrix(faithful_param$Omega))
- 
- if (verbatim) {
-  message("Simulation from real data ecdf...")
- }
- 
- simu_counts <- simulate_from_ecdf(
-  real_data,
-  Sigma = faithful_param$Sigma,
-  n = n,
-  seed = seed,
-  verbatim = verbatim
- )
- simulated_data <- list(counts = simu_counts, par.cor = parcor, G = G)
- simulated_data
+  generator_param <- function(G, signed = FALSE, v = 0.01) {
+    lambda <- 1
+    p <- ncol(G)
+    sumlignes <- rowSums(matrix(G, p, p))
+    if (sum(sumlignes == 0) != 0) {
+      sumlignes[sumlignes == 0] <- 0.1
+    }
+    D <- diag(sumlignes + v)
+    if (signed) {
+      Gsign <- ToSym(ToVec(
+        G * matrix(2 * stats::rbinom(p^2, 1, 0.3) - 1, p, p)
+      ))
+      omega <- lambda * D + Gsign
+      while (min(eigen(omega)$values) < 1e-10 & lambda < 1000) {
+        lambda <- 1.1 * lambda
+        omega <- lambda * D + Gsign
+      }
+    } else {
+      omega <- lambda * D + G
+      while (min(eigen(omega)$values) < 1e-10) {
+        lambda <- 1.1 * lambda
+        omega <- lambda * D + G
+      }
+    }
+    sigma <- solve(omega)
+    sim <- list(Sigma = sigma, Omega = omega, Lambda = lambda)
+    sim
+  }
+
+  if (is.null(graph)) {
+    if (!must_connect) {
+      G <- as.matrix(generator_graph(
+        p = p,
+        graph = graph_type,
+        dens = dens / p,
+        r,
+        k
+      ))
+    } else {
+      i <- 0
+      connect <- FALSE
+      while (!connect) {
+        i <- i + 1
+        set.seed(i)
+        G <- as.matrix(generator_graph(
+          p = p,
+          graph = graph_type,
+          dens = dens / p,
+          r,
+          k
+        ))
+        graph <- igraph::graph_from_adjacency_matrix(G)
+        connect <- igraph::is_connected(graph)
+      }
+    }
+  } else {
+    if (
+      !all(species %in% colnames(graph)) || !all(species %in% rownames(graph))
+    ) {
+      stop(
+        "Some species in the abundance dataset do not appear in the provided graph."
+      )
+    }
+    G <- graph[species, species]
+  }
+  dimnames(G) <- list(species, species)
+  faithful_param <- generator_param(G = G, signed = signed)
+  parcor <- -stats::cov2cor(as.matrix(faithful_param$Omega))
+
+  if (verbatim) {
+    message("Simulation from real data ecdf...")
+  }
+
+  simu_counts <- simulate_from_ecdf(
+    real_data,
+    Sigma = faithful_param$Sigma,
+    n = n,
+    seed = seed,
+    verbatim = verbatim
+  )
+  simulated_data <- list(counts = simu_counts, par.cor = parcor, G = G)
+  simulated_data
 }
 ```
 
@@ -1090,7 +1097,7 @@ simulate_by_prevalence <- function(
   verbatim = FALSE,
   data_type = "shotgun"
 ) {
-  if(!is.null(seed)){
+  if (!is.null(seed)) {
     set.seed(seed)
   }
   if (is.null(graph_file)) {
@@ -2172,7 +2179,7 @@ choose_params_values <- function(
   list_truth <- truth_by_prevalence(true_edges, prev_list)
 
   #Applying  cv.glmnet on 10 seeds
-  if(!is.null(seed)){
+  if (!is.null(seed)) {
     set.seed(seed)
   }
   seeds10 <- sample(1:1000000, 10)
@@ -2267,7 +2274,8 @@ choose_params_values(
   filtering_list = c(10, 20),
   graph_file = graphs$CRC_JPN,
   col_module_id = "msp_id",
-  annotation_level = "species"
+  annotation_level = "species",
+  seed = 123
 )
 #' }
 ```
