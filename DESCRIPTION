@@ -1,7 +1,7 @@
 Package: NeighborFinder
 Title: Find Neighbor Species of a Bacteria of Interest in the Human Gut
     Microbiota
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person("Mathilde", "Sola", , "mathilde.sola@inrae.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0009-0436-5078")),
