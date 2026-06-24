@@ -41,7 +41,7 @@ simulate_from_ecdf <- function(
   real_data,
   Sigma,
   n,
-  seed = 10010,
+  seed = NULL,
   verbatim = FALSE
 ) {
   p <- ncol(real_data)

@@ -15,7 +15,7 @@
 # @param meta_df Dataframe. The dataframe giving metadata information
 # @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
 #'
-#' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
+#' @return Dataframe. Returns results after using apply_NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 #' @importFrom stats quantile
 #' @examples

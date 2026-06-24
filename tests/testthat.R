@@ -1,4 +1,4 @@
 library(testthat)
-library(neighborfinder)
+library(NeighborFinder)
 
-test_check("neighborfinder")
+test_check("NeighborFinder")

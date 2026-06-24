@@ -32,7 +32,7 @@ Original copyright (c) 2021-2024 INRAE.
 }\if{html}{\out{</div>}}
 }
 \usage{
-simulate_from_ecdf(real_data, Sigma, n, seed = 10010, verbatim = FALSE)
+simulate_from_ecdf(real_data, Sigma, n, seed = NULL, verbatim = FALSE)
 }
 \arguments{
 \item{real_data}{Matrix. Contains real count data of size n by p}

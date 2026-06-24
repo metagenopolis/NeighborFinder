@@ -14,7 +14,7 @@
 # @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
 #' @param ... Additional arguments passed on to [apply_NF_simple()]
 #'
-#' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
+#' @return Dataframe. Returns results after using apply_NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 #' @importFrom stats median
 #' @examples
@@ -33,7 +33,7 @@ apply_NeighborFinder <- function(
   annotation_level,
   prev_level = 0.30,
   filtering_top = 20,
-  .seed = 123,
+  .seed = NULL,
   ...
 ) {
   # Performance depends on the number of samples in the dataset, please choose the good comination of prev_level and filtering_top

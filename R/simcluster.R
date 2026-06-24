@@ -10,9 +10,18 @@
 #' @examples
 #' SimCluster(p = 4, k = 3, dens = 4, r = 50)
 #' SimCluster(p = 4, k = 3, dens = 4, r = 50, mode = "igraph>=2.2")
-SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
+SimCluster <- function(
+  p,
+  k,
+  dens,
+  r,
+  mode = c("igraph<2.2", "igraph>=2.2"),
+  seed = NULL
+) {
   mode <- match.arg(mode)
-
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   ## Legacy version of the function for retrocompatibility with previous results
   if (mode == "igraph<2.2") {
     ## Ideal case, user-provided values are "admissible"
@@ -62,7 +71,7 @@ SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
       ))
       dens <- 0.99 * dens_max
     } else {
-      cat(paste0(
+      message(paste0(
         "Maximum value for r is below 1, decreasing target intra/inter ratio to ",
         round(0.99 * r_max, 3)
       ))

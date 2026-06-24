@@ -11,7 +11,7 @@ simulate_by_prevalence(
   col_module_id,
   annotation_level,
   sample_size = 500,
-  seed,
+  seed = NULL,
   verbatim = FALSE,
   data_type = "shotgun"
 )

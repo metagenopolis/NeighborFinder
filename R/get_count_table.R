@@ -104,7 +104,7 @@ get_count_table <- function(
   # Verbatim
   pct_zero_after <- sum(counts == 0) / length(counts)
   if (verbatim) {
-    cat(paste0(
+    message(paste0(
       "Preprocessing step output for species prevalence>",
       prev.min * 100,
       "% : \n   -from ",
