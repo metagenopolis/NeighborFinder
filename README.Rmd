@@ -59,7 +59,7 @@ remotes::install_github("metagenopolis/NeighborFinder")
 We use the data provided in the package: abundance tables from three datasets. NeighborFinder requires an abundance table (`data`) (with species as rows and samples as columns) and can use a taxonomic affiliation table (`taxo`) to provide additional details on the taxa when visualizing the results.
 
 ```{r data-ex}
-library(neighborfinder)
+library(NeighborFinder)
 data(data)
 data(taxo)
 ```

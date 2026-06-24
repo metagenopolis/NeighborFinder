@@ -24,8 +24,13 @@ fusen::fill_description(
   overwrite = TRUE,
   pkg = here::here(),
   fields = list(
-    Title = "Find neighbor species of a bacteria of interest in the human gut microbiota",
-    Description = "NeighborFinder uses the local approach described in Sola et al., 2026 <https://doi.org/10.64898/2025.12.05.692507> to identify companion species of a bacteria of interest. From several abundance tables of metagenomic data, NeighborFinder suggests a shortlist of companion species based on the integration of results. A visualization via a network is proposed.",
+    Title = "Find Neighbor Species of a Bacteria of Interest in the Human Gut
+    Microbiota",
+    Description = "Implementation of the local approach described in Sola et
+    al., 2026 <https://doi.org/10.64898/2025.12.05.692507> to identify companion 
+    species of a bacteria of interest. From several abundance tables of metagenomic 
+    data, 'NeighborFinder' suggests a shortlist of companion species based on the 
+    integration of results. A visualization via a network is proposed.",
     `Authors@R` = c(
       person(
         "Mathilde",
@@ -150,6 +155,7 @@ write(
 #' @export
 #' @importFrom magrittr %>%
 #' @usage lhs \%>\% rhs
+#' @return No return value, called for side effects
 NULL
 ```
 
@@ -244,7 +250,7 @@ get_count_table <- function(
   #Verbatim
   pct_zero_after = sum(counts == 0) / length(counts)
   if (verbatim) {
-    cat(paste0(
+    message(paste0(
       "Preprocessing step output for species prevalence>",
       prev.min * 100,
       "% : \n   -from ",
@@ -499,7 +505,7 @@ simulate_from_ecdf <- function(
   real_data,
   Sigma,
   n,
-  seed = 10010,
+  seed = NULL,
   verbatim = FALSE
 ) {
   p <- ncol(real_data)
@@ -541,9 +547,11 @@ simulate_from_ecdf <- function(
 #' @return A graph with clusters as an adjacency matrix
 #'
 #' @noRd
-SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
+SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2"), seed = NULL) {
   mode <- match.arg(mode)
-
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   ## Legacy version of the function for retrocompatibility with previous results
   if (mode == "igraph<2.2") {
     ## Ideal case, user-provided values are "admissible"
@@ -593,7 +601,7 @@ SimCluster <- function(p, k, dens, r, mode = c("igraph<2.2", "igraph>=2.2")) {
       ))
       dens <- 0.99 * dens_max
     } else {
-      cat(paste0(
+      message(paste0(
         "Maximum value for r is below 1, decreasing target intra/inter ratio to ",
         round(0.99 * r_max, 3)
       ))
@@ -688,113 +696,115 @@ new_synth_data <- function(
   must_connect = TRUE,
   graph = NULL,
   n = 300,
-  seed = 10010,
+  seed = NULL,
   r = 50,
   dens = 4,
   k = 3,
   verbatim = TRUE,
   signed = FALSE
 ) {
-  p = ncol(real_data)
-  species <- colnames(real_data)
-
-  #Functions extracted from EMtree package to remove dependency
-  generator_graph <- function(
-    p = 20,
-    graph = "cluster",
-    dens = 0.3,
-    r = 2,
-    k = 3
-  ) {
-    theta <- matrix(0, p, p)
-    if (graph == "cluster") {
-      theta <- SimCluster(p, k = k, dens, r)
-    }
-    return(theta = Matrix::Matrix(theta, sparse = TRUE))
+ if (!is.null(seed)) {
+  set.seed(seed)
+ }
+ p = ncol(real_data)
+ species <- colnames(real_data)
+ 
+ #Functions extracted from EMtree package to remove dependency
+ generator_graph <- function(
+  p = 20,
+  graph = "cluster",
+  dens = 0.3,
+  r = 2,
+  k = 3
+ ) {
+  theta <- matrix(0, p, p)
+  if (graph == "cluster") {
+   theta <- SimCluster(p, k = k, dens, r)
   }
-  generator_param <- function(G, signed = FALSE, v = 0.01) {
-    lambda <- 1
-    p <- ncol(G)
-    sumlignes <- rowSums(matrix(G, p, p))
-    if (sum(sumlignes == 0) != 0) {
-      sumlignes[sumlignes == 0] <- 0.1
-    }
-    D <- diag(sumlignes + v)
-    if (signed) {
-      Gsign <- ToSym(ToVec(
-        G * matrix(2 * stats::rbinom(p^2, 1, 0.3) - 1, p, p)
-      ))
-      omega <- lambda * D + Gsign
-      while (min(eigen(omega)$values) < 1e-10 & lambda < 1000) {
-        lambda <- 1.1 * lambda
-        omega <- lambda * D + Gsign
-      }
-    } else {
-      omega <- lambda * D + G
-      while (min(eigen(omega)$values) < 1e-10) {
-        lambda <- 1.1 * lambda
-        omega <- lambda * D + G
-      }
-    }
-    sigma <- solve(omega)
-    sim <- list(Sigma = sigma, Omega = omega, Lambda = lambda)
-    sim
+  return(theta = Matrix::Matrix(theta, sparse = TRUE))
+ }
+ generator_param <- function(G, signed = FALSE, v = 0.01) {
+  lambda <- 1
+  p <- ncol(G)
+  sumlignes <- rowSums(matrix(G, p, p))
+  if (sum(sumlignes == 0) != 0) {
+   sumlignes[sumlignes == 0] <- 0.1
   }
-
-  if (is.null(graph)) {
-    if (!must_connect) {
-      set.seed(seed)
-      G <- as.matrix(generator_graph(
-        p = p,
-        graph = graph_type,
-        dens = dens / p,
-        r,
-        k
-      ))
-    } else {
-      i <- 0
-      connect <- FALSE
-      while (!connect) {
-        i <- i + 1
-        set.seed(i)
-        G <- as.matrix(generator_graph(
-          p = p,
-          graph = graph_type,
-          dens = dens / p,
-          r,
-          k
-        ))
-        graph <- igraph::graph_from_adjacency_matrix(G)
-        connect <- igraph::is_connected(graph)
-      }
-    }
+  D <- diag(sumlignes + v)
+  if (signed) {
+   Gsign <- ToSym(ToVec(
+    G * matrix(2 * stats::rbinom(p^2, 1, 0.3) - 1, p, p)
+   ))
+   omega <- lambda * D + Gsign
+   while (min(eigen(omega)$values) < 1e-10 & lambda < 1000) {
+    lambda <- 1.1 * lambda
+    omega <- lambda * D + Gsign
+   }
   } else {
-    if (
-      !all(species %in% colnames(graph)) || !all(species %in% rownames(graph))
-    ) {
-      stop(
-        "Some species in the abundance dataset do not appear in the provided graph."
-      )
-    }
-    G <- graph[species, species]
+   omega <- lambda * D + G
+   while (min(eigen(omega)$values) < 1e-10) {
+    lambda <- 1.1 * lambda
+    omega <- lambda * D + G
+   }
   }
-  dimnames(G) <- list(species, species)
-  faithful_param <- generator_param(G = G, signed = signed)
-  parcor <- -stats::cov2cor(as.matrix(faithful_param$Omega))
-
-  if (verbatim) {
-    cat("Simulation from real data ecdf...")
+  sigma <- solve(omega)
+  sim <- list(Sigma = sigma, Omega = omega, Lambda = lambda)
+  sim
+ }
+ 
+ if (is.null(graph)) {
+  if (!must_connect) {
+   G <- as.matrix(generator_graph(
+    p = p,
+    graph = graph_type,
+    dens = dens / p,
+    r,
+    k
+   ))
+  } else {
+   i <- 0
+   connect <- FALSE
+   while (!connect) {
+    i <- i + 1
+    set.seed(i)
+    G <- as.matrix(generator_graph(
+     p = p,
+     graph = graph_type,
+     dens = dens / p,
+     r,
+     k
+    ))
+    graph <- igraph::graph_from_adjacency_matrix(G)
+    connect <- igraph::is_connected(graph)
+   }
   }
-
-  simu_counts <- simulate_from_ecdf(
-    real_data,
-    Sigma = faithful_param$Sigma,
-    n = n,
-    seed = seed,
-    verbatim = verbatim
-  )
-  simulated_data <- list(counts = simu_counts, par.cor = parcor, G = G)
-  simulated_data
+ } else {
+  if (
+   !all(species %in% colnames(graph)) || !all(species %in% rownames(graph))
+  ) {
+   stop(
+    "Some species in the abundance dataset do not appear in the provided graph."
+   )
+  }
+  G <- graph[species, species]
+ }
+ dimnames(G) <- list(species, species)
+ faithful_param <- generator_param(G = G, signed = signed)
+ parcor <- -stats::cov2cor(as.matrix(faithful_param$Omega))
+ 
+ if (verbatim) {
+  message("Simulation from real data ecdf...")
+ }
+ 
+ simu_counts <- simulate_from_ecdf(
+  real_data,
+  Sigma = faithful_param$Sigma,
+  n = n,
+  seed = seed,
+  verbatim = verbatim
+ )
+ simulated_data <- list(counts = simu_counts, par.cor = parcor, G = G)
+ simulated_data
 }
 ```
 
@@ -1076,18 +1086,20 @@ simulate_by_prevalence <- function(
   col_module_id,
   annotation_level,
   sample_size = 500,
-  seed,
+  seed = NULL,
   verbatim = FALSE,
   data_type = "shotgun"
 ) {
-  set.seed(seed)
+  if(!is.null(seed)){
+    set.seed(seed)
+  }
   if (is.null(graph_file)) {
     stop("Please generate the graph beforehand with graph_step() function")
   } else {
     G <- graph_file
   }
   if (verbatim) {
-    cat("Generating simulated tables for each level of prevalence...\n")
+    message("Generating simulated tables for each level of prevalence...\n")
   }
 
   abund_table <- data_with_annotation %>%
@@ -1099,7 +1111,7 @@ simulate_by_prevalence <- function(
 
   sim_one_prev <- function(prev) {
     if (verbatim) {
-      cat(glue::glue("p{100*prev}"), sep = "\n")
+      message(glue::glue("p{100*prev}"), sep = "\n")
     }
     if (data_type == "shotgun") {
       # Generating count table
@@ -1132,7 +1144,7 @@ simulate_by_prevalence <- function(
     df_sim <- new_synth_data(
       df_counts,
       n = sample_size,
-      graph = as.matrix(G %>% dplyr::select(-.data[[annotation_level]])),
+      graph = as.matrix(G %>% dplyr::select(-dplyr::any_of(annotation_level))),
       verbatim = FALSE,
       seed = seed
     )
@@ -1377,7 +1389,7 @@ truth_by_prevalence <- function(edge_table, prev_list) {
   for_one_prev <- function(prev) {
     edge_table %>% dplyr::filter(.data$prev1 >= prev, .data$prev2 >= prev)
   }
-  cat("Defining and saving true neighbors...\n")
+  message("Defining and saving true neighbors...\n")
   purrr::map(prev_list, for_one_prev) %>% rlang::set_names(prev_list)
 }
 ```
@@ -1457,7 +1469,7 @@ norm_data <- function(
   list_norm <- list()
   res <- tibble::tibble()
   #Normalizing for each level of prevalence if prev_list is a vector
-  # cat("Normalizing data...\n")
+  # message("Normalizing data...\n")
   for (prev in prev_list) {
     if (data_type == "shotgun") {
       #Creating count table
@@ -1747,7 +1759,7 @@ cvglm_to_coeffs_by_object <- function(
   seed = NULL,
   ...
 ) {
-  # cat("Applying NeighborFinder to detect neighbors...\n")
+  # message("Applying NeighborFinder to detect neighbors...\n")
   purrr::map(list_dfs, function(df) {
     find_all_module_neighbors(df, test_module, seed, ...)
   }) %>%
@@ -2122,8 +2134,9 @@ scores <- test_filter(neighbors, neighbors2)
 #' @param graph_file Dataframe. The object generated by graph_step() function
 #' @param col_module_id String. The name of the column with the module names in annotation_table
 #' @param annotation_level String. The name of the column with the level to be studied. Examples: species, genus, level_1
+#' @param seed Numeric. The seed number, ensuring reproducibility
 #'
-#' @return Dataframe. Returns F1 rates before and after using NeighborFinder()
+#' @return Dataframe. Returns F1 rates before and after using apply_NeighborFinder()
 #' @export
 #' @importFrom stats quantile
 choose_params_values <- function(
@@ -2134,7 +2147,8 @@ choose_params_values <- function(
   filtering_list = c(10, 20, 30),
   graph_file = NULL,
   col_module_id,
-  annotation_level
+  annotation_level,
+  seed = NULL
 ) {
   #Loading graph
   if (is.null(graph_file)) {
@@ -2158,7 +2172,9 @@ choose_params_values <- function(
   list_truth <- truth_by_prevalence(true_edges, prev_list)
 
   #Applying  cv.glmnet on 10 seeds
-  set.seed(seed = 123)
+  if(!is.null(seed)){
+    set.seed(seed)
+  }
   seeds10 <- sample(1:1000000, 10)
   res_glm <- c()
   for (seed in seeds10) {
@@ -2203,7 +2219,7 @@ choose_params_values <- function(
   list_glm <- split(res_glm, res_glm$prev_level)
 
   #Filtering results & rendering table
-  cat("Calculating scores...\n")
+  message("Calculating scores...\n")
   before <- final_step(list_truth, list_glm, robustness_step = FALSE) #naïve method with scores calculated on 10 seeds, with filtering_top=100%
   after <- final_step(list_truth, list_glm, robustness_step = TRUE) #full method with a value of filtering_top + the robustness part (selection of neighbors if they were found at least 5 out of 10 times)
 
@@ -2240,7 +2256,7 @@ choose_params_values <- function(
 ```
 
 ```{r ex-choose_params_values}
-#' \dontrun{
+#' \donttest{
 data(data)
 data(graphs)
 choose_params_values(
@@ -2284,7 +2300,7 @@ choose_params_values(
 # @param meta_df Dataframe. The dataframe giving metadata information
 # @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
 #'
-#' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
+#' @return Dataframe. Returns results after using apply_NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 #' @importFrom stats quantile
 apply_NF_simple <- function(
@@ -2376,7 +2392,7 @@ test_that("apply_NF_simple works", {
 # @param sample_col String. The name of the column in metadata indicating the sample names, it should be consistent with the colnames of 'df'
 #' @param ... Additional arguments passed on to [apply_NF_simple()]
 #'
-#' @return Dataframe. Returns results after using NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
+#' @return Dataframe. Returns results after using apply_NeighborFinder(): for each module ID from 'object_of_interest', the names of their neighbors and the corresponding coefficients calculated by cv.glmnet()
 #' @export
 #' @importFrom stats median
 apply_NeighborFinder <- function(
@@ -2386,7 +2402,7 @@ apply_NeighborFinder <- function(
   annotation_level,
   prev_level = 0.30,
   filtering_top = 20,
-  .seed = 123,
+  .seed = NULL,
   ...
 ) {
   # Performance depends on the number of samples in the dataset, please choose the good comination of prev_level and filtering_top
