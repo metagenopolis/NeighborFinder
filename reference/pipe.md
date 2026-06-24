@@ -7,3 +7,7 @@ See `magrittr::%>%` for details.
 ``` r
 lhs %>% rhs
 ```
+
+## Value
+
+No return value, called for side effects

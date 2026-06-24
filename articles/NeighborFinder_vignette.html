@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Detailed example • neighborfinder</title>
+<title>Detailed example • NeighborFinder</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -18,9 +18,9 @@
 
     <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html">neighborfinder</a>
+    <a class="navbar-brand me-2" href="../index.html">NeighborFinder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,9 +67,9 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rstudio/rmarkdown" class="external-link">rmarkdown</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">neighborfinder</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">NeighborFinder</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'neighborfinder'</span></span>
+<span><span class="co">#&gt; Attaching package: 'NeighborFinder'</span></span>
 <span><span class="co">#&gt; The following object is masked from 'package:rmarkdown':</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     metadata</span></span></code></pre></div>
@@ -411,7 +411,8 @@ is included in the ‘graphs’ object.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># G &lt;- graph_step(data_with_annotation = data$CRC_JPN_CHN_EUR,</span></span>
 <span><span class="co">#                 col_module_id = "msp_id",</span></span>
-<span><span class="co">#                 annotation_level = "species"</span></span>
+<span><span class="co">#                 annotation_level = "species",</span></span>
+<span><span class="co">#                 seed = 20242025</span></span>
 <span><span class="co">#                 )</span></span>
 <span></span>
 <span><span class="va">G</span> <span class="op">&lt;-</span> <span class="va">graphs</span><span class="op">$</span><span class="va">CRC_JPN_CHN_EUR</span></span></code></pre></div>
@@ -430,7 +431,8 @@ function <code><a href="../reference/apply_NeighborFinder.html">apply_NeighborFi
 <span>  filtering_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span><span class="op">)</span>,</span>
 <span>  graph_file <span class="op">=</span> <span class="va">graphs</span><span class="op">$</span><span class="va">CRC_JPN</span>,</span>
 <span>  col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span>
-<span>  annotation_level <span class="op">=</span> <span class="st">"species"</span></span>
+<span>  annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>filtering_top <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">filtering_top</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -529,7 +531,8 @@ abundance table preview).</p>
 <span>  col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span>
 <span>  annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span>
 <span>  prev_level <span class="op">=</span> <span class="fl">0.30</span>,</span>
-<span>  filtering_top <span class="op">=</span> <span class="fl">30</span></span>
+<span>  filtering_top <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  .seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">res_CRC_JPN</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -640,7 +643,8 @@ of “data_with_taxo”.</p></li>
 <span>  filtering_top <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  covar <span class="op">=</span> <span class="op">~</span><span class="va">study_accession</span>,</span>
 <span>  meta_df <span class="op">=</span> <span class="va">metadata</span><span class="op">$</span><span class="va">CRC_CHN</span>,</span>
-<span>  sample_col <span class="op">=</span> <span class="st">"secondary_sample_accession"</span></span>
+<span>  sample_col <span class="op">=</span> <span class="st">"secondary_sample_accession"</span>,</span>
+<span>  .seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># EUROPE</span></span>
@@ -653,7 +657,8 @@ of “data_with_taxo”.</p></li>
 <span>  filtering_top <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  covar <span class="op">=</span> <span class="op">~</span><span class="va">study_accession</span>,</span>
 <span>  meta_df <span class="op">=</span> <span class="va">metadata</span><span class="op">$</span><span class="va">CRC_EUR</span>,</span>
-<span>  sample_col <span class="op">=</span> <span class="st">"secondary_sample_accession"</span></span>
+<span>  sample_col <span class="op">=</span> <span class="st">"secondary_sample_accession"</span>,</span>
+<span>  .seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/visualize_network.html">visualize_network</a></span><span class="op">(</span></span>
@@ -730,7 +735,8 @@ above the set <code>threshold</code>.</p>
 <span>  col_module_id <span class="op">=</span> <span class="st">"msp_id"</span>,</span>
 <span>  annotation_level <span class="op">=</span> <span class="st">"species"</span>,</span>
 <span>  <span class="st">"Escherichia coli"</span></span>
-<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="9%">

@@ -4,9 +4,9 @@
 
 library(rmarkdown)
 library(knitr)
-library(neighborfinder)
+library(NeighborFinder)
 #> 
-#> Attaching package: 'neighborfinder'
+#> Attaching package: 'NeighborFinder'
 #> The following object is masked from 'package:rmarkdown':
 #> 
 #>     metadata
@@ -123,7 +123,7 @@ where $`z_{min} = {min }_{{ij:B}_{ij}\neq 0}{ log\{{B_{ij}/g(B_i)}}\}`$.
 We consider a linear regression problem where we regress the abundance
 $`C_{j0}`$ of module $`j0`$ against the abundances of all others modules
 $`{(C_j)}_{j\neq j0}`$. The function
-[`glmnet::cv.glmnet()`](https://glmnet.stanford.edu/reference/cv.glmnet.html)
+[`glmnet::cv.glmnet()`](https://rdrr.io/pkg/glmnet/man/cv.glmnet.html)
 is applied on the normalized data 10 times, each time with a different
 seed. The following model is used:
 

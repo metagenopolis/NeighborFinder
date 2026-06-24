@@ -6,7 +6,7 @@ cumulative distribution (ecdf) of real count data
 ## Usage
 
 ``` r
-simulate_from_ecdf(real_data, Sigma, n, seed = 10010, verbatim = FALSE)
+simulate_from_ecdf(real_data, Sigma, n, seed = NULL, verbatim = FALSE)
 ```
 
 ## Source

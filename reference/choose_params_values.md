@@ -14,7 +14,8 @@ choose_params_values(
   filtering_list = c(10, 20, 30),
   graph_file = NULL,
   col_module_id,
-  annotation_level
+  annotation_level,
+  seed = NULL
 )
 ```
 
@@ -60,14 +61,19 @@ choose_params_values(
   String. The name of the column with the level to be studied. Examples:
   species, genus, level_1
 
+- seed:
+
+  Numeric. The seed number, ensuring reproducibility
+
 ## Value
 
-Dataframe. Returns F1 rates before and after using NeighborFinder()
+Dataframe. Returns F1 rates before and after using
+apply_NeighborFinder()
 
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 data(data)
 data(graphs)
 choose_params_values(
@@ -78,7 +84,15 @@ choose_params_values(
   filtering_list = c(10, 20),
   graph_file = graphs$CRC_JPN,
   col_module_id = "msp_id",
-  annotation_level = "species"
+  annotation_level = "species",
+  seed = 123
 )
-} # }
+#> Defining and saving true neighbors...
+#> Calculating scores...
+#>   prev_level filtering_top F1_before F1_after
+#> 1        0.2            10    0.0120     0.00
+#> 2        0.2            20    0.0120     0.67
+#> 3        0.3            10    0.0058     0.67
+#> 4        0.3            20    0.0058     1.00
+# }
 ```

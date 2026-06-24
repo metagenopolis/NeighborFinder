@@ -12,7 +12,7 @@ new_synth_data(
   must_connect = TRUE,
   graph = NULL,
   n = 300,
-  seed = 10010,
+  seed = NULL,
   r = 50,
   dens = 4,
   k = 3,

@@ -12,13 +12,13 @@
 
 ## Citation
 
-Sola M, Mariadassou M, Berland M (2026). *neighborfinder: Find Neighbor
+Sola M, Mariadassou M, Berland M (2026). *NeighborFinder: Find Neighbor
 Species of a Bacteria of Interest in the Human Gut Microbiota*. R
-package version 1.0.0.
+package version 1.0.1.
 
     @Manual{,
-      title = {neighborfinder: Find Neighbor Species of a Bacteria of Interest in the Human Gut Microbiota},
+      title = {NeighborFinder: Find Neighbor Species of a Bacteria of Interest in the Human Gut Microbiota},
       author = {Mathilde Sola and Mahendra Mariadassou and Magali Berland},
       year = {2026},
-      note = {R package version 1.0.0},
+      note = {R package version 1.0.1},
     }

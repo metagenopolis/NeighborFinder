@@ -49,7 +49,7 @@ when visualizing the results.
 
 ``` r
 
-library(neighborfinder)
+library(NeighborFinder)
 data(data)
 data(taxo)
 ```
@@ -68,7 +68,8 @@ res_CRC_JPN <- apply_NeighborFinder(
   col_module_id = "msp_id",
   annotation_level = "species",
   prev_level = 0.30,
-  filtering_top = 30
+  filtering_top = 30,
+  .seed = 123
 )
 ```
 
@@ -129,7 +130,8 @@ res_CRC_CHN <- apply_NeighborFinder(
   filtering_top = 30,
   covar = ~study_accession,
   meta_df = metadata$CRC_CHN,
-  sample_col = "secondary_sample_accession"
+  sample_col = "secondary_sample_accession",
+  .seed = 123
 )
 
 plot_CHN <- visualize_network(
@@ -151,7 +153,8 @@ res_CRC_EUR <- apply_NeighborFinder(
   filtering_top = 30,
   covar = ~study_accession,
   meta_df = metadata$CRC_EUR,
-  sample_col = "secondary_sample_accession"
+  sample_col = "secondary_sample_accession",
+  .seed = 123
 )
 
 plot_EUR <- visualize_network(

@@ -4,9 +4,9 @@
 
 library(rmarkdown)
 library(knitr)
-library(neighborfinder)
+library(NeighborFinder)
 #> 
-#> Attaching package: 'neighborfinder'
+#> Attaching package: 'NeighborFinder'
 #> The following object is masked from 'package:rmarkdown':
 #> 
 #>     metadata
@@ -151,7 +151,8 @@ included in the ‘graphs’ object.
 
 # G <- graph_step(data_with_annotation = data$CRC_JPN_CHN_EUR,
 #                 col_module_id = "msp_id",
-#                 annotation_level = "species"
+#                 annotation_level = "species",
+#                 seed = 20242025
 #                 )
 
 G <- graphs$CRC_JPN_CHN_EUR
@@ -175,7 +176,8 @@ choose_params_values(
   filtering_list = c(10, 20, 30),
   graph_file = graphs$CRC_JPN,
   col_module_id = "msp_id",
-  annotation_level = "species"
+  annotation_level = "species",
+  seed = 123
 ) %>%
   dplyr::mutate(filtering_top = as.numeric(filtering_top)) %>%
   as.data.frame() %>%
@@ -225,7 +227,8 @@ res_CRC_JPN <- apply_NeighborFinder(
   col_module_id = "msp_id",
   annotation_level = "species",
   prev_level = 0.30,
-  filtering_top = 30
+  filtering_top = 30,
+  .seed = 123
 )
 res_CRC_JPN %>% kable()
 ```
@@ -319,7 +322,8 @@ res_CRC_CHN <- apply_NeighborFinder(
   filtering_top = 30,
   covar = ~study_accession,
   meta_df = metadata$CRC_CHN,
-  sample_col = "secondary_sample_accession"
+  sample_col = "secondary_sample_accession",
+  .seed = 123
 )
 
 # EUROPE
@@ -332,7 +336,8 @@ res_CRC_EUR <- apply_NeighborFinder(
   filtering_top = 30,
   covar = ~study_accession,
   meta_df = metadata$CRC_EUR,
-  sample_col = "secondary_sample_accession"
+  sample_col = "secondary_sample_accession",
+  .seed = 123
 )
 ```
 
@@ -425,7 +430,8 @@ intersections_table(
   col_module_id = "msp_id",
   annotation_level = "species",
   "Escherichia coli"
-) %>% kable()
+) %>%
+  kable()
 ```
 
 | node1 | module1 | node2 | module2 | datasets | intersections | mean_coef |

@@ -12,7 +12,7 @@ apply_NeighborFinder(
   annotation_level,
   prev_level = 0.3,
   filtering_top = 20,
-  .seed = 123,
+  .seed = NULL,
   ...
 )
 ```
@@ -63,9 +63,9 @@ apply_NeighborFinder(
 
 ## Value
 
-Dataframe. Returns results after using NeighborFinder(): for each module
-ID from 'object_of_interest', the names of their neighbors and the
-corresponding coefficients calculated by cv.glmnet()
+Dataframe. Returns results after using apply_NeighborFinder(): for each
+module ID from 'object_of_interest', the names of their neighbors and
+the corresponding coefficients calculated by cv.glmnet()
 
 ## Examples
 

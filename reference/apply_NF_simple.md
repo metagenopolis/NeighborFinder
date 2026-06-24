@@ -62,9 +62,9 @@ apply_NF_simple(
 
 ## Value
 
-Dataframe. Returns results after using NeighborFinder(): for each module
-ID from 'object_of_interest', the names of their neighbors and the
-corresponding coefficients calculated by cv.glmnet()
+Dataframe. Returns results after using apply_NeighborFinder(): for each
+module ID from 'object_of_interest', the names of their neighbors and
+the corresponding coefficients calculated by cv.glmnet()
 
 ## Examples
 
