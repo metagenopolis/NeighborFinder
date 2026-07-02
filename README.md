@@ -37,8 +37,14 @@ data (and other count-based inputs) by skipping it.
 
 ## Installation
 
-The latest NeighborFinder version is available from the public [github
-repo](https://github.com/metagenopolis/NeighborFinder).
+The package NeighborFinder is available from CRAN:
+
+``` r
+install.packages("NeighborFinder")
+```
+
+The latest release is available from the public [github
+repo](https://github.com/metagenopolis/NeighborFinder):
 
 ``` r
 if (!requireNamespace("remotes")) {

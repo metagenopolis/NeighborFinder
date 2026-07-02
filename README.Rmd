@@ -33,10 +33,15 @@ NeighborFinder is tailored to microbiome data. It was specifically developed for
 
 ## Installation
 
-The latest NeighborFinder version is available from the public [github repo](https://github.com/metagenopolis/NeighborFinder).
+The package NeighborFinder is available from CRAN:
 
+```{r cran, eval=FALSE}
+install.packages("NeighborFinder")
+```
 
-```{r eval=FALSE}
+The latest release is available from the public [github repo](https://github.com/metagenopolis/NeighborFinder):
+
+```{r install, eval=FALSE}
 if (!requireNamespace("remotes")) {
   install.packages("remotes")
 }
